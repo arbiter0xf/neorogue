@@ -5,5 +5,5 @@ How to run
 ==========
 ```
 make
-./rogue_forever # expected to be ran from the top level directory
+make run
 ```
