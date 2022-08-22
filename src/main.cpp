@@ -79,6 +79,7 @@ int main(void) {
     }
 
     SDL_FreeSurface(temporarySurface);
+    temporarySurface = NULL;
 
     while (!quitEventReceived) {
         do {
@@ -98,6 +99,9 @@ int main(void) {
     mainLoop();
 #endif
 
+    SDL_FreeSurface(imageSurface);
+    imageSurface = NULL;
+
     SDL_DestroyWindow(mainWindow);
     mainWindow = NULL;
 
@@ -107,6 +111,11 @@ int main(void) {
     return 0;
 
 error_exit:
+
+    if (NULL != imageSurface) {
+        SDL_FreeSurface(imageSurface);
+        imageSurface = NULL;
+    }
 
     if (NULL != mainWindow) {
         SDL_DestroyWindow(mainWindow);
