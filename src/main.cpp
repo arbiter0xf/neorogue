@@ -1,7 +1,9 @@
+#include <boost/json/src.hpp>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdio.h>
 
+#include <stdio.h>
 #include <string>
 
 const int SCREEN_WIDTH = 640;
