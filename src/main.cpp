@@ -4,7 +4,10 @@
 #include <SDL2/SDL_image.h>
 
 #include <stdio.h>
+
 #include <string>
+#include <iostream>
+#include <fstream>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -16,17 +19,124 @@ void mainLoop(void) {
 }
 #endif
 
-int main(void) {
+int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
+{
+    std::ifstream jsonStream;
+    std::string line;
+    char buffer[4096] = {0};
+    std::size_t readAmount = 0;
+    boost::json::stream_parser jsonStreamParser;
+    boost::json::error_code ec;
+
+    printf("Reading JSON from file: %s\n", filename.c_str());
+
+    jsonStream.open(filename, std::ifstream::in);
+    if (jsonStream.fail()) {
+        printf("Failed to open json file: %s\n", filename.c_str());
+        return -1;
+    }
+
+    do {
+        jsonStream.read(buffer, sizeof(buffer));
+        readAmount = jsonStream.gcount();
+        std::cout << "Successfully read " << readAmount << " characters" << "\n";
+        jsonStreamParser.write(buffer, readAmount, ec);
+        if (ec) {
+            printf("Stream parser write failed");
+            return -1;
+        }
+    } while(!jsonStream.eof());
+
+    jsonStreamParser.finish(ec);
+    if (ec) {
+        printf("Stream parser finish failed");
+        return -1;
+    }
+
+    jsonStream.clear();
+    jsonStream.close();
+    if (jsonStream.fail()) {
+        printf("Failed to close json file: %s\n", filename.c_str());
+        return -1;
+    }
+
+    jsonValue = jsonStreamParser.release();
+
+    return 0;
+}
+
+// {"frames": {
+//
+//     "altars/dngn_altar.png":
+//     {
+//         "frame": {"x":35,"y":37,"w":32,"h":31},
+//         "rotated": true,
+//         "trimmed": true,
+//         "spriteSourceSize": {"x":0,"y":1,"w":32,"h":31},
+//         "sourceSize": {"w":32,"h":32}
+//     },
+//     "altars/dngn_altar_beogh.png":
+//     {
+int texturepackerJsonGetFilenames(boost::json::value const& jsonValue, std::string& filenames)
+{
+    filenames = "";
+
+    if (boost::json::kind::object != jsonValue.kind()) {
+        printf("JSON value top level is not an object\n");
+        return -1;
+    }
+
+    auto const& topObj = jsonValue.get_object();
+
+    if (topObj.empty()) {
+        printf("Empty top level JSON object\n");
+        return -1;
+    }
+
+    auto iter = topObj.begin();
+    std::cout << "iter points to topObj.begin(): " << iter->key() << "\n";
+    std::cout << "iter->key is: " << iter->key() << "\n";
+
+    boost::json::value framesObj = iter->value();
+
+    // iter is expected to point to "frames"
+    if (boost::json::kind::object != framesObj.kind()) {
+        printf("iter does not seem to point to \"frames\"\n");
+        return -1;
+    }
+
+    iter = framesObj.get_object().begin();
+    auto iterEnd = framesObj.get_object().end();
+    std::cout << "iter points to framesObj.begin(): " << iter->key() << "\n";
+    std::cout << "iter->key is: " << iter->key() << "\n";
+
+    while (iter != iterEnd) {
+        filenames += iter->key();
+        filenames += "\n";
+        iter++;
+    }
+
+    return 0;
+}
+
+int main(void)
+{
     const std::string assetsPrefix = "assets/";
     const std::string imagePathWallStoneGray1 =
         assetsPrefix + "dc-dngn/wall/stone_gray1.png";
-    const std::string imagePathDngnWallSpritesheet =
-        assetsPrefix + "spritesheets/dc-dngn_wall.png";
+    const std::string imagePathDngnSpritesheet =
+        assetsPrefix + "spritesheets/dc-dngn.png";
+    const std::string dataPathDngnSpritesheet =
+        assetsPrefix + "spritesheets/dc-dngn.json";
 
     const int imgFlags = IMG_INIT_PNG;
 
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
+
+    boost::json::value jsonValue;
+
+    std::string dngnSpritesheetFilenames = "";
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -39,6 +149,28 @@ int main(void) {
     SDL_Texture* textureSpritesheet = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
+
+    try {
+        ret = readJsonFromFile(dataPathDngnSpritesheet, jsonValue);
+    } catch(std::exception const& e) {
+        std::cerr << "Exception while reading JSON from file: "
+            << e.what() << "\n";
+        goto error_exit;
+    }
+    if (0 != ret) {
+        printf("Failed to read JSON from file: %s\n",
+                dataPathDngnSpritesheet.c_str());
+        goto error_exit;
+    }
+
+    ret = texturepackerJsonGetFilenames(jsonValue, dngnSpritesheetFilenames);
+    if (0 != ret) {
+        printf("texturepackerJsonGetFilenames() failed");
+        goto error_exit;
+    }
+
+    std::cout << "Found following filenames from JSON value:\n";
+    std::cout << dngnSpritesheetFilenames << "\n";
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
@@ -93,10 +225,10 @@ int main(void) {
 
     textureSpritesheet = IMG_LoadTexture(
             renderer,
-            imagePathDngnWallSpritesheet.c_str());
+            imagePathDngnSpritesheet.c_str());
     if (NULL == textureSpritesheet) {
         printf("Failed to load texture from file %s\n",
-                imagePathDngnWallSpritesheet.c_str());
+                imagePathDngnSpritesheet.c_str());
         goto error_exit;
     }
 
