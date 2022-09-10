@@ -17,25 +17,38 @@ void mainLoop(void) {
 #endif
 
 int main(void) {
-    const std::string assets_prefix = "assets/";
-    const std::string image_path_wall_stone_gray1 =
-        assets_prefix + "dc-dngn/wall/stone_gray1.png";
+    const std::string assetsPrefix = "assets/";
+    const std::string imagePathWallStoneGray1 =
+        assetsPrefix + "dc-dngn/wall/stone_gray1.png";
+    const std::string imagePathDngnWallSpritesheet =
+        assetsPrefix + "spritesheets/dc-dngn_wall.png";
 
     const int imgFlags = IMG_INIT_PNG;
+
+    const int renderingDriver = -1; // -1 initializes the first driver
+                                    // supporting requested flags
+
+    SDL_Rect srcRect = {0, 0, 0, 0};
+    SDL_Rect dstRect = {0, 0, 0, 0};
 
     int ret = -1;
     bool quitEventReceived = false;
 
     SDL_Window* mainWindow = NULL;
-    SDL_Surface* mainWindowSurface = NULL;
-    SDL_Surface* temporarySurface = NULL;
-    SDL_Surface* imageSurface = NULL;
+    SDL_Texture* texture = NULL;
+    SDL_Texture* textureSpritesheet = NULL;
+    SDL_Renderer* renderer = NULL;
     SDL_Event event;
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
         printf("Failed to initialize SDL: %s\n", SDL_GetError());
         goto error_exit;
+    }
+
+    ret = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    if (ret < 0) {
+        printf( "Warning: Linear texture filtering not enabled!" );
     }
 
     ret = IMG_Init(imgFlags);
@@ -56,33 +69,36 @@ int main(void) {
         goto error_exit;
     }
 
-    mainWindowSurface = SDL_GetWindowSurface(mainWindow);
-    if (NULL == mainWindowSurface) {
-        printf("Failed to get window surface: %s\n", SDL_GetError());
+    renderer = SDL_CreateRenderer(
+            mainWindow,
+            renderingDriver,
+            SDL_RENDERER_ACCELERATED );
+    if(NULL == renderer) {
+        printf("Failed to create renderer. SDL Error: %s\n", SDL_GetError());
         goto error_exit;
     }
 
-    printf("Loading asset: %s\n", image_path_wall_stone_gray1.c_str());
-    temporarySurface = IMG_Load(image_path_wall_stone_gray1.c_str());
-    if (NULL == temporarySurface) {
-        printf("Unable to load asset: %s Error: %s",
-                image_path_wall_stone_gray1.c_str(),
-                IMG_GetError());
+    ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    if (ret < 0) {
+        printf("Failed to set render draw color: %s\n", SDL_GetError());
         goto error_exit;
     }
 
-    imageSurface = SDL_ConvertSurface(
-            temporarySurface,
-            mainWindowSurface->format,
-            0);
-    if (NULL == imageSurface) {
-        printf("Failed to convert surface to format of main "
-                "windows surface: %s\n", SDL_GetError());
+    texture = IMG_LoadTexture(renderer, imagePathWallStoneGray1.c_str());
+    if (NULL == texture) {
+        printf("Failed to load texture from file %s\n",
+                imagePathWallStoneGray1.c_str());
         goto error_exit;
     }
 
-    SDL_FreeSurface(temporarySurface);
-    temporarySurface = NULL;
+    textureSpritesheet = IMG_LoadTexture(
+            renderer,
+            imagePathDngnWallSpritesheet.c_str());
+    if (NULL == textureSpritesheet) {
+        printf("Failed to load texture from file %s\n",
+                imagePathDngnWallSpritesheet.c_str());
+        goto error_exit;
+    }
 
     while (!quitEventReceived) {
         do {
@@ -93,17 +109,34 @@ int main(void) {
             }
         } while (0 != ret);
 
-        SDL_BlitSurface(imageSurface, NULL, mainWindowSurface, NULL);
+        SDL_RenderClear(renderer);
 
-        SDL_UpdateWindowSurface(mainWindow);
+        srcRect = {0, 0, 32, 32};
+        dstRect = {0, 0, 32, 32};
+        SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
+
+        srcRect.x = 409;
+        srcRect.y = 137;
+        srcRect.w = 32;
+        srcRect.h = 32;
+        dstRect = {32, 32, 32, 32};
+        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
+
+        SDL_RenderPresent(renderer);
     }
 
 #if 0
     mainLoop();
 #endif
 
-    SDL_FreeSurface(imageSurface);
-    imageSurface = NULL;
+    SDL_DestroyTexture(texture);
+    texture = NULL;
+
+    SDL_DestroyTexture(textureSpritesheet);
+    texture = NULL;
+
+    SDL_DestroyRenderer(renderer);
+    renderer = NULL;
 
     SDL_DestroyWindow(mainWindow);
     mainWindow = NULL;
@@ -115,9 +148,19 @@ int main(void) {
 
 error_exit:
 
-    if (NULL != imageSurface) {
-        SDL_FreeSurface(imageSurface);
-        imageSurface = NULL;
+    if (NULL != textureSpritesheet) {
+        SDL_DestroyTexture(textureSpritesheet);
+        texture = NULL;
+    }
+
+    if (NULL != texture) {
+        SDL_DestroyTexture(texture);
+        texture = NULL;
+    }
+
+    if (NULL != renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = NULL;
     }
 
     if (NULL != mainWindow) {
