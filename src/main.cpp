@@ -34,9 +34,6 @@ int main(void) {
 
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
-    SDL_Surface* mainWindowSurface = NULL;
-    SDL_Surface* temporarySurface = NULL;
-    SDL_Surface* imageSurface = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
 
@@ -78,12 +75,6 @@ int main(void) {
         goto error_exit;
     }
 
-    mainWindowSurface = SDL_GetWindowSurface(mainWindow);
-    if (NULL == mainWindowSurface) {
-        printf("Failed to get window surface: %s\n", SDL_GetError());
-        goto error_exit;
-    }
-
     ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     if (ret < 0) {
         printf("Failed to set render draw color: %s\n", SDL_GetError());
@@ -97,30 +88,6 @@ int main(void) {
         goto error_exit;
     }
 
-#if 0
-    printf("Loading asset: %s\n", image_path_wall_stone_gray1.c_str());
-    temporarySurface = IMG_Load(image_path_wall_stone_gray1.c_str());
-    if (NULL == temporarySurface) {
-        printf("Unable to load asset: %s Error: %s",
-                image_path_wall_stone_gray1.c_str(),
-                IMG_GetError());
-        goto error_exit;
-    }
-
-    imageSurface = SDL_ConvertSurface(
-            temporarySurface,
-            mainWindowSurface->format,
-            0);
-    if (NULL == imageSurface) {
-        printf("Failed to convert surface to format of main "
-                "windows surface: %s\n", SDL_GetError());
-        goto error_exit;
-    }
-
-    SDL_FreeSurface(temporarySurface);
-    temporarySurface = NULL;
-#endif
-
     while (!quitEventReceived) {
         do {
             ret = SDL_PollEvent(&event);
@@ -129,12 +96,6 @@ int main(void) {
                 quitEventReceived = true;
             }
         } while (0 != ret);
-
-#if 0
-        SDL_BlitSurface(imageSurface, NULL, mainWindowSurface, NULL);
-
-        SDL_UpdateWindowSurface(mainWindow);
-#endif
 
         SDL_RenderClear(renderer);
 
@@ -147,8 +108,7 @@ int main(void) {
     mainLoop();
 #endif
 
-    SDL_FreeSurface(imageSurface);
-    imageSurface = NULL;
+    // TODO free texture
 
     SDL_DestroyRenderer(renderer);
     renderer = NULL;
@@ -163,10 +123,7 @@ int main(void) {
 
 error_exit:
 
-    if (NULL != imageSurface) {
-        SDL_FreeSurface(imageSurface);
-        imageSurface = NULL;
-    }
+    // TODO free texture
 
     if (NULL != renderer) {
         SDL_DestroyRenderer(renderer);
