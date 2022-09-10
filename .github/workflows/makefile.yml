@@ -18,10 +18,14 @@ jobs:
       run: ./configure
       
     - name: Install dependencies
+      run: echo "Install dependencies placeholder"
+
+    - name: Build
       run: make
       
-    - name: Run check
-      run: make check
+    # - name: Run tests
+    #   run: make check
       
+    # https://www.gnu.org/software/automake/manual/html_node/Checking-the-Distribution.html
     - name: Run distcheck
       run: make distcheck

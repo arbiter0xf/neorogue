@@ -20,5 +20,8 @@ EXE_NAME = rogue_forever
 all: $(SRC)
 	$(CC) $(SRC) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(EXE_NAME)
 
+test: all
+	echo "Test placeholder"
+
 run: all
 	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME)
