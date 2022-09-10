@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $(dirname $0)
+
 pushd ..
 
 if [ "rogue_forever" != "$(basename $(pwd))" ] ; then

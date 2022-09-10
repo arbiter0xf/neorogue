@@ -4,6 +4,8 @@ set -e
 
 readonly spritesheets_dir="spritesheets"
 
+cd $(dirname $0)
+
 pushd ../assets
 
 if [ ! -d "${spritesheets_dir}" ] ; then

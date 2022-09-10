@@ -17,6 +17,8 @@ readonly INSTALL_BOOSTORG_SYSTEM="TRUE"
 readonly INSTALL_BOOSTORG_MP11="TRUE"
 readonly INSTALL_BOOSTORG_ALIGN="TRUE"
 
+cd $(dirname $0)
+
 if [ ! -d deps_install_workarea ] ; then
 	mkdir deps_install_workarea
 fi
