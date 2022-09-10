@@ -108,7 +108,8 @@ int main(void) {
     mainLoop();
 #endif
 
-    // TODO free texture
+    SDL_DestroyTexture(texture);
+    texture = NULL;
 
     SDL_DestroyRenderer(renderer);
     renderer = NULL;
@@ -123,7 +124,10 @@ int main(void) {
 
 error_exit:
 
-    // TODO free texture
+    if (NULL != texture) {
+        SDL_DestroyTexture(texture);
+        texture = NULL;
+    }
 
     if (NULL != renderer) {
         SDL_DestroyRenderer(renderer);
