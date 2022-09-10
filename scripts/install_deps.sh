@@ -49,6 +49,8 @@ fi
 
 popd
 
+rm -r deps_install_workarea
+
 pushd ../
 if [ ! -d external ] ; then
 	mkdir external
@@ -109,5 +111,3 @@ fi
 popd
 
 popd
-
-rmdir deps_install_workarea
