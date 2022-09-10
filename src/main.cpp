@@ -27,7 +27,7 @@ int main(void) {
                                     // supporting requested flags
 
     SDL_Rect* srcRect = NULL;
-    SDL_Rect* dstRect = NULL;
+    SDL_Rect dstRect = { 0, 0, 32, 32 };
 
     int ret = -1;
     bool quitEventReceived = false;
@@ -99,7 +99,7 @@ int main(void) {
 
         SDL_RenderClear(renderer);
 
-        SDL_RenderCopy(renderer, texture, srcRect, dstRect);
+        SDL_RenderCopy(renderer, texture, srcRect, &dstRect);
 
         SDL_RenderPresent(renderer);
     }
