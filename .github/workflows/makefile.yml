@@ -22,10 +22,13 @@ jobs:
 
     - name: Build
       run: make
-      
+
+    - name: Test
+      run: make test
+
     # - name: Run tests
     #   run: make check
       
     # https://www.gnu.org/software/automake/manual/html_node/Checking-the-Distribution.html
-    - name: Run distcheck
-      run: make distcheck
+    # - name: Run distcheck
+    #   run: make distcheck
