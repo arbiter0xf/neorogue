@@ -20,20 +20,23 @@ int main(void) {
     const std::string assetsPrefix = "assets/";
     const std::string imagePathWallStoneGray1 =
         assetsPrefix + "dc-dngn/wall/stone_gray1.png";
+    const std::string imagePathDngnWallSpritesheet =
+        assetsPrefix + "spritesheets/dc-dngn_wall.png";
 
     const int imgFlags = IMG_INIT_PNG;
 
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
 
-    SDL_Rect* srcRect = NULL;
-    SDL_Rect dstRect = { 0, 0, 32, 32 };
+    SDL_Rect srcRect = {0, 0, 0, 0};
+    SDL_Rect dstRect = {0, 0, 0, 0};
 
     int ret = -1;
     bool quitEventReceived = false;
 
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
+    SDL_Texture* textureSpritesheet = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
 
@@ -88,6 +91,15 @@ int main(void) {
         goto error_exit;
     }
 
+    textureSpritesheet = IMG_LoadTexture(
+            renderer,
+            imagePathDngnWallSpritesheet.c_str());
+    if (NULL == textureSpritesheet) {
+        printf("Failed to load texture from file %s\n",
+                imagePathDngnWallSpritesheet.c_str());
+        goto error_exit;
+    }
+
     while (!quitEventReceived) {
         do {
             ret = SDL_PollEvent(&event);
@@ -99,7 +111,16 @@ int main(void) {
 
         SDL_RenderClear(renderer);
 
-        SDL_RenderCopy(renderer, texture, srcRect, &dstRect);
+        srcRect = {0, 0, 32, 32};
+        dstRect = {0, 0, 32, 32};
+        SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
+
+        srcRect.x = 409;
+        srcRect.y = 137;
+        srcRect.w = 32;
+        srcRect.h = 32;
+        dstRect = {32, 32, 32, 32};
+        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
 
         SDL_RenderPresent(renderer);
     }
@@ -109,6 +130,9 @@ int main(void) {
 #endif
 
     SDL_DestroyTexture(texture);
+    texture = NULL;
+
+    SDL_DestroyTexture(textureSpritesheet);
     texture = NULL;
 
     SDL_DestroyRenderer(renderer);
@@ -123,6 +147,11 @@ int main(void) {
     return 0;
 
 error_exit:
+
+    if (NULL != textureSpritesheet) {
+        SDL_DestroyTexture(textureSpritesheet);
+        texture = NULL;
+    }
 
     if (NULL != texture) {
         SDL_DestroyTexture(texture);
