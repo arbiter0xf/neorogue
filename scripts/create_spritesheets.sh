@@ -38,7 +38,7 @@ for directory in ${directories} ; do
 	echo -e "\tspritesheet_filename=${spritesheet_filename}"
 	echo -e "\tspritesheet_coordinates_filename=${spritesheet_coordinates_filename}"
 
-	TexturePacker --sheet ${spritesheet_filename} --data ${spritesheet_coordinates_filename} ${directory}
+	TexturePacker --sheet ${spritesheet_filename} --format json --data ${spritesheet_coordinates_filename} ${directory}
 done
 
 popd
