@@ -76,7 +76,8 @@ int main(void) {
             mainWindowSurface->format,
             0);
     if (NULL == imageSurface) {
-        printf("Failed to convert surface to format of main windows surface: %s\n", SDL_GetError());
+        printf("Failed to convert surface to format of main "
+                "windows surface: %s\n", SDL_GetError());
         goto error_exit;
     }
 
