@@ -8,9 +8,17 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <array>
 
+#include "tile.hpp"
+
+const int TILE_HEIGHT = 32;
+const int TILE_WIDTH = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
+const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
+                                 // pass by using -DTILE_POOL_SIZE=$(script)
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
@@ -18,6 +26,8 @@ const char PROGRAM_NAME[] = "Rogue Forever";
 #define INFO "[I] "
 #define ERR "[E] "
 #define DBG "[D] "
+
+using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 
 #if 0
 void mainLoop(void) {
@@ -86,7 +96,7 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
  * \exception Throws std::runtime_error on failure
  */
 void texturepackerJsonGetFrameObject(
-        const char* frameKey,
+        std::string frameKey,
         const boost::json::value& jsonValue,
         boost::json::object& frameObjectOut)
 {
@@ -125,6 +135,54 @@ void texturepackerJsonGetValueWithKey(
     frameObjectFrame = frameObjectIter->value();
 }
 
+void renderTile(
+        SDL_Renderer* renderer,
+        Tile* tile)
+{
+    SDL_Rect srcRect = {
+        tile->getSheetX(),
+        tile->getSheetY(),
+        tile->getSheetW(),
+        tile->getSheetH(),
+    };
+    SDL_Rect dstRect = {
+        tile->getScreenX(),
+        tile->getScreenY(),
+        tile->getSheetW(),
+        tile->getSheetH()
+    };
+
+    SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
+}
+
+void fillScreenTiles(
+        screen_tiles& screenTiles,
+        Tile* tile1,
+        Tile* tile2,
+        Tile* tile3)
+{
+    screenTiles[0] = tile1;
+    screenTiles[1] = tile2;
+    screenTiles[2] = tile3;
+    screenTiles[3] = 0;
+}
+
+void renderScreenTiles(
+        SDL_Renderer* renderer,
+        screen_tiles screenTiles)
+{
+    for (Tile* tile : screenTiles) {
+        if (NULL == tile) {
+            // screenTiles is assumed to contain valid tiles starting from
+            // index 0 and continuing until NULL ptr is met or end of
+            // screenTiles
+            break;
+        }
+
+        renderTile(renderer, tile);
+    }
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -145,6 +203,10 @@ int main(void)
     boost::json::object frameObject;
     boost::json::object frameAltarObject;
     boost::json::object frameAltarObjectFrame;
+    boost::json::object frameStoneGrayObject;
+    boost::json::object frameStoneGrayObjectFrame;
+    boost::json::object frameGateObject;
+    boost::json::object frameGateObjectFrame;
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -153,17 +215,43 @@ int main(void)
     int ret = -1;
     bool quitEventReceived = false;
 
-    const char* tileAltarPath = "altars/dngn_altar.png";
-    int tileAltarX = -1;
-    int tileAltarY = -1;
-    int tileAltarW = -1;
-    int tileAltarH = -1;
+    SDL_Texture* tileStoneGray1Spritesheet = NULL;
+    std::string tileStoneGray1Path = "wall/stone_gray1.png";
+    int tileStoneGray1ScreenX = 0;
+    int tileStoneGray1ScreenY = 0;
+    int tileStoneGray1SheetX = -1;
+    int tileStoneGray1SheetY = -1;
+    int tileStoneGray1SheetW = -1;
+    int tileStoneGray1SheetH = -1;
+
+    SDL_Texture* tileGateClosedMiddleSpritesheet = NULL;
+    std::string tileGateClosedMiddlePath = "gate_closed_middle.png";
+    int tileGateClosedMiddleScreenX = 32;
+    int tileGateClosedMiddleScreenY = 32;
+    int tileGateClosedMiddleSheetX = -1;
+    int tileGateClosedMiddleSheetY = -1;
+    int tileGateClosedMiddleSheetW = -1;
+    int tileGateClosedMiddleSheetH = -1;
+
+    SDL_Texture* tileAltarSpritesheet = NULL;
+    std::string tileAltarPath = "altars/dngn_altar.png";
+    int tileAltarScreenX = 64;
+    int tileAltarScreenY = 64;
+    int tileAltarSheetX = -1;
+    int tileAltarSheetY = -1;
+    int tileAltarSheetW = -1;
+    int tileAltarSheetH = -1;
 
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
     SDL_Texture* textureSpritesheet = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
+
+    // TODO implement tilePool that contains all tiles from spritesheets in use
+    // std::array<Tile, TILE_POOL_SIZE> tilePool = generateTilesFrom("/path/to/tiles");
+    // std::array<Tile, SCREEN_TILES> screenTiles = { 0 };
+    std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
     try {
         ret = readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
@@ -178,19 +266,45 @@ int main(void)
         goto error_exit;
     }
 
-    texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
-    texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
-    frameAltarObjectFrame = tPackerJsonTemp.get_object();
-
     try {
+        texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
+        texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
+        frameAltarObjectFrame = tPackerJsonTemp.get_object();
+
         texturepackerJsonGetValueWithKey("x", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarX = tPackerJsonTemp.as_int64();
+        tileAltarSheetX = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("y", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarY = tPackerJsonTemp.as_int64();
+        tileAltarSheetY = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("w", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarW = tPackerJsonTemp.as_int64();
+        tileAltarSheetW = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("h", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarH = tPackerJsonTemp.as_int64();
+        tileAltarSheetH = tPackerJsonTemp.as_int64();
+
+        texturepackerJsonGetFrameObject(tileStoneGray1Path, tPackerJsonValue, frameStoneGrayObject);
+        texturepackerJsonGetValueWithKey("frame", frameStoneGrayObject, tPackerJsonTemp);
+        frameStoneGrayObjectFrame = tPackerJsonTemp.get_object();
+
+        texturepackerJsonGetValueWithKey("x", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetH = tPackerJsonTemp.as_int64();
+
+        texturepackerJsonGetFrameObject(tileGateClosedMiddlePath, tPackerJsonValue, frameGateObject);
+        texturepackerJsonGetValueWithKey("frame", frameGateObject, tPackerJsonTemp);
+        frameGateObjectFrame = tPackerJsonTemp.get_object();
+
+        texturepackerJsonGetValueWithKey("x", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetH = tPackerJsonTemp.as_int64();
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while converting json value to uint64"
             << e.what() << "\n";
@@ -248,6 +362,7 @@ int main(void)
         goto error_exit;
     }
 
+    // TODO consider handling errors without gotos
     textureSpritesheet = IMG_LoadTexture(
             renderer,
             imagePathDngnSpritesheet.c_str());
@@ -268,23 +383,43 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
-        srcRect = {0, 0, 32, 32};
-        dstRect = {0, 0, 32, 32};
-        SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
+        tileStoneGray1Spritesheet = textureSpritesheet;
+        Tile testTile1(
+                tileStoneGray1ScreenX,
+                tileStoneGray1ScreenY,
+                tileStoneGray1Spritesheet,
+                tileStoneGray1SheetX,
+                tileStoneGray1SheetY,
+                tileStoneGray1SheetW,
+                tileStoneGray1SheetH);
 
-        srcRect.x = 409;
-        srcRect.y = 137;
-        srcRect.w = 32;
-        srcRect.h = 32;
-        dstRect = {32, 32, 32, 32};
-        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
+        tileGateClosedMiddleSpritesheet = textureSpritesheet;
+        Tile testTile2(
+                tileGateClosedMiddleScreenX,
+                tileGateClosedMiddleScreenY,
+                tileGateClosedMiddleSpritesheet,
+                tileGateClosedMiddleSheetX,
+                tileGateClosedMiddleSheetY,
+                tileGateClosedMiddleSheetW,
+                tileGateClosedMiddleSheetH);
 
-        srcRect.x = tileAltarX;
-        srcRect.y = tileAltarY;
-        srcRect.w = tileAltarW;
-        srcRect.h = tileAltarH;
-        dstRect = {64, 64, 32, 32};
-        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
+        tileAltarSpritesheet = textureSpritesheet;
+        Tile testTile3(
+                tileAltarScreenX,
+                tileAltarScreenY,
+                tileAltarSpritesheet,
+                tileAltarSheetX,
+                tileAltarSheetY,
+                tileAltarSheetW,
+                tileAltarSheetH);
+
+        fillScreenTiles(
+                screenTiles,
+                &testTile1,
+                &testTile2,
+                &testTile3);
+
+        renderScreenTiles(renderer, screenTiles);
 
         SDL_RenderPresent(renderer);
     }
