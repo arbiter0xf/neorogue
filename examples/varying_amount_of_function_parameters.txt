@@ -1,0 +1,4 @@
+screen_tiles fillScreenTiles(auto ...tiles)
+{
+    return { tiles... };
+}
