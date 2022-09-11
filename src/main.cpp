@@ -94,7 +94,7 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
  * \exception Throws std::runtime_error on failure
  */
 void texturepackerJsonGetFrameObject(
-        const char* frameKey,
+        std::string frameKey,
         const boost::json::value& jsonValue,
         boost::json::object& frameObjectOut)
 {
@@ -192,7 +192,7 @@ int main(void)
     bool quitEventReceived = false;
 
     SDL_Texture* tileStoneGray1Spritesheet = NULL;
-    const char* tileStoneGray1Path = "wall/stone_gray1.png";
+    std::string tileStoneGray1Path = "wall/stone_gray1.png";
     int tileStoneGray1ScreenX = 0;
     int tileStoneGray1ScreenY = 0;
     int tileStoneGray1SheetX = -1;
@@ -201,7 +201,7 @@ int main(void)
     int tileStoneGray1SheetH = -1;
 
     SDL_Texture* tileGateClosedMiddleSpritesheet = NULL;
-    const char* tileGateClosedMiddlePath = "gate_closed_middle.png";
+    std::string tileGateClosedMiddlePath = "gate_closed_middle.png";
     int tileGateClosedMiddleScreenX = 32;
     int tileGateClosedMiddleScreenY = 32;
     int tileGateClosedMiddleSheetX = -1;
@@ -210,7 +210,7 @@ int main(void)
     int tileGateClosedMiddleSheetH = -1;
 
     SDL_Texture* tileAltarSpritesheet = NULL;
-    const char* tileAltarPath = "altars/dngn_altar.png";
+    std::string tileAltarPath = "altars/dngn_altar.png";
     int tileAltarScreenX = 64;
     int tileAltarScreenY = 64;
     int tileAltarSheetX = -1;
