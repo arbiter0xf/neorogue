@@ -82,66 +82,6 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
 //     },
 //     "altars/dngn_altar_beogh.png":
 //     {
-int texturepackerJsonGetFilenames(boost::json::value const& jsonValue, std::string& filenames)
-{
-    filenames = "";
-
-    if (boost::json::kind::object != jsonValue.kind()) {
-        printf(ERR "JSON value top level is not an object\n");
-        return -1;
-    }
-
-    auto const& topObj = jsonValue.get_object();
-
-    if (topObj.empty()) {
-        printf(ERR "Empty top level JSON object\n");
-        return -1;
-    }
-
-    auto iter = topObj.begin();
-    std::cout << DBG << "iter points to topObj.begin(): " << iter->key() << "\n";
-    std::cout << DBG << "iter->key is: " << iter->key() << "\n";
-
-    boost::json::value framesObj = iter->value();
-
-    // iter is expected to point to "frames"
-    if (boost::json::kind::object != framesObj.kind()) {
-        printf(ERR "iter does not seem to point to \"frames\"\n");
-        return -1;
-    }
-
-    iter = framesObj.get_object().begin();
-    auto iterEnd = framesObj.get_object().end();
-    std::cout << DBG << "iter points to framesObj.begin(): " << iter->key() << "\n";
-    std::cout << DBG << "iter->key is: " << iter->key() << "\n";
-
-    while (iter != iterEnd) {
-        filenames += iter->key();
-        filenames += "\n";
-        iter++;
-    }
-
-    return 0;
-}
-
-int testPrintFilenamesFromJson(const boost::json::value& jsonValue)
-{
-    int ret = -1;
-
-    std::string dngnSpritesheetFilenames = "";
-
-    ret = texturepackerJsonGetFilenames(jsonValue, dngnSpritesheetFilenames);
-    if (0 != ret) {
-        printf(ERR "texturepackerJsonGetFilenames() failed");
-        return -1;
-    }
-
-    std::cout << DBG << "Found following filenames from JSON value:\n";
-    std::cout << DBG << dngnSpritesheetFilenames << "\n";
-
-    return 0;
-}
-
 /*
  * \exception Throws std::runtime_error on failure
  */
