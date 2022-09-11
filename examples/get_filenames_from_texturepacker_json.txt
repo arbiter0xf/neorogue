@@ -57,5 +57,3 @@ int texturepackerJsonGetFilenames(boost::json::value const& jsonValue, std::stri
 
     return 0;
 }
-
-

@@ -27,7 +27,10 @@ const char PROGRAM_NAME[] = "Rogue Forever";
 #define ERR "[E] "
 #define DBG "[D] "
 
+#define DEBUG 1
+
 using screen_tiles = std::array<Tile*, SCREEN_TILES>;
+using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -155,9 +158,9 @@ void renderTile(
     SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
-screen_tiles fillScreenTiles(auto ...tiles)
+screen_tiles fillScreenTiles(tile_pool& tilePool)
 {
-    return { tiles... };
+    return { &tilePool[0] };
 }
 
 void renderScreenTiles(
@@ -174,6 +177,113 @@ void renderScreenTiles(
 
         renderTile(renderer, tile);
     }
+}
+
+/*
+ * \exception May throw std::exception
+ */
+tile_pool generateTilesFrom(
+        SDL_Renderer* renderer,
+        std::string imagePathSpritesheet,
+        std::string dataPathSpritesheet)
+{
+    int ret = -1;
+
+    boost::json::value tPackerJsonValue;
+    boost::json::value tPackerJsonTemp;
+    boost::json::object tPackerFramesObj;
+    int tileSheetX = -1;
+    int tileSheetY = -1;
+    int tileSheetW = -1;
+    int tileSheetH = -1;
+    Tile tileTemp;
+    tile_pool tilePool;
+
+    SDL_Texture* textureSpritesheet = NULL;
+
+    ret = readJsonFromFile(dataPathSpritesheet, tPackerJsonValue);
+
+    // TODO deallocate spritesheet
+    textureSpritesheet = IMG_LoadTexture(
+            renderer,
+            imagePathSpritesheet.c_str());
+    if (NULL == textureSpritesheet) {
+        throw std::runtime_error("Failed to load texture" + imagePathSpritesheet);
+        return {};
+    }
+
+    if (boost::json::kind::object != tPackerJsonValue.kind()) {
+        printf(ERR "JSON value top level is not an object\n");
+        return {};
+    }
+
+    auto const& topObj = tPackerJsonValue.get_object();
+    if (topObj.empty()) {
+        throw std::runtime_error("Empty top level JSON object");
+        return {};
+    }
+
+    auto iter = topObj.begin();
+    tPackerFramesObj = iter->value().get_object();
+    iter = tPackerFramesObj.begin();
+    auto iterEnd = tPackerFramesObj.end();
+
+    auto tilePoolIter = tilePool.begin();
+    for (const auto& [tileName, tileConfig] : tPackerFramesObj) {
+        const auto tileConfigObj = tileConfig.as_object();
+        texturepackerJsonGetValueWithKey("frame", tileConfigObj, tPackerJsonTemp);
+        const auto tileConfigFrameObj = tPackerJsonTemp.as_object();
+
+#if DEBUG
+        std::cout << DBG << "Constructing tile for tile pool:" << "\n";
+        std::cout << DBG << "tileName is: " << tileName << "\n";
+        std::cout << DBG << "tileConfig is: " << tileConfig << "\n";
+#endif
+
+        texturepackerJsonGetValueWithKey("x", tileConfigFrameObj, tPackerJsonTemp);
+        tileSheetX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", tileConfigFrameObj, tPackerJsonTemp);
+        tileSheetY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", tileConfigFrameObj, tPackerJsonTemp);
+        tileSheetW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", tileConfigFrameObj, tPackerJsonTemp);
+        tileSheetH = tPackerJsonTemp.as_int64();
+
+        // TODO use std::generate & std::transform
+        // https://en.cppreference.com/w/cpp/algorithm/generate
+        // https://en.cppreference.com/w/cpp/algorithm/transform
+        // std::transform(tPackerFramesObj.cbegin(), tPackerFramesObj.cend(), tilePool.begin(), [](auto frame) { ... return Tile{...};});
+        *tilePoolIter = Tile(
+                -1,
+                -1,
+                tileName,
+                textureSpritesheet,
+                tileSheetX,
+                tileSheetY,
+                tileSheetW,
+                tileSheetH);
+
+        if (tilePool.begin() == tilePoolIter) {
+            // Print only once
+#if DEBUG
+            std::cout << DBG << "Constructed a tile with:" << "\n";
+            std::cout << DBG << "sheetX: " << (*tilePoolIter).getSheetX() << "\n";
+            std::cout << DBG << "sheetY: " << (*tilePoolIter).getSheetY() << "\n";
+            std::cout << DBG << "sheetW: " << (*tilePoolIter).getSheetW() << "\n";
+            std::cout << DBG << "sheetH: " << (*tilePoolIter).getSheetH() << "\n";
+            std::cout << DBG << "name: " << (*tilePoolIter).getName() << "\n";
+#endif
+        }
+
+        tilePoolIter++;
+    }
+
+    return tilePool;
+}
+
+void cleanup(void)
+{
+    printf(INFO "Cleanup placeholder running");
 }
 
 int main(void)
@@ -208,42 +318,13 @@ int main(void)
     int ret = -1;
     bool quitEventReceived = false;
 
-    SDL_Texture* tileStoneGray1Spritesheet = NULL;
-    std::string tileStoneGray1Path = "wall/stone_gray1.png";
-    int tileStoneGray1ScreenX = 0;
-    int tileStoneGray1ScreenY = 0;
-    int tileStoneGray1SheetX = -1;
-    int tileStoneGray1SheetY = -1;
-    int tileStoneGray1SheetW = -1;
-    int tileStoneGray1SheetH = -1;
-
-    SDL_Texture* tileGateClosedMiddleSpritesheet = NULL;
-    std::string tileGateClosedMiddlePath = "gate_closed_middle.png";
-    int tileGateClosedMiddleScreenX = 32;
-    int tileGateClosedMiddleScreenY = 32;
-    int tileGateClosedMiddleSheetX = -1;
-    int tileGateClosedMiddleSheetY = -1;
-    int tileGateClosedMiddleSheetW = -1;
-    int tileGateClosedMiddleSheetH = -1;
-
-    SDL_Texture* tileAltarSpritesheet = NULL;
-    std::string tileAltarPath = "altars/dngn_altar.png";
-    int tileAltarScreenX = 64;
-    int tileAltarScreenY = 64;
-    int tileAltarSheetX = -1;
-    int tileAltarSheetY = -1;
-    int tileAltarSheetW = -1;
-    int tileAltarSheetH = -1;
-
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
-    SDL_Texture* textureSpritesheet = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
 
-    // TODO implement tilePool that contains all tiles from spritesheets in use
-    // std::array<Tile, TILE_POOL_SIZE> tilePool = generateTilesFrom("/path/to/tiles");
-    // std::array<Tile, SCREEN_TILES> screenTiles = { 0 };
+    tile_pool tilePool;
+
     std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
     try {
@@ -256,51 +337,6 @@ int main(void)
     if (0 != ret) {
         printf(ERR "Failed to read JSON from file: %s\n",
                 dataPathDngnSpritesheet.c_str());
-        goto error_exit;
-    }
-
-    try {
-        texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
-        texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
-        frameAltarObjectFrame = tPackerJsonTemp.get_object();
-
-        texturepackerJsonGetValueWithKey("x", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarSheetX = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("y", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarSheetY = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("w", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarSheetW = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("h", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarSheetH = tPackerJsonTemp.as_int64();
-
-        texturepackerJsonGetFrameObject(tileStoneGray1Path, tPackerJsonValue, frameStoneGrayObject);
-        texturepackerJsonGetValueWithKey("frame", frameStoneGrayObject, tPackerJsonTemp);
-        frameStoneGrayObjectFrame = tPackerJsonTemp.get_object();
-
-        texturepackerJsonGetValueWithKey("x", frameStoneGrayObjectFrame, tPackerJsonTemp);
-        tileStoneGray1SheetX = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("y", frameStoneGrayObjectFrame, tPackerJsonTemp);
-        tileStoneGray1SheetY = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("w", frameStoneGrayObjectFrame, tPackerJsonTemp);
-        tileStoneGray1SheetW = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("h", frameStoneGrayObjectFrame, tPackerJsonTemp);
-        tileStoneGray1SheetH = tPackerJsonTemp.as_int64();
-
-        texturepackerJsonGetFrameObject(tileGateClosedMiddlePath, tPackerJsonValue, frameGateObject);
-        texturepackerJsonGetValueWithKey("frame", frameGateObject, tPackerJsonTemp);
-        frameGateObjectFrame = tPackerJsonTemp.get_object();
-
-        texturepackerJsonGetValueWithKey("x", frameGateObjectFrame, tPackerJsonTemp);
-        tileGateClosedMiddleSheetX = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("y", frameGateObjectFrame, tPackerJsonTemp);
-        tileGateClosedMiddleSheetY = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("w", frameGateObjectFrame, tPackerJsonTemp);
-        tileGateClosedMiddleSheetW = tPackerJsonTemp.as_int64();
-        texturepackerJsonGetValueWithKey("h", frameGateObjectFrame, tPackerJsonTemp);
-        tileGateClosedMiddleSheetH = tPackerJsonTemp.as_int64();
-    } catch(std::exception const& e) {
-        std::cerr << ERR << "Exception while converting json value to uint64"
-            << e.what() << "\n";
         goto error_exit;
     }
 
@@ -348,6 +384,11 @@ int main(void)
         goto error_exit;
     }
 
+    // TODO consider handling errors without gotos
+    //
+    // See lippincott functions:
+    // https://isocpp.org/blog/2017/11/cpp-weekly-episode-91-using-lippincott-functions-jason-turner
+    // https://cppsecrets.blogspot.com/
     texture = IMG_LoadTexture(renderer, imagePathWallStoneGray1.c_str());
     if (NULL == texture) {
         printf(ERR "Failed to load texture from file %s\n",
@@ -355,14 +396,16 @@ int main(void)
         goto error_exit;
     }
 
-    // TODO consider handling errors without gotos
-    textureSpritesheet = IMG_LoadTexture(
-            renderer,
-            imagePathDngnSpritesheet.c_str());
-    if (NULL == textureSpritesheet) {
-        printf(ERR "Failed to load texture from file %s\n",
-                imagePathDngnSpritesheet.c_str());
-        goto error_exit;
+    try {
+        tilePool = generateTilesFrom(
+                renderer,
+                imagePathDngnSpritesheet,
+                dataPathDngnSpritesheet);
+    } catch (std::exception const& e) {
+        std::cerr << ERR << "Exception while generating tiles from spritesheets"
+            << e.what() << "\n";
+        cleanup();
+        return -1;
     }
 
     while (!quitEventReceived) {
@@ -376,40 +419,7 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
-        tileStoneGray1Spritesheet = textureSpritesheet;
-        Tile testTile1(
-                tileStoneGray1ScreenX,
-                tileStoneGray1ScreenY,
-                tileStoneGray1Spritesheet,
-                tileStoneGray1SheetX,
-                tileStoneGray1SheetY,
-                tileStoneGray1SheetW,
-                tileStoneGray1SheetH);
-
-        tileGateClosedMiddleSpritesheet = textureSpritesheet;
-        Tile testTile2(
-                tileGateClosedMiddleScreenX,
-                tileGateClosedMiddleScreenY,
-                tileGateClosedMiddleSpritesheet,
-                tileGateClosedMiddleSheetX,
-                tileGateClosedMiddleSheetY,
-                tileGateClosedMiddleSheetW,
-                tileGateClosedMiddleSheetH);
-
-        tileAltarSpritesheet = textureSpritesheet;
-        Tile testTile3(
-                tileAltarScreenX,
-                tileAltarScreenY,
-                tileAltarSpritesheet,
-                tileAltarSheetX,
-                tileAltarSheetY,
-                tileAltarSheetW,
-                tileAltarSheetH);
-
-        screenTiles = fillScreenTiles(
-                &testTile1,
-                &testTile2,
-                &testTile3);
+        screenTiles = fillScreenTiles(tilePool);
 
         renderScreenTiles(renderer, screenTiles);
 
@@ -421,9 +431,6 @@ int main(void)
 #endif
 
     SDL_DestroyTexture(texture);
-    texture = NULL;
-
-    SDL_DestroyTexture(textureSpritesheet);
     texture = NULL;
 
     SDL_DestroyRenderer(renderer);
@@ -438,11 +445,6 @@ int main(void)
     return 0;
 
 error_exit:
-
-    if (NULL != textureSpritesheet) {
-        SDL_DestroyTexture(textureSpritesheet);
-        texture = NULL;
-    }
 
     if (NULL != texture) {
         SDL_DestroyTexture(texture);
