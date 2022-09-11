@@ -155,17 +155,9 @@ void renderTile(
     SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
-screen_tiles fillScreenTiles(
-        Tile* tile1,
-        Tile* tile2,
-        Tile* tile3)
+screen_tiles fillScreenTiles(auto ...tiles)
 {
-    return {
-        tile1,
-        tile2,
-        tile3,
-        0
-    };
+    return { tiles... };
 }
 
 void renderScreenTiles(

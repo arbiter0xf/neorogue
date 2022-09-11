@@ -14,7 +14,7 @@ INCLUDES := \
 	    -Iexternal/boostorg/mp11/include/ \
 	    -Iexternal/boostorg/align/include/ \
 	    -Iinclude
-COMPILER_FLAGS = $(INCLUDES) -w -std=c++11
+COMPILER_FLAGS = $(INCLUDES) -w -std=c++14
 LINKER_FLAGS = -lSDL2 -lSDL2_image
 EXE_NAME = rogue_forever
 
