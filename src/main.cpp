@@ -179,6 +179,8 @@ int main(void)
     boost::json::object frameObject;
     boost::json::object frameAltarObject;
     boost::json::object frameAltarObjectFrame;
+    boost::json::object frameStoneGrayObject;
+    boost::json::object frameStoneGrayObjectFrame;
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -186,6 +188,15 @@ int main(void)
     int err = -1;
     int ret = -1;
     bool quitEventReceived = false;
+
+    SDL_Texture* tileStoneGray1Spritesheet = NULL;
+    const char* tileStoneGray1Path = "wall/stone_gray1.png";
+    int tileStoneGray1ScreenX = 0;
+    int tileStoneGray1ScreenY = 0;
+    int tileStoneGray1SheetX = -1;
+    int tileStoneGray1SheetY = -1;
+    int tileStoneGray1SheetW = -1;
+    int tileStoneGray1SheetH = -1;
 
     SDL_Texture* tileAltarSpritesheet = NULL;
     const char* tileAltarPath = "altars/dngn_altar.png";
@@ -220,11 +231,11 @@ int main(void)
         goto error_exit;
     }
 
-    texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
-    texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
-    frameAltarObjectFrame = tPackerJsonTemp.get_object();
-
     try {
+        texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
+        texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
+        frameAltarObjectFrame = tPackerJsonTemp.get_object();
+
         texturepackerJsonGetValueWithKey("x", frameAltarObjectFrame, tPackerJsonTemp);
         tileAltarSheetX = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("y", frameAltarObjectFrame, tPackerJsonTemp);
@@ -233,6 +244,19 @@ int main(void)
         tileAltarSheetW = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("h", frameAltarObjectFrame, tPackerJsonTemp);
         tileAltarSheetH = tPackerJsonTemp.as_int64();
+
+        texturepackerJsonGetFrameObject(tileStoneGray1Path, tPackerJsonValue, frameStoneGrayObject);
+        texturepackerJsonGetValueWithKey("frame", frameStoneGrayObject, tPackerJsonTemp);
+        frameStoneGrayObjectFrame = tPackerJsonTemp.get_object();
+
+        texturepackerJsonGetValueWithKey("x", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", frameStoneGrayObjectFrame, tPackerJsonTemp);
+        tileStoneGray1SheetH = tPackerJsonTemp.as_int64();
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while converting json value to uint64"
             << e.what() << "\n";
@@ -311,8 +335,18 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
-        tileAltarSpritesheet = textureSpritesheet;
+        tileStoneGray1Spritesheet = textureSpritesheet;
         Tile testTile1(
+                tileStoneGray1ScreenX,
+                tileStoneGray1ScreenY,
+                tileStoneGray1Spritesheet,
+                tileStoneGray1SheetX,
+                tileStoneGray1SheetY,
+                tileStoneGray1SheetW,
+                tileStoneGray1SheetH);
+
+        tileAltarSpritesheet = textureSpritesheet;
+        Tile testTile2(
                 tileAltarScreenX,
                 tileAltarScreenY,
                 tileAltarSpritesheet,
@@ -323,9 +357,9 @@ int main(void)
 
         fillScreenTiles(screenTiles, testTile1);
 
-        srcRect = {0, 0, 32, 32};
-        dstRect = {0, 0, 32, 32};
-        SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
+        renderTileFromSpritesheet(
+                renderer,
+                testTile1);
 
         srcRect.x = 409;
         srcRect.y = 137;
@@ -336,7 +370,7 @@ int main(void)
 
         renderTileFromSpritesheet(
                 renderer,
-                testTile1);
+                testTile2);
 
         SDL_RenderPresent(renderer);
     }
