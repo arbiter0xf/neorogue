@@ -142,6 +142,35 @@ int testPrintFilenamesFromJson(const boost::json::value& jsonValue)
     return 0;
 }
 
+/*
+ * \exception Throws std::runtime_error on failure
+ */
+void texturepackerJsonGetFrameObject(
+        const char* frameKey,
+        const boost::json::value& jsonValue,
+        boost::json::object& frameObjectOut)
+{
+    if (boost::json::kind::object != jsonValue.kind()) {
+        throw std::runtime_error("JSON value top level is not an object");
+    }
+
+    auto const& topObj = jsonValue.get_object();
+    auto iter = topObj.begin();
+    boost::json::value framesValue = iter->value();
+
+    auto frameIter = framesValue.get_object().find(frameKey);
+    std::cout << DBG << "frameIter->key() is: " << frameIter->key() << "\n";
+    std::cout << DBG << "frameIter->value() is: " << frameIter->value() << "\n";
+
+    boost::json::value frameValue = frameIter->value();
+
+    if (boost::json::kind::object != frameValue.kind()) {
+        throw std::runtime_error("Frame JSON value is not an object");
+    }
+
+    frameObjectOut = frameValue.get_object();
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -157,11 +186,13 @@ int main(void)
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
 
-    boost::json::value jsonValue;
+    boost::json::value tPackerJsonValue;
+    boost::json::object frameObject;
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
 
+    int err = -1;
     int ret = -1;
     bool quitEventReceived = false;
 
@@ -172,7 +203,7 @@ int main(void)
     SDL_Event event;
 
     try {
-        ret = readJsonFromFile(dataPathDngnSpritesheet, jsonValue);
+        ret = readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while reading JSON from file: "
             << e.what() << "\n";
@@ -184,11 +215,15 @@ int main(void)
         goto error_exit;
     }
 
-    ret = testPrintFilenamesFromJson(jsonValue);
+#if 0
+    ret = testPrintFilenamesFromJson(tPackerJsonValue);
     if (0 != ret) {
         printf(ERR "testPrintFilenamesFromJson() failed");
         goto error_exit;
     }
+#endif
+
+    texturepackerJsonGetFrameObject("altars/dngn_altar.png", tPackerJsonValue, frameObject);
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
