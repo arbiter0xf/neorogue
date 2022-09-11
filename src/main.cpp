@@ -8,11 +8,15 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <array>
 
 #include "tile.hpp"
 
+const int TILE_HEIGHT = 32;
+const int TILE_WIDTH = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT);
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
@@ -189,6 +193,9 @@ int main(void)
     SDL_Texture* textureSpritesheet = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
+
+    // TODO implement tilePool that contains all tiles from spritesheets in use
+    std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
     try {
         ret = readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
