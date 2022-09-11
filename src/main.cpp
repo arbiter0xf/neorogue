@@ -125,6 +125,33 @@ void texturepackerJsonGetValueWithKey(
     frameObjectFrame = frameObjectIter->value();
 }
 
+void renderTileFromSpritesheet(
+        SDL_Renderer* renderer,
+        SDL_Texture* sheetTexture,
+        int sheetX,
+        int sheetY,
+        int sheetW,
+        int sheetH,
+        int destX,
+        int destY,
+        int destW,
+        int destH)
+{
+    // TODO Wrap following to a texture object
+    // TEXTURE* sheetTexture
+    // sheetX
+    // sheetY
+    // sheetW
+    // sheetH
+    // destW
+    // destH
+
+    SDL_Rect srcRect = {sheetX, sheetY, sheetW, sheetH};
+    SDL_Rect dstRect = {destX, destY, destW, destH};
+
+    SDL_RenderCopy(renderer, sheetTexture, &srcRect, &dstRect);
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -153,6 +180,7 @@ int main(void)
     int ret = -1;
     bool quitEventReceived = false;
 
+    SDL_Texture* tileAltarSpritesheet = NULL;
     const char* tileAltarPath = "altars/dngn_altar.png";
     int tileAltarX = -1;
     int tileAltarY = -1;
@@ -257,6 +285,8 @@ int main(void)
         goto error_exit;
     }
 
+    tileAltarSpritesheet = textureSpritesheet;
+
     while (!quitEventReceived) {
         do {
             ret = SDL_PollEvent(&event);
@@ -279,12 +309,17 @@ int main(void)
         dstRect = {32, 32, 32, 32};
         SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
 
-        srcRect.x = tileAltarX;
-        srcRect.y = tileAltarY;
-        srcRect.w = tileAltarW;
-        srcRect.h = tileAltarH;
-        dstRect = {64, 64, 32, 32};
-        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
+        renderTileFromSpritesheet(
+                renderer,
+                tileAltarSpritesheet,
+                tileAltarX,
+                tileAltarY,
+                tileAltarW,
+                tileAltarH,
+                64,
+                64,
+                32,
+                32);
 
         SDL_RenderPresent(renderer);
     }
