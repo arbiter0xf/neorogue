@@ -124,6 +124,24 @@ int texturepackerJsonGetFilenames(boost::json::value const& jsonValue, std::stri
     return 0;
 }
 
+int testPrintFilenamesFromJson(const boost::json::value& jsonValue)
+{
+    int ret = -1;
+
+    std::string dngnSpritesheetFilenames = "";
+
+    ret = texturepackerJsonGetFilenames(jsonValue, dngnSpritesheetFilenames);
+    if (0 != ret) {
+        printf(ERR "texturepackerJsonGetFilenames() failed");
+        return -1;
+    }
+
+    std::cout << DBG << "Found following filenames from JSON value:\n";
+    std::cout << DBG << dngnSpritesheetFilenames << "\n";
+
+    return 0;
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -140,8 +158,6 @@ int main(void)
                                     // supporting requested flags
 
     boost::json::value jsonValue;
-
-    std::string dngnSpritesheetFilenames = "";
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -168,14 +184,11 @@ int main(void)
         goto error_exit;
     }
 
-    ret = texturepackerJsonGetFilenames(jsonValue, dngnSpritesheetFilenames);
+    ret = testPrintFilenamesFromJson(jsonValue);
     if (0 != ret) {
-        printf(ERR "texturepackerJsonGetFilenames() failed");
+        printf(ERR "testPrintFilenamesFromJson() failed");
         goto error_exit;
     }
-
-    std::cout << DBG << "Found following filenames from JSON value:\n";
-    std::cout << DBG << dngnSpritesheetFilenames << "\n";
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
