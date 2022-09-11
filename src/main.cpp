@@ -17,7 +17,8 @@ const int TILE_WIDTH = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT);
-const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this
+const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
+                                 // pass by using -DTILE_POOL_SIZE=$(script)
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
@@ -154,6 +155,12 @@ void renderTileFromSpritesheet(
     SDL_RenderCopy(renderer, tile.getSheetTexture(), &srcRect, &dstRect);
 }
 
+void fillScreenTiles(
+        std::array<Tile*, SCREEN_TILES>& screenTiles,
+        Tile tile)
+{
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -283,6 +290,7 @@ int main(void)
         goto error_exit;
     }
 
+    // TODO consider handling errors without gotos
     textureSpritesheet = IMG_LoadTexture(
             renderer,
             imagePathDngnSpritesheet.c_str());
@@ -291,8 +299,6 @@ int main(void)
                 imagePathDngnSpritesheet.c_str());
         goto error_exit;
     }
-
-    tileAltarSpritesheet = textureSpritesheet;
 
     while (!quitEventReceived) {
         do {
@@ -305,6 +311,16 @@ int main(void)
 
         SDL_RenderClear(renderer);
 
+        tileAltarSpritesheet = textureSpritesheet;
+        Tile testTile1(
+                tileAltarSpritesheet,
+                tileAltarX,
+                tileAltarY,
+                tileAltarW,
+                tileAltarH);
+
+        fillScreenTiles(screenTiles, testTile1);
+
         srcRect = {0, 0, 32, 32};
         dstRect = {0, 0, 32, 32};
         SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
@@ -316,15 +332,9 @@ int main(void)
         dstRect = {32, 32, 32, 32};
         SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
 
-        Tile testTile(
-                tileAltarSpritesheet,
-                tileAltarX,
-                tileAltarY,
-                tileAltarW,
-                tileAltarH);
         renderTileFromSpritesheet(
                 renderer,
-                testTile,
+                testTile1,
                 64,
                 64);
 
