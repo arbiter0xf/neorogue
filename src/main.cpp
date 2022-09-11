@@ -16,7 +16,7 @@ const int TILE_HEIGHT = 32;
 const int TILE_WIDTH = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT);
+const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
 const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
                                  // pass by using -DTILE_POOL_SIZE=$(script)
 
@@ -26,6 +26,8 @@ const char PROGRAM_NAME[] = "Rogue Forever";
 #define INFO "[I] "
 #define ERR "[E] "
 #define DBG "[D] "
+
+using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 
 #if 0
 void mainLoop(void) {
@@ -133,30 +135,52 @@ void texturepackerJsonGetValueWithKey(
     frameObjectFrame = frameObjectIter->value();
 }
 
-void renderTileFromSpritesheet(
+void renderTile(
         SDL_Renderer* renderer,
-        Tile& tile)
+        Tile* tile)
 {
     SDL_Rect srcRect = {
-        tile.getSheetX(),
-        tile.getSheetY(),
-        tile.getSheetW(),
-        tile.getSheetH(),
+        tile->getSheetX(),
+        tile->getSheetY(),
+        tile->getSheetW(),
+        tile->getSheetH(),
     };
     SDL_Rect dstRect = {
-        tile.getScreenX(),
-        tile.getScreenY(),
-        tile.getSheetW(),
-        tile.getSheetH()
+        tile->getScreenX(),
+        tile->getScreenY(),
+        tile->getSheetW(),
+        tile->getSheetH()
     };
 
-    SDL_RenderCopy(renderer, tile.getSheetTexture(), &srcRect, &dstRect);
+    SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
 void fillScreenTiles(
-        std::array<Tile*, SCREEN_TILES>& screenTiles,
-        Tile tile)
+        screen_tiles& screenTiles,
+        Tile* tile1,
+        Tile* tile2,
+        Tile* tile3)
 {
+    screenTiles[0] = tile1;
+    screenTiles[1] = tile2;
+    screenTiles[2] = tile3;
+    screenTiles[3] = 0;
+}
+
+void renderScreenTiles(
+        SDL_Renderer* renderer,
+        screen_tiles screenTiles)
+{
+    for (Tile* tile : screenTiles) {
+        if (NULL == tile) {
+            // screenTiles is assumed to contain valid tiles starting from
+            // index 0 and continuing until NULL ptr is met or end of
+            // screenTiles
+            break;
+        }
+
+        renderTile(renderer, tile);
+    }
 }
 
 int main(void)
@@ -389,19 +413,13 @@ int main(void)
                 tileAltarSheetW,
                 tileAltarSheetH);
 
-        fillScreenTiles(screenTiles, testTile1);
+        fillScreenTiles(
+                screenTiles,
+                &testTile1,
+                &testTile2,
+                &testTile3);
 
-        renderTileFromSpritesheet(
-                renderer,
-                testTile1);
-
-        renderTileFromSpritesheet(
-                renderer,
-                testTile2);
-
-        renderTileFromSpritesheet(
-                renderer,
-                testTile3);
+        renderScreenTiles(renderer, screenTiles);
 
         SDL_RenderPresent(renderer);
     }
