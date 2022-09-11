@@ -171,6 +171,20 @@ void texturepackerJsonGetFrameObject(
     frameObjectOut = frameValue.get_object();
 }
 
+void texturepackerJsonGetValueWithKey(
+        const char* key,
+        const boost::json::object& frameObject,
+        boost::json::value& frameObjectFrame)
+{
+    // auto frameObjectIter = frameObject.find("frame");
+    auto frameObjectIter = frameObject.find(key);
+
+    std::cout << DBG << "frameObjectIter->key() is: " << frameObjectIter->key() << "\n";
+    std::cout << DBG << "frameObjectIter->value() is: " << frameObjectIter->value() << "\n";
+
+    frameObjectFrame = frameObjectIter->value();
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -187,7 +201,10 @@ int main(void)
                                     // supporting requested flags
 
     boost::json::value tPackerJsonValue;
+    boost::json::value tPackerJsonTemp;
     boost::json::object frameObject;
+    boost::json::object frameAltarObject;
+    boost::json::object frameAltarObjectFrame;
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -195,6 +212,12 @@ int main(void)
     int err = -1;
     int ret = -1;
     bool quitEventReceived = false;
+
+    const char* tileAltarPath = "altars/dngn_altar.png";
+    int tileAltarX = -1;
+    int tileAltarY = -1;
+    int tileAltarW = -1;
+    int tileAltarH = -1;
 
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
@@ -215,15 +238,24 @@ int main(void)
         goto error_exit;
     }
 
-#if 0
-    ret = testPrintFilenamesFromJson(tPackerJsonValue);
-    if (0 != ret) {
-        printf(ERR "testPrintFilenamesFromJson() failed");
+    texturepackerJsonGetFrameObject(tileAltarPath, tPackerJsonValue, frameAltarObject);
+    texturepackerJsonGetValueWithKey("frame", frameAltarObject, tPackerJsonTemp);
+    frameAltarObjectFrame = tPackerJsonTemp.get_object();
+
+    try {
+        texturepackerJsonGetValueWithKey("x", frameAltarObjectFrame, tPackerJsonTemp);
+        tileAltarX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", frameAltarObjectFrame, tPackerJsonTemp);
+        tileAltarY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", frameAltarObjectFrame, tPackerJsonTemp);
+        tileAltarW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", frameAltarObjectFrame, tPackerJsonTemp);
+        tileAltarH = tPackerJsonTemp.as_int64();
+    } catch(std::exception const& e) {
+        std::cerr << ERR << "Exception while converting json value to uint64"
+            << e.what() << "\n";
         goto error_exit;
     }
-#endif
-
-    texturepackerJsonGetFrameObject("altars/dngn_altar.png", tPackerJsonValue, frameObject);
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
@@ -305,6 +337,13 @@ int main(void)
         srcRect.w = 32;
         srcRect.h = 32;
         dstRect = {32, 32, 32, 32};
+        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
+
+        srcRect.x = tileAltarX;
+        srcRect.y = tileAltarY;
+        srcRect.w = tileAltarW;
+        srcRect.h = tileAltarH;
+        dstRect = {64, 64, 32, 32};
         SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
 
         SDL_RenderPresent(renderer);
