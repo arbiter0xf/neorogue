@@ -1,4 +1,4 @@
-SRC = src/main.cpp
+SRC = src/main.cpp src/tile.cpp
 CC = g++
 INCLUDES := \
 	    -Iexternal/boostorg/json/include/ \
@@ -12,8 +12,9 @@ INCLUDES := \
 	    -Iexternal/boostorg/intrusive/include/ \
 	    -Iexternal/boostorg/system/include/ \
 	    -Iexternal/boostorg/mp11/include/ \
-	    -Iexternal/boostorg/align/include/
-COMPILER_FLAGS = $(INCLUDES) -w
+	    -Iexternal/boostorg/align/include/ \
+	    -Iinclude
+COMPILER_FLAGS = $(INCLUDES) -w -std=c++11
 LINKER_FLAGS = -lSDL2 -lSDL2_image
 EXE_NAME = rogue_forever
 

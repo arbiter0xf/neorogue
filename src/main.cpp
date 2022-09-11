@@ -9,6 +9,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "tile.hpp"
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -127,29 +129,24 @@ void texturepackerJsonGetValueWithKey(
 
 void renderTileFromSpritesheet(
         SDL_Renderer* renderer,
-        SDL_Texture* sheetTexture,
-        int sheetX,
-        int sheetY,
-        int sheetW,
-        int sheetH,
+        Tile& tile,
         int destX,
-        int destY,
-        int destW,
-        int destH)
+        int destY)
 {
-    // TODO Wrap following to a texture object
-    // TEXTURE* sheetTexture
-    // sheetX
-    // sheetY
-    // sheetW
-    // sheetH
-    // destW
-    // destH
+    SDL_Rect srcRect = {
+        tile.getX(),
+        tile.getY(),
+        tile.getW(),
+        tile.getH(),
+    };
+    SDL_Rect dstRect = {
+        destX,
+        destY,
+        tile.getW(),
+        tile.getH()
+    };
 
-    SDL_Rect srcRect = {sheetX, sheetY, sheetW, sheetH};
-    SDL_Rect dstRect = {destX, destY, destW, destH};
-
-    SDL_RenderCopy(renderer, sheetTexture, &srcRect, &dstRect);
+    SDL_RenderCopy(renderer, tile.getSheetTexture(), &srcRect, &dstRect);
 }
 
 int main(void)
@@ -309,17 +306,17 @@ int main(void)
         dstRect = {32, 32, 32, 32};
         SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
 
-        renderTileFromSpritesheet(
-                renderer,
+        Tile testTile(
                 tileAltarSpritesheet,
                 tileAltarX,
                 tileAltarY,
                 tileAltarW,
-                tileAltarH,
+                tileAltarH);
+        renderTileFromSpritesheet(
+                renderer,
+                testTile,
                 64,
-                64,
-                32,
-                32);
+                64);
 
         SDL_RenderPresent(renderer);
     }
