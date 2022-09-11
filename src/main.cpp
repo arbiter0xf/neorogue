@@ -181,6 +181,8 @@ int main(void)
     boost::json::object frameAltarObjectFrame;
     boost::json::object frameStoneGrayObject;
     boost::json::object frameStoneGrayObjectFrame;
+    boost::json::object frameGateObject;
+    boost::json::object frameGateObjectFrame;
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -197,6 +199,15 @@ int main(void)
     int tileStoneGray1SheetY = -1;
     int tileStoneGray1SheetW = -1;
     int tileStoneGray1SheetH = -1;
+
+    SDL_Texture* tileGateClosedMiddleSpritesheet = NULL;
+    const char* tileGateClosedMiddlePath = "gate_closed_middle.png";
+    int tileGateClosedMiddleScreenX = 32;
+    int tileGateClosedMiddleScreenY = 32;
+    int tileGateClosedMiddleSheetX = -1;
+    int tileGateClosedMiddleSheetY = -1;
+    int tileGateClosedMiddleSheetW = -1;
+    int tileGateClosedMiddleSheetH = -1;
 
     SDL_Texture* tileAltarSpritesheet = NULL;
     const char* tileAltarPath = "altars/dngn_altar.png";
@@ -257,6 +268,19 @@ int main(void)
         tileStoneGray1SheetW = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("h", frameStoneGrayObjectFrame, tPackerJsonTemp);
         tileStoneGray1SheetH = tPackerJsonTemp.as_int64();
+
+        texturepackerJsonGetFrameObject(tileGateClosedMiddlePath, tPackerJsonValue, frameGateObject);
+        texturepackerJsonGetValueWithKey("frame", frameGateObject, tPackerJsonTemp);
+        frameGateObjectFrame = tPackerJsonTemp.get_object();
+
+        texturepackerJsonGetValueWithKey("x", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetX = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("y", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetY = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("w", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetW = tPackerJsonTemp.as_int64();
+        texturepackerJsonGetValueWithKey("h", frameGateObjectFrame, tPackerJsonTemp);
+        tileGateClosedMiddleSheetH = tPackerJsonTemp.as_int64();
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while converting json value to uint64"
             << e.what() << "\n";
@@ -345,8 +369,18 @@ int main(void)
                 tileStoneGray1SheetW,
                 tileStoneGray1SheetH);
 
-        tileAltarSpritesheet = textureSpritesheet;
+        tileGateClosedMiddleSpritesheet = textureSpritesheet;
         Tile testTile2(
+                tileGateClosedMiddleScreenX,
+                tileGateClosedMiddleScreenY,
+                tileGateClosedMiddleSpritesheet,
+                tileGateClosedMiddleSheetX,
+                tileGateClosedMiddleSheetY,
+                tileGateClosedMiddleSheetW,
+                tileGateClosedMiddleSheetH);
+
+        tileAltarSpritesheet = textureSpritesheet;
+        Tile testTile3(
                 tileAltarScreenX,
                 tileAltarScreenY,
                 tileAltarSpritesheet,
@@ -361,16 +395,13 @@ int main(void)
                 renderer,
                 testTile1);
 
-        srcRect.x = 409;
-        srcRect.y = 137;
-        srcRect.w = 32;
-        srcRect.h = 32;
-        dstRect = {32, 32, 32, 32};
-        SDL_RenderCopy(renderer, textureSpritesheet, &srcRect, &dstRect);
-
         renderTileFromSpritesheet(
                 renderer,
                 testTile2);
+
+        renderTileFromSpritesheet(
+                renderer,
+                testTile3);
 
         SDL_RenderPresent(renderer);
     }
