@@ -135,21 +135,19 @@ void texturepackerJsonGetValueWithKey(
 
 void renderTileFromSpritesheet(
         SDL_Renderer* renderer,
-        Tile& tile,
-        int destX,
-        int destY)
+        Tile& tile)
 {
     SDL_Rect srcRect = {
-        tile.getX(),
-        tile.getY(),
-        tile.getW(),
-        tile.getH(),
+        tile.getSheetX(),
+        tile.getSheetY(),
+        tile.getSheetW(),
+        tile.getSheetH(),
     };
     SDL_Rect dstRect = {
-        destX,
-        destY,
-        tile.getW(),
-        tile.getH()
+        tile.getScreenX(),
+        tile.getScreenY(),
+        tile.getSheetW(),
+        tile.getSheetH()
     };
 
     SDL_RenderCopy(renderer, tile.getSheetTexture(), &srcRect, &dstRect);
@@ -191,10 +189,12 @@ int main(void)
 
     SDL_Texture* tileAltarSpritesheet = NULL;
     const char* tileAltarPath = "altars/dngn_altar.png";
-    int tileAltarX = -1;
-    int tileAltarY = -1;
-    int tileAltarW = -1;
-    int tileAltarH = -1;
+    int tileAltarScreenX = 64;
+    int tileAltarScreenY = 64;
+    int tileAltarSheetX = -1;
+    int tileAltarSheetY = -1;
+    int tileAltarSheetW = -1;
+    int tileAltarSheetH = -1;
 
     SDL_Window* mainWindow = NULL;
     SDL_Texture* texture = NULL;
@@ -226,13 +226,13 @@ int main(void)
 
     try {
         texturepackerJsonGetValueWithKey("x", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarX = tPackerJsonTemp.as_int64();
+        tileAltarSheetX = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("y", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarY = tPackerJsonTemp.as_int64();
+        tileAltarSheetY = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("w", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarW = tPackerJsonTemp.as_int64();
+        tileAltarSheetW = tPackerJsonTemp.as_int64();
         texturepackerJsonGetValueWithKey("h", frameAltarObjectFrame, tPackerJsonTemp);
-        tileAltarH = tPackerJsonTemp.as_int64();
+        tileAltarSheetH = tPackerJsonTemp.as_int64();
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while converting json value to uint64"
             << e.what() << "\n";
@@ -313,11 +313,13 @@ int main(void)
 
         tileAltarSpritesheet = textureSpritesheet;
         Tile testTile1(
+                tileAltarScreenX,
+                tileAltarScreenY,
                 tileAltarSpritesheet,
-                tileAltarX,
-                tileAltarY,
-                tileAltarW,
-                tileAltarH);
+                tileAltarSheetX,
+                tileAltarSheetY,
+                tileAltarSheetW,
+                tileAltarSheetH);
 
         fillScreenTiles(screenTiles, testTile1);
 
@@ -334,9 +336,7 @@ int main(void)
 
         renderTileFromSpritesheet(
                 renderer,
-                testTile1,
-                64,
-                64);
+                testTile1);
 
         SDL_RenderPresent(renderer);
     }

@@ -8,24 +8,30 @@ public:
     Tile() = delete;
     ~Tile();
     Tile(
+            const int _screenX,
+            const int _screenY,
             SDL_Texture* _texture,
-            const int _x,
-            const int _y,
-            const int _w,
-            const int _h);
+            const int _sheetX,
+            const int _sheetY,
+            const int _sheetW,
+            const int _sheetH);
 
+    const int getScreenX() const;
+    const int getScreenY() const;
     SDL_Texture* getSheetTexture();
-    const int getX() const;
-    const int getY() const;
-    const int getW() const;
-    const int getH() const;
+    const int getSheetX() const;
+    const int getSheetY() const;
+    const int getSheetW() const;
+    const int getSheetH() const;
 
 private:
     SDL_Texture* sheetTexture;
-    int x;
-    int y;
-    int w;
-    int h;
+    int screenX;
+    int screenY;
+    int sheetX;
+    int sheetY;
+    int sheetW;
+    int sheetH;
 };
 
 #endif
