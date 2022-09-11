@@ -14,6 +14,11 @@ const int SCREEN_HEIGHT = 480;
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
+#define WARN "[W] "
+#define INFO "[I] "
+#define ERR "[E] "
+#define DBG "[D] "
+
 #if 0
 void mainLoop(void) {
 }
@@ -28,11 +33,11 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
     boost::json::stream_parser jsonStreamParser;
     boost::json::error_code ec;
 
-    printf("Reading JSON from file: %s\n", filename.c_str());
+    printf(INFO "Reading JSON from file: %s\n", filename.c_str());
 
     jsonStream.open(filename, std::ifstream::in);
     if (jsonStream.fail()) {
-        printf("Failed to open json file: %s\n", filename.c_str());
+        printf(ERR "Failed to open json file: %s\n", filename.c_str());
         return -1;
     }
 
@@ -42,21 +47,21 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
         std::cout << "Successfully read " << readAmount << " characters" << "\n";
         jsonStreamParser.write(buffer, readAmount, ec);
         if (ec) {
-            printf("Stream parser write failed");
+            printf(ERR "Stream parser write failed");
             return -1;
         }
     } while(!jsonStream.eof());
 
     jsonStreamParser.finish(ec);
     if (ec) {
-        printf("Stream parser finish failed");
+        printf(ERR "Stream parser finish failed");
         return -1;
     }
 
     jsonStream.clear();
     jsonStream.close();
     if (jsonStream.fail()) {
-        printf("Failed to close json file: %s\n", filename.c_str());
+        printf(ERR "Failed to close json file: %s\n", filename.c_str());
         return -1;
     }
 
@@ -82,33 +87,33 @@ int texturepackerJsonGetFilenames(boost::json::value const& jsonValue, std::stri
     filenames = "";
 
     if (boost::json::kind::object != jsonValue.kind()) {
-        printf("JSON value top level is not an object\n");
+        printf(ERR "JSON value top level is not an object\n");
         return -1;
     }
 
     auto const& topObj = jsonValue.get_object();
 
     if (topObj.empty()) {
-        printf("Empty top level JSON object\n");
+        printf(ERR "Empty top level JSON object\n");
         return -1;
     }
 
     auto iter = topObj.begin();
-    std::cout << "iter points to topObj.begin(): " << iter->key() << "\n";
-    std::cout << "iter->key is: " << iter->key() << "\n";
+    std::cout << DBG << "iter points to topObj.begin(): " << iter->key() << "\n";
+    std::cout << DBG << "iter->key is: " << iter->key() << "\n";
 
     boost::json::value framesObj = iter->value();
 
     // iter is expected to point to "frames"
     if (boost::json::kind::object != framesObj.kind()) {
-        printf("iter does not seem to point to \"frames\"\n");
+        printf(ERR "iter does not seem to point to \"frames\"\n");
         return -1;
     }
 
     iter = framesObj.get_object().begin();
     auto iterEnd = framesObj.get_object().end();
-    std::cout << "iter points to framesObj.begin(): " << iter->key() << "\n";
-    std::cout << "iter->key is: " << iter->key() << "\n";
+    std::cout << DBG << "iter points to framesObj.begin(): " << iter->key() << "\n";
+    std::cout << DBG << "iter->key is: " << iter->key() << "\n";
 
     while (iter != iterEnd) {
         filenames += iter->key();
@@ -153,39 +158,39 @@ int main(void)
     try {
         ret = readJsonFromFile(dataPathDngnSpritesheet, jsonValue);
     } catch(std::exception const& e) {
-        std::cerr << "Exception while reading JSON from file: "
+        std::cerr << ERR << "Exception while reading JSON from file: "
             << e.what() << "\n";
         goto error_exit;
     }
     if (0 != ret) {
-        printf("Failed to read JSON from file: %s\n",
+        printf(ERR "Failed to read JSON from file: %s\n",
                 dataPathDngnSpritesheet.c_str());
         goto error_exit;
     }
 
     ret = texturepackerJsonGetFilenames(jsonValue, dngnSpritesheetFilenames);
     if (0 != ret) {
-        printf("texturepackerJsonGetFilenames() failed");
+        printf(ERR "texturepackerJsonGetFilenames() failed");
         goto error_exit;
     }
 
-    std::cout << "Found following filenames from JSON value:\n";
-    std::cout << dngnSpritesheetFilenames << "\n";
+    std::cout << DBG << "Found following filenames from JSON value:\n";
+    std::cout << DBG << dngnSpritesheetFilenames << "\n";
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
-        printf("Failed to initialize SDL: %s\n", SDL_GetError());
+        printf(ERR "Failed to initialize SDL: %s\n", SDL_GetError());
         goto error_exit;
     }
 
     ret = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     if (ret < 0) {
-        printf( "Warning: Linear texture filtering not enabled!" );
+        printf(WARN "Warning: Linear texture filtering not enabled!");
     }
 
     ret = IMG_Init(imgFlags);
     if (0 == ret) {
-        printf("Failed to initialize SDL_image: %s\n", IMG_GetError());
+        printf(ERR "Failed to initialize SDL_image: %s\n", IMG_GetError());
         goto error_exit;
     }
 
@@ -197,7 +202,7 @@ int main(void)
             SCREEN_HEIGHT,
             SDL_WINDOW_SHOWN);
     if (NULL == mainWindow) {
-        printf("Failed to create window: %s\n", SDL_GetError());
+        printf(ERR "Failed to create window: %s\n", SDL_GetError());
         goto error_exit;
     }
 
@@ -206,19 +211,19 @@ int main(void)
             renderingDriver,
             SDL_RENDERER_ACCELERATED );
     if(NULL == renderer) {
-        printf("Failed to create renderer. SDL Error: %s\n", SDL_GetError());
+        printf(ERR "Failed to create renderer. SDL Error: %s\n", SDL_GetError());
         goto error_exit;
     }
 
     ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     if (ret < 0) {
-        printf("Failed to set render draw color: %s\n", SDL_GetError());
+        printf(ERR "Failed to set render draw color: %s\n", SDL_GetError());
         goto error_exit;
     }
 
     texture = IMG_LoadTexture(renderer, imagePathWallStoneGray1.c_str());
     if (NULL == texture) {
-        printf("Failed to load texture from file %s\n",
+        printf(ERR "Failed to load texture from file %s\n",
                 imagePathWallStoneGray1.c_str());
         goto error_exit;
     }
@@ -227,7 +232,7 @@ int main(void)
             renderer,
             imagePathDngnSpritesheet.c_str());
     if (NULL == textureSpritesheet) {
-        printf("Failed to load texture from file %s\n",
+        printf(ERR "Failed to load texture from file %s\n",
                 imagePathDngnSpritesheet.c_str());
         goto error_exit;
     }
