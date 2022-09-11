@@ -155,16 +155,17 @@ void renderTile(
     SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
-void fillScreenTiles(
-        screen_tiles& screenTiles,
+screen_tiles fillScreenTiles(
         Tile* tile1,
         Tile* tile2,
         Tile* tile3)
 {
-    screenTiles[0] = tile1;
-    screenTiles[1] = tile2;
-    screenTiles[2] = tile3;
-    screenTiles[3] = 0;
+    return {
+        tile1,
+        tile2,
+        tile3,
+        0
+    };
 }
 
 void renderScreenTiles(
@@ -413,8 +414,7 @@ int main(void)
                 tileAltarSheetW,
                 tileAltarSheetH);
 
-        fillScreenTiles(
-                screenTiles,
+        screenTiles = fillScreenTiles(
                 &testTile1,
                 &testTile2,
                 &testTile3);
