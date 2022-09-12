@@ -189,11 +189,6 @@ tile_pool generateTilesFrom(
 
     boost::json::value tPackerJsonValue;
     boost::json::object tPackerFramesObj;
-    int tileSheetX = -1;
-    int tileSheetY = -1;
-    int tileSheetW = -1;
-    int tileSheetH = -1;
-    Tile tileTemp;
     tile_pool tilePool;
 
     SDL_Texture* textureSpritesheet = NULL;
