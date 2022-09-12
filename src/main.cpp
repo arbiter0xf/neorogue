@@ -11,6 +11,7 @@
 #include <array>
 
 #include "Tile.hpp"
+#include "TextureSpritesheet.hpp"
 
 const int TILE_HEIGHT = 32;
 const int TILE_WIDTH = 32;
@@ -19,6 +20,8 @@ const int SCREEN_HEIGHT = 480;
 const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
 const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
                                  // pass by using -DTILE_POOL_SIZE=$(script)
+const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
+                                  // pass by using -TEXUTRE_POOL_SIZE=$(script)
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
@@ -31,6 +34,7 @@ const char PROGRAM_NAME[] = "Rogue Forever";
 
 using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
+using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -275,6 +279,7 @@ int main(void)
     SDL_Event event;
 
     tile_pool tilePool;
+    texture_pool texturePool;
 
     std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
@@ -335,6 +340,7 @@ int main(void)
     }
 
     try {
+        // TODO eventually generateTilesFrom(texturePool);
         tilePool = generateTilesFrom(
                 renderer,
                 imagePathDngnSpritesheet,
