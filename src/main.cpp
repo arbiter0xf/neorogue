@@ -227,6 +227,10 @@ tile_pool generateTilesFrom(
 
     auto tilePoolIter = tilePool.begin();
     for (const auto& [tileName, tileConfig] : tPackerFramesObj) {
+        if (tilePoolIter == tilePool.end()) {
+            throw std::runtime_error("Reached end of tilePool");
+        }
+
         const auto tileConfigObj = tileConfig.as_object();
         texturepackerJsonGetValueWithKey("frame", tileConfigObj, tPackerJsonTemp);
         const auto tileConfigFrameObj = tPackerJsonTemp.as_object();
