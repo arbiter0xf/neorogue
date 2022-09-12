@@ -204,6 +204,8 @@ tile_pool generateTilesFrom(
     ret = readJsonFromFile(dataPathSpritesheet, tPackerJsonValue);
 
     // TODO deallocate spritesheet
+    //
+    // Proposal: Add GraphicsPool that has a TexturePool
     textureSpritesheet = IMG_LoadTexture(
             renderer,
             imagePathSpritesheet.c_str());
