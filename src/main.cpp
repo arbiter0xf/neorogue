@@ -184,7 +184,6 @@ tile_pool generateTilesFrom(
     int ret = -1;
 
     boost::json::value tPackerJsonValue;
-    boost::json::value tPackerJsonTemp;
     boost::json::object tPackerFramesObj;
     int tileSheetX = -1;
     int tileSheetY = -1;
@@ -218,57 +217,27 @@ tile_pool generateTilesFrom(
 
     auto iter = topObj.begin();
     tPackerFramesObj = iter->value().get_object();
-    iter = tPackerFramesObj.begin();
-    auto iterEnd = tPackerFramesObj.end();
 
-    auto tilePoolIter = tilePool.begin();
-    for (const auto& [tileName, tileConfig] : tPackerFramesObj) {
-        if (tilePoolIter == tilePool.end()) {
-            throw std::runtime_error("Reached end of tilePool");
-        }
-
-        const auto tileConfigObj = tileConfig.as_object();
-        const auto tileConfigFrameObj = jsonGetValueWithKey("frame", tileConfigObj).as_object();
-
-#if DEBUG
-        std::cout << DBG << "Constructing tile for tile pool:" << "\n";
-        std::cout << DBG << "tileName is: " << tileName << "\n";
-        std::cout << DBG << "tileConfig is: " << tileConfig << "\n";
-#endif
-
-        tileSheetX = jsonGetValueWithKey("x", tileConfigFrameObj).as_int64();
-        tileSheetY = jsonGetValueWithKey("y", tileConfigFrameObj).as_int64();
-        tileSheetW = jsonGetValueWithKey("w", tileConfigFrameObj).as_int64();
-        tileSheetH = jsonGetValueWithKey("h", tileConfigFrameObj).as_int64();
-
-        // TODO use std::generate & std::transform
-        // https://en.cppreference.com/w/cpp/algorithm/generate
-        // https://en.cppreference.com/w/cpp/algorithm/transform
-        // std::transform(tPackerFramesObj.cbegin(), tPackerFramesObj.cend(), tilePool.begin(), [](auto frame) { ... return Tile{...};});
-        *tilePoolIter = Tile(
-                -1,
-                -1,
-                tileName,
-                textureSpritesheet,
-                tileSheetX,
-                tileSheetY,
-                tileSheetW,
-                tileSheetH);
-
-#if DEBUG
-        if (tilePool.begin() == tilePoolIter) {
-            // Print only once
-            std::cout << DBG << "Constructed a tile with:" << "\n";
-            std::cout << DBG << "sheetX: " << (*tilePoolIter).getSheetX() << "\n";
-            std::cout << DBG << "sheetY: " << (*tilePoolIter).getSheetY() << "\n";
-            std::cout << DBG << "sheetW: " << (*tilePoolIter).getSheetW() << "\n";
-            std::cout << DBG << "sheetH: " << (*tilePoolIter).getSheetH() << "\n";
-            std::cout << DBG << "name: " << (*tilePoolIter).getName() << "\n";
-        }
-#endif
-
-        tilePoolIter++;
-    }
+    // TODO See also:
+    // https://en.cppreference.com/w/cpp/algorithm/generate
+    std::transform(
+            tPackerFramesObj.cbegin(),
+            tPackerFramesObj.cend(),
+            tilePool.begin(),
+            [&](const auto frameObj) {
+                const auto& [tileName, tileConfig] = frameObj;
+                const auto tileConfigObj = tileConfig.as_object();
+                const auto tileConfigFrameObj = jsonGetValueWithKey("frame", tileConfigObj).as_object();
+                return Tile(
+                        -1,
+                        -1,
+                        tileName,
+                        textureSpritesheet,
+                        jsonGetValueWithKey("x", tileConfigFrameObj).as_int64(),
+                        jsonGetValueWithKey("y", tileConfigFrameObj).as_int64(),
+                        jsonGetValueWithKey("w", tileConfigFrameObj).as_int64(),
+                        jsonGetValueWithKey("h", tileConfigFrameObj).as_int64());
+            });
 
     return tilePool;
 }
