@@ -298,16 +298,6 @@ int main(void)
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
 
-    boost::json::value tPackerJsonValue;
-    boost::json::value tPackerJsonTemp;
-    boost::json::object frameObject;
-    boost::json::object frameAltarObject;
-    boost::json::object frameAltarObjectFrame;
-    boost::json::object frameStoneGrayObject;
-    boost::json::object frameStoneGrayObjectFrame;
-    boost::json::object frameGateObject;
-    boost::json::object frameGateObjectFrame;
-
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
 
@@ -323,14 +313,6 @@ int main(void)
     tile_pool tilePool;
 
     std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
-
-    try {
-        readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
-    } catch(std::exception const& e) {
-        std::cerr << ERR << "Exception while reading JSON from file: "
-            << e.what() << "\n";
-        goto error_exit;
-    }
 
     ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret < 0) {
