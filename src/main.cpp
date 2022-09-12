@@ -37,7 +37,7 @@ void mainLoop(void) {
 }
 #endif
 
-int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
+void readJsonFromFile(std::string filename, boost::json::value& jsonValue)
 {
     std::ifstream jsonStream;
     std::string line;
@@ -50,8 +50,7 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
 
     jsonStream.open(filename, std::ifstream::in);
     if (jsonStream.fail()) {
-        printf(ERR "Failed to open json file: %s\n", filename.c_str());
-        return -1;
+        throw std::runtime_error(ERR "Failed to open json file: " + filename);
     }
 
     do {
@@ -60,27 +59,22 @@ int readJsonFromFile(std::string filename, boost::json::value& jsonValue)
         std::cout << "Successfully read " << readAmount << " characters" << "\n";
         jsonStreamParser.write(buffer, readAmount, ec);
         if (ec) {
-            printf(ERR "Stream parser write failed");
-            return -1;
+            throw std::runtime_error(ERR "Stream parser write failed");
         }
     } while(!jsonStream.eof());
 
     jsonStreamParser.finish(ec);
     if (ec) {
-        printf(ERR "Stream parser finish failed");
-        return -1;
+        throw std::runtime_error(ERR "Stream parser finish failed");
     }
 
     jsonStream.clear();
     jsonStream.close();
     if (jsonStream.fail()) {
-        printf(ERR "Failed to close json file: %s\n", filename.c_str());
-        return -1;
+        throw std::runtime_error(ERR "Failed to close json file: " + filename);
     }
 
     jsonValue = jsonStreamParser.release();
-
-    return 0;
 }
 
 // {"frames": {
@@ -201,7 +195,7 @@ tile_pool generateTilesFrom(
 
     SDL_Texture* textureSpritesheet = NULL;
 
-    ret = readJsonFromFile(dataPathSpritesheet, tPackerJsonValue);
+    readJsonFromFile(dataPathSpritesheet, tPackerJsonValue);
 
     // TODO deallocate spritesheet
     //
@@ -331,15 +325,10 @@ int main(void)
     std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
     try {
-        ret = readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
+        readJsonFromFile(dataPathDngnSpritesheet, tPackerJsonValue);
     } catch(std::exception const& e) {
         std::cerr << ERR << "Exception while reading JSON from file: "
             << e.what() << "\n";
-        goto error_exit;
-    }
-    if (0 != ret) {
-        printf(ERR "Failed to read JSON from file: %s\n",
-                dataPathDngnSpritesheet.c_str());
         goto error_exit;
     }
 
