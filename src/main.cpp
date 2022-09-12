@@ -209,18 +209,15 @@ tile_pool generateTilesFrom(
             imagePathSpritesheet.c_str());
     if (NULL == textureSpritesheet) {
         throw std::runtime_error("Failed to load texture" + imagePathSpritesheet);
-        return {};
     }
 
     if (boost::json::kind::object != tPackerJsonValue.kind()) {
         printf(ERR "JSON value top level is not an object\n");
-        return {};
     }
 
     auto const& topObj = tPackerJsonValue.get_object();
     if (topObj.empty()) {
         throw std::runtime_error("Empty top level JSON object");
-        return {};
     }
 
     auto iter = topObj.begin();
