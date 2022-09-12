@@ -1,4 +1,4 @@
-SRC = src/main.cpp src/tile.cpp
+SRC = src/main.cpp src/Tile.cpp
 CC = g++
 INCLUDES := \
 	    -Iexternal/boostorg/json/include/ \

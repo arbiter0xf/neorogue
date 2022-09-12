@@ -10,7 +10,7 @@
 #include <fstream>
 #include <array>
 
-#include "tile.hpp"
+#include "Tile.hpp"
 
 const int TILE_HEIGHT = 32;
 const int TILE_WIDTH = 32;

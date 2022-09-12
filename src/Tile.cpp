@@ -1,4 +1,4 @@
-#include "tile.hpp"
+#include "Tile.hpp"
 
 Tile::~Tile()
 {
