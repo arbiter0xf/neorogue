@@ -246,6 +246,68 @@ void cleanup(void)
     printf(INFO "Cleanup placeholder running");
 }
 
+/*
+ * \exception throws std::runtime_error on failure
+ */
+void initRendering(SDL_Window*& mainWindow, SDL_Renderer*& renderer)
+{
+    int ret = -1;
+    std::string msg = "";
+
+    const int imgFlags = IMG_INIT_PNG;
+    const int renderingDriver = -1; // -1 initializes the first driver
+                                    // supporting requested flags
+
+    ret = SDL_Init(SDL_INIT_VIDEO);
+    if (ret < 0) {
+        msg = "Failed to initialize SDL: ";
+        msg += SDL_GetError();
+        throw std::runtime_error(msg);
+    }
+
+    ret = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    if (ret < 0) {
+        printf(WARN "Warning: Linear texture filtering not enabled!");
+    }
+
+    ret = IMG_Init(imgFlags);
+    if (0 == ret) {
+        msg = "Failed to initialize SDL_image: ";
+        msg += IMG_GetError();
+        throw std::runtime_error(msg);
+    }
+
+    mainWindow = SDL_CreateWindow(
+            PROGRAM_NAME,
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN);
+    if (NULL == mainWindow) {
+        msg = "Failed to create window: ";
+        msg += SDL_GetError();
+        throw std::runtime_error(msg);
+    }
+
+    renderer = SDL_CreateRenderer(
+            mainWindow,
+            renderingDriver,
+            SDL_RENDERER_ACCELERATED );
+    if(NULL == renderer) {
+        msg = "Failed to create renderer. SDL Error: ";
+        msg += SDL_GetError();
+        throw std::runtime_error(msg);
+    }
+
+    ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    if (ret < 0) {
+        msg = "Failed to set render draw color: ";
+        msg += SDL_GetError();
+        throw std::runtime_error(msg);
+    }
+}
+
 int main(void)
 {
     const std::string assetsPrefix = "assets/";
@@ -255,11 +317,6 @@ int main(void)
         assetsPrefix + "spritesheets/dc-dngn.png";
     const std::string dataPathDngnSpritesheet =
         assetsPrefix + "spritesheets/dc-dngn.json";
-
-    const int imgFlags = IMG_INIT_PNG;
-
-    const int renderingDriver = -1; // -1 initializes the first driver
-                                    // supporting requested flags
 
     SDL_Rect srcRect = {0, 0, 0, 0};
     SDL_Rect dstRect = {0, 0, 0, 0};
@@ -278,48 +335,11 @@ int main(void)
 
     std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
 
-    ret = SDL_Init(SDL_INIT_VIDEO);
-    if (ret < 0) {
-        printf(ERR "Failed to initialize SDL: %s\n", SDL_GetError());
-        goto error_exit;
-    }
-
-    ret = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    if (ret < 0) {
-        printf(WARN "Warning: Linear texture filtering not enabled!");
-    }
-
-    ret = IMG_Init(imgFlags);
-    if (0 == ret) {
-        printf(ERR "Failed to initialize SDL_image: %s\n", IMG_GetError());
-        goto error_exit;
-    }
-
-    mainWindow = SDL_CreateWindow(
-            PROGRAM_NAME,
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN);
-    if (NULL == mainWindow) {
-        printf(ERR "Failed to create window: %s\n", SDL_GetError());
-        goto error_exit;
-    }
-
-    renderer = SDL_CreateRenderer(
-            mainWindow,
-            renderingDriver,
-            SDL_RENDERER_ACCELERATED );
-    if(NULL == renderer) {
-        printf(ERR "Failed to create renderer. SDL Error: %s\n", SDL_GetError());
-        goto error_exit;
-    }
-
-    ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    if (ret < 0) {
-        printf(ERR "Failed to set render draw color: %s\n", SDL_GetError());
-        goto error_exit;
+    try {
+        initRendering(mainWindow, renderer);
+    } catch(std::exception& e) {
+        std::cerr << "Exception while initializing rendering: " << e.what();
+        return 1;
     }
 
     // TODO consider handling errors without gotos
