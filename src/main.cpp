@@ -333,7 +333,7 @@ int main(void)
     tile_pool tilePool;
     texture_pool texturePool;
 
-    std::array<Tile*, SCREEN_TILES> screenTiles = { 0 };
+    screen_tiles screenTiles = { 0 };
 
     try {
         initRendering(mainWindow, renderer);
