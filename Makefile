@@ -1,4 +1,9 @@
-SRC = src/main.cpp src/Tile.cpp src/TextureSpritesheet.cpp
+SRC := \
+       src/main.cpp \
+       src/Tile.cpp \
+       src/TextureSpritesheet.cpp \
+       src/Sdlw.cpp
+
 CC = g++
 INCLUDES := \
 	    -Iexternal/boostorg/json/include/ \

@@ -10,6 +10,8 @@
 #include <fstream>
 #include <array>
 
+#include "Log.hpp"
+#include "Sdlw.hpp"
 #include "Tile.hpp"
 #include "TextureSpritesheet.hpp"
 
@@ -24,13 +26,6 @@ const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
                                   // pass by using -TEXUTRE_POOL_SIZE=$(script)
 
 const char PROGRAM_NAME[] = "Rogue Forever";
-
-#define WARN "[W] "
-#define INFO "[I] "
-#define ERR "[E] "
-#define DBG "[D] "
-
-#define DEBUG 1
 
 using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
@@ -137,7 +132,7 @@ boost::json::value jsonGetValueWithKey(
 }
 
 void renderTile(
-        SDL_Renderer* renderer,
+        Sdlw& sdlw,
         Tile* tile)
 {
     SDL_Rect srcRect = {
@@ -153,7 +148,7 @@ void renderTile(
         tile->getSheetH()
     };
 
-    SDL_RenderCopy(renderer, tile->getSheetTexture(), &srcRect, &dstRect);
+    sdlw.renderCopy(tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
 screen_tiles fillScreenTiles(tile_pool& tilePool)
@@ -162,7 +157,7 @@ screen_tiles fillScreenTiles(tile_pool& tilePool)
 }
 
 void renderScreenTiles(
-        SDL_Renderer* renderer,
+        Sdlw& sdlw,
         screen_tiles screenTiles)
 {
     for (Tile* tile : screenTiles) {
@@ -173,7 +168,7 @@ void renderScreenTiles(
             break;
         }
 
-        renderTile(renderer, tile);
+        renderTile(sdlw, tile);
     }
 }
 
@@ -181,7 +176,7 @@ void renderScreenTiles(
  * \exception May throw std::exception
  */
 tile_pool generateTilesFrom(
-        SDL_Renderer* renderer,
+        Sdlw& sdlw,
         std::string imagePathSpritesheet,
         std::string dataPathSpritesheet)
 {
@@ -198,9 +193,7 @@ tile_pool generateTilesFrom(
     // TODO deallocate spritesheet
     //
     // Proposal: Add GraphicsPool that has a TexturePool
-    textureSpritesheet = IMG_LoadTexture(
-            renderer,
-            imagePathSpritesheet.c_str());
+    textureSpritesheet = sdlw.imgLoadTexture(imagePathSpritesheet);
     if (NULL == textureSpritesheet) {
         throw std::runtime_error("Failed to load texture" + imagePathSpritesheet);
     }
@@ -241,15 +234,10 @@ tile_pool generateTilesFrom(
     return tilePool;
 }
 
-void cleanup(void)
-{
-    printf(INFO "Cleanup placeholder running");
-}
-
 /*
  * \exception throws std::runtime_error on failure
  */
-void initRendering(SDL_Window*& mainWindow, SDL_Renderer*& renderer)
+void initRendering(Sdlw& sdlw)
 {
     int ret = -1;
     std::string msg = "";
@@ -258,54 +246,25 @@ void initRendering(SDL_Window*& mainWindow, SDL_Renderer*& renderer)
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
 
-    ret = SDL_Init(SDL_INIT_VIDEO);
-    if (ret < 0) {
-        msg = "Failed to initialize SDL: ";
-        msg += SDL_GetError();
-        throw std::runtime_error(msg);
-    }
+    sdlw.init(SDL_INIT_VIDEO);
 
-    ret = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    if (ret < 0) {
-        printf(WARN "Warning: Linear texture filtering not enabled!");
-    }
+    sdlw.setHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-    ret = IMG_Init(imgFlags);
-    if (0 == ret) {
-        msg = "Failed to initialize SDL_image: ";
-        msg += IMG_GetError();
-        throw std::runtime_error(msg);
-    }
+    sdlw.imgInit(imgFlags);
 
-    mainWindow = SDL_CreateWindow(
+    sdlw.createMainWindow(
             PROGRAM_NAME,
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
             SDL_WINDOW_SHOWN);
-    if (NULL == mainWindow) {
-        msg = "Failed to create window: ";
-        msg += SDL_GetError();
-        throw std::runtime_error(msg);
-    }
 
-    renderer = SDL_CreateRenderer(
-            mainWindow,
+    sdlw.createMainRenderer(
             renderingDriver,
-            SDL_RENDERER_ACCELERATED );
-    if(NULL == renderer) {
-        msg = "Failed to create renderer. SDL Error: ";
-        msg += SDL_GetError();
-        throw std::runtime_error(msg);
-    }
+            SDL_RENDERER_ACCELERATED);
 
-    ret = SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    if (ret < 0) {
-        msg = "Failed to set render draw color: ";
-        msg += SDL_GetError();
-        throw std::runtime_error(msg);
-    }
+    sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
 int main(void)
@@ -325,9 +284,8 @@ int main(void)
     int ret = -1;
     bool quitEventReceived = false;
 
-    SDL_Window* mainWindow = NULL;
-    SDL_Texture* texture = NULL;
-    SDL_Renderer* renderer = NULL;
+    Sdlw sdlw = Sdlw();
+
     SDL_Event event;
 
     tile_pool tilePool;
@@ -336,34 +294,22 @@ int main(void)
     screen_tiles screenTiles = { 0 };
 
     try {
-        initRendering(mainWindow, renderer);
+        initRendering(sdlw);
     } catch(std::exception& e) {
         std::cerr << "Exception while initializing rendering: " << e.what();
         return 1;
     }
 
-    // TODO consider handling errors without gotos
-    //
-    // See lippincott functions:
-    // https://isocpp.org/blog/2017/11/cpp-weekly-episode-91-using-lippincott-functions-jason-turner
-    // https://cppsecrets.blogspot.com/
-    texture = IMG_LoadTexture(renderer, imagePathWallStoneGray1.c_str());
-    if (NULL == texture) {
-        printf(ERR "Failed to load texture from file %s\n",
-                imagePathWallStoneGray1.c_str());
-        goto error_exit;
-    }
-
     try {
         // TODO eventually generateTilesFrom(texturePool);
         tilePool = generateTilesFrom(
-                renderer,
+                sdlw,
                 imagePathDngnSpritesheet,
                 dataPathDngnSpritesheet);
     } catch (std::exception const& e) {
         std::cerr << ERR << "Exception while generating tiles from spritesheets"
             << e.what() << "\n";
-        cleanup();
+        sdlw.destroy();
         return -1;
     }
 
@@ -376,52 +322,20 @@ int main(void)
             }
         } while (0 != ret);
 
-        SDL_RenderClear(renderer);
+        sdlw.renderClear();
 
         screenTiles = fillScreenTiles(tilePool);
 
-        renderScreenTiles(renderer, screenTiles);
+        renderScreenTiles(sdlw, screenTiles);
 
-        SDL_RenderPresent(renderer);
+        sdlw.renderPresent();
     }
 
 #if 0
     mainLoop();
 #endif
 
-    SDL_DestroyTexture(texture);
-    texture = NULL;
-
-    SDL_DestroyRenderer(renderer);
-    renderer = NULL;
-
-    SDL_DestroyWindow(mainWindow);
-    mainWindow = NULL;
-
-    IMG_Quit();
-    SDL_Quit();
+    sdlw.destroy();
 
     return 0;
-
-error_exit:
-
-    if (NULL != texture) {
-        SDL_DestroyTexture(texture);
-        texture = NULL;
-    }
-
-    if (NULL != renderer) {
-        SDL_DestroyRenderer(renderer);
-        renderer = NULL;
-    }
-
-    if (NULL != mainWindow) {
-        SDL_DestroyWindow(mainWindow);
-        mainWindow = NULL;
-    }
-
-    IMG_Quit();
-    SDL_Quit();
-
-    return -1;
 }
