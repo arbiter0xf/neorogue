@@ -310,7 +310,7 @@ int main(void)
         std::cerr << ERR << "Exception while generating tiles from spritesheets"
             << e.what() << "\n";
         sdlw.destroy();
-        return -1;
+        return 1;
     }
 
     while (!quitEventReceived) {
