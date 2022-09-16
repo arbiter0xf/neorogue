@@ -1,3 +1,7 @@
+// Header-only with multiple translation units
+// https://www.boost.org/doc/libs/1_69_0/libs/test/doc/html/boost_test/adv_scenarios/single_header_customizations/multiple_translation_units.html
+// Must to include boost/json/src.hpp in only one source file and other files
+// must then include boost/json.hpp.
 #include <boost/json/src.hpp>
 
 #include <SDL2/SDL.h>
@@ -5,11 +9,11 @@
 
 #include <stdio.h>
 
-#include <string>
-#include <iostream>
-#include <fstream>
 #include <array>
+#include <iostream>
+#include <string>
 
+#include "Json.hpp"
 #include "Log.hpp"
 #include "Sdlw.hpp"
 #include "Tile.hpp"
@@ -35,101 +39,6 @@ using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
 void mainLoop(void) {
 }
 #endif
-
-void readJsonFromFile(std::string filename, boost::json::value& jsonValue)
-{
-    std::ifstream jsonStream;
-    std::string line;
-    char buffer[4096] = {0};
-    std::size_t readAmount = 0;
-    boost::json::stream_parser jsonStreamParser;
-    boost::json::error_code ec;
-
-    printf(INFO "Reading JSON from file: %s\n", filename.c_str());
-
-    jsonStream.open(filename, std::ifstream::in);
-    if (jsonStream.fail()) {
-        throw std::runtime_error(ERR "Failed to open json file: " + filename);
-    }
-
-    do {
-        jsonStream.read(buffer, sizeof(buffer));
-        readAmount = jsonStream.gcount();
-        std::cout << "Successfully read " << readAmount << " characters" << "\n";
-        jsonStreamParser.write(buffer, readAmount, ec);
-        if (ec) {
-            throw std::runtime_error(ERR "Stream parser write failed");
-        }
-    } while(!jsonStream.eof());
-
-    jsonStreamParser.finish(ec);
-    if (ec) {
-        throw std::runtime_error(ERR "Stream parser finish failed");
-    }
-
-    jsonStream.clear();
-    jsonStream.close();
-    if (jsonStream.fail()) {
-        throw std::runtime_error(ERR "Failed to close json file: " + filename);
-    }
-
-    jsonValue = jsonStreamParser.release();
-}
-
-// {"frames": {
-//
-//     "altars/dngn_altar.png":
-//     {
-//         "frame": {"x":35,"y":37,"w":32,"h":31},
-//         "rotated": true,
-//         "trimmed": true,
-//         "spriteSourceSize": {"x":0,"y":1,"w":32,"h":31},
-//         "sourceSize": {"w":32,"h":32}
-//     },
-//     "altars/dngn_altar_beogh.png":
-//     {
-/*
- * \exception Throws std::runtime_error on failure
- */
-void texturepackerJsonGetFrameObject(
-        std::string frameKey,
-        const boost::json::value& jsonValue,
-        boost::json::object& frameObjectOut)
-{
-    if (boost::json::kind::object != jsonValue.kind()) {
-        throw std::runtime_error("JSON value top level is not an object");
-    }
-
-    auto const& topObj = jsonValue.get_object();
-    auto iter = topObj.begin();
-    boost::json::value framesValue = iter->value();
-
-    auto frameIter = framesValue.get_object().find(frameKey);
-    std::cout << DBG << "frameIter->key() is: " << frameIter->key() << "\n";
-    std::cout << DBG << "frameIter->value() is: " << frameIter->value() << "\n";
-
-    boost::json::value frameValue = frameIter->value();
-
-    if (boost::json::kind::object != frameValue.kind()) {
-        throw std::runtime_error("Frame JSON value is not an object");
-    }
-
-    frameObjectOut = frameValue.get_object();
-}
-
-boost::json::value jsonGetValueWithKey(
-        const char* key,
-        const boost::json::object& frameObject)
-{
-    auto frameObjectIter = frameObject.find(key);
-
-#if DEBUG
-    std::cout << DBG << "frameObjectIter->key() is: " << frameObjectIter->key() << "\n";
-    std::cout << DBG << "frameObjectIter->value() is: " << frameObjectIter->value() << "\n";
-#endif
-
-    return frameObjectIter->value();
-}
 
 void renderTile(
         Sdlw& sdlw,
@@ -188,7 +97,7 @@ tile_pool generateTilesFrom(
 
     SDL_Texture* textureSpritesheet = NULL;
 
-    readJsonFromFile(dataPathSpritesheet, tPackerJsonValue);
+    Json::readFromFile(dataPathSpritesheet, tPackerJsonValue);
 
     // TODO deallocate spritesheet
     //
@@ -219,16 +128,16 @@ tile_pool generateTilesFrom(
             [&](const auto frameObj) {
                 const auto& [tileName, tileConfig] = frameObj;
                 const auto tileConfigObj = tileConfig.as_object();
-                const auto tileConfigFrameObj = jsonGetValueWithKey("frame", tileConfigObj).as_object();
+                const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
                 return Tile(
                         -1,
                         -1,
                         tileName,
                         textureSpritesheet,
-                        jsonGetValueWithKey("x", tileConfigFrameObj).as_int64(),
-                        jsonGetValueWithKey("y", tileConfigFrameObj).as_int64(),
-                        jsonGetValueWithKey("w", tileConfigFrameObj).as_int64(),
-                        jsonGetValueWithKey("h", tileConfigFrameObj).as_int64());
+                        Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
+                        Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
+                        Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
+                        Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
             });
 
     return tilePool;

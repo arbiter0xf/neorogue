@@ -2,7 +2,8 @@ SRC := \
        src/main.cpp \
        src/Tile.cpp \
        src/TextureSpritesheet.cpp \
-       src/Sdlw.cpp
+       src/Sdlw.cpp \
+       src/Json.cpp
 
 CC = g++
 INCLUDES := \
