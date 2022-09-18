@@ -1,8 +1,6 @@
 #ifndef JSON_HPP_DEFINED
 #define JSON_HPP_DEFINED
 
-// Header-only with multiple translation units
-// https://www.boost.org/doc/libs/1_69_0/libs/test/doc/html/boost_test/adv_scenarios/single_header_customizations/multiple_translation_units.html
 #include <boost/json.hpp>
 
 class Json
