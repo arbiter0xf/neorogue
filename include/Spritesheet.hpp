@@ -4,11 +4,11 @@
 #include <SDL2/SDL.h>
 #include <string>
 
-class TextureSpritesheet {
+class Spritesheet {
 public:
-    TextureSpritesheet() = delete;
-    ~TextureSpritesheet();
-    TextureSpritesheet(
+    Spritesheet() = delete;
+    ~Spritesheet();
+    Spritesheet(
             std::string _name,
             SDL_Texture* _texture);
 

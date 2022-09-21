@@ -1,10 +1,10 @@
-#include "TextureSpritesheet.hpp"
+#include "Spritesheet.hpp"
 
-TextureSpritesheet::~TextureSpritesheet()
+Spritesheet::~Spritesheet()
 {
 }
 
-TextureSpritesheet::TextureSpritesheet(
+Spritesheet::Spritesheet(
         std::string _name,
         SDL_Texture* _texture)
     :

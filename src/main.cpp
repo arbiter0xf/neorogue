@@ -17,7 +17,7 @@
 #include "Log.hpp"
 #include "Sdlw.hpp"
 #include "Tile.hpp"
-#include "TextureSpritesheet.hpp"
+#include "Spritesheet.hpp"
 
 const int TILE_HEIGHT = 32;
 const int TILE_WIDTH = 32;

@@ -1,7 +1,7 @@
 SRC := \
        src/main.cpp \
        src/Tile.cpp \
-       src/TextureSpritesheet.cpp \
+       src/Spritesheet.cpp \
        src/Sdlw.cpp \
        src/Json.cpp
 
