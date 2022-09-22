@@ -23,7 +23,9 @@ void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
     do {
         jsonStream.read(buffer, sizeof(buffer));
         readAmount = jsonStream.gcount();
-        std::cout << "Successfully read " << readAmount << " characters" << "\n";
+#if DEBUG_VERBOSE
+        std::cout << DBG << "Successfully read " << readAmount << " characters" << "\n";
+#endif
         jsonStreamParser.write(buffer, readAmount, ec);
         if (ec) {
             throw std::runtime_error(ERR "Stream parser write failed");
@@ -50,7 +52,7 @@ boost::json::value Json::getValueWithKey(
 {
     auto frameObjectIter = frameObject.find(key);
 
-#if DEBUG
+#if DEBUG_VERBOSE
     std::cout << DBG << "frameObjectIter->key() is: " << frameObjectIter->key() << "\n";
     std::cout << DBG << "frameObjectIter->value() is: " << frameObjectIter->value() << "\n";
 #endif
@@ -87,8 +89,10 @@ void Json::texturepackerGetFrameObject(
     boost::json::value framesValue = iter->value();
 
     auto frameIter = framesValue.get_object().find(frameKey);
+#if DEBUG
     std::cout << DBG << "frameIter->key() is: " << frameIter->key() << "\n";
     std::cout << DBG << "frameIter->value() is: " << frameIter->value() << "\n";
+#endif
 
     boost::json::value frameValue = frameIter->value();
 

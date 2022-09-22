@@ -7,5 +7,6 @@
 #define DBG "[D] "
 
 #define DEBUG 1
+#define DEBUG_VERBOSE 0
 
 #endif LOG_HPP_DEFINED
