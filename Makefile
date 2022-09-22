@@ -3,7 +3,8 @@ SRC := \
        src/Tile.cpp \
        src/Spritesheet.cpp \
        src/Sdlw.cpp \
-       src/Json.cpp
+       src/Json.cpp \
+       src/Log.cpp
 
 CC = g++
 INCLUDES := \

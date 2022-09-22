@@ -13,8 +13,6 @@ void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
     boost::json::stream_parser jsonStreamParser;
     boost::json::error_code ec;
 
-    printf(INFO "Reading JSON from file: %s\n", filename.c_str());
-
     jsonStream.open(filename, std::ifstream::in);
     if (jsonStream.fail()) {
         throw std::runtime_error(ERR "Failed to open json file: " + filename);

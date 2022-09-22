@@ -97,6 +97,7 @@ tile_pool generateTilesFrom(
 
     SDL_Texture* textureSpritesheet = NULL;
 
+    Log::i("Reading JSON from file: " + dataPathSpritesheet);
     Json::readFromFile(dataPathSpritesheet, tPackerJsonValue);
 
     // TODO deallocate spritesheet
@@ -202,6 +203,7 @@ int main(void)
 
     screen_tiles screenTiles = { 0 };
 
+    Log::i("Initializing rendering");
     try {
         initRendering(sdlw);
     } catch(std::exception& e) {
@@ -209,6 +211,7 @@ int main(void)
         return 1;
     }
 
+    Log::i("Generating tiles");
     try {
         // TODO eventually generateTilesFrom(texturePool);
         tilePool = generateTilesFrom(
@@ -222,6 +225,7 @@ int main(void)
         return 1;
     }
 
+    Log::i("Entering main loop");
     while (!quitEventReceived) {
         do {
             ret = SDL_PollEvent(&event);
