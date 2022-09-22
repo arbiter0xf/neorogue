@@ -187,9 +187,6 @@ int main(void)
     const std::string dataPathDngnSpritesheet =
         assetsPrefix + "spritesheets/dc-dngn.json";
 
-    SDL_Rect srcRect = {0, 0, 0, 0};
-    SDL_Rect dstRect = {0, 0, 0, 0};
-
     int err = -1;
     int ret = -1;
     bool quitEventReceived = false;
