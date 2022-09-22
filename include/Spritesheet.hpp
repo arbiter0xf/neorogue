@@ -1,5 +1,5 @@
-#ifndef TILE_HPP_DEFINED
-#define TILE_HPP_DEFINED
+#ifndef SPRITESHEET_HPP_DEFINED
+#define SPRITESHEET_HPP_DEFINED
 
 #include <SDL2/SDL.h>
 #include <string>
