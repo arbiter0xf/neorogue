@@ -44,5 +44,5 @@ test: all
 targets:
 	@echo $(ALL_EXE_NAMES)
 
-run: all
-	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME)
+run: $(EXE_NAME_GAME)
+	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME_GAME)
