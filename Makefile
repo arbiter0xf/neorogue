@@ -4,7 +4,8 @@ SRC_GAME := \
        src/Spritesheet.cpp \
        src/Sdlw.cpp \
        src/Json.cpp \
-       src/Log.cpp
+       src/Log.cpp \
+       src/Level.cpp
 
 SRC_MAP_EDITOR := src/Log.cpp
 

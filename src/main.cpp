@@ -14,10 +14,11 @@
 #include <string>
 
 #include "Json.hpp"
+#include "Level.hpp"
 #include "Log.hpp"
 #include "Sdlw.hpp"
-#include "Tile.hpp"
 #include "Spritesheet.hpp"
+#include "Tile.hpp"
 
 const int TILE_HEIGHT = 32;
 const int TILE_WIDTH = 32;
@@ -60,7 +61,11 @@ void renderTile(
     sdlw.renderCopy(tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
-screen_tiles fillScreenTiles(tile_pool& tilePool)
+screen_tiles fillScreenTiles(
+		tile_pool& tilePool,
+		Level& level,
+		int cameraX,
+		int cameraY)
 {
     return { &tilePool[0] };
 }
@@ -189,6 +194,8 @@ int main(void)
 
     int err = -1;
     int ret = -1;
+    int cameraX = 0;
+    int cameraY = 0;
     bool quitEventReceived = false;
 
     Sdlw sdlw = Sdlw();
@@ -199,6 +206,13 @@ int main(void)
     texture_pool texturePool;
 
     screen_tiles screenTiles = { 0 };
+
+    Log::i("Loading test level");
+    Level testLevel1 = Level("levels/test_level1.txt");
+
+    Log::d("Printing from testLevel:");
+    Log::d(testLevel1.getTileDescription(10, 0));
+    Log::d(testLevel1.getTileDescription(0, 12));
 
     Log::i("Initializing rendering");
     try {
@@ -234,7 +248,7 @@ int main(void)
 
         sdlw.renderClear();
 
-        screenTiles = fillScreenTiles(tilePool);
+        screenTiles = fillScreenTiles(tilePool, testLevel1, cameraX, cameraY);
 
         renderScreenTiles(sdlw, screenTiles);
 

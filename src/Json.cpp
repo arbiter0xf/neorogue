@@ -7,7 +7,6 @@
 void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
 {
     std::ifstream jsonStream;
-    std::string line;
     char buffer[4096] = {0};
     std::size_t readAmount = 0;
     boost::json::stream_parser jsonStreamParser;
@@ -15,7 +14,7 @@ void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
 
     jsonStream.open(filename, std::ifstream::in);
     if (jsonStream.fail()) {
-        throw std::runtime_error(ERR "Failed to open json file: " + filename);
+        throw std::runtime_error("Failed to open json file: " + filename);
     }
 
     do {
@@ -26,19 +25,19 @@ void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
 #endif
         jsonStreamParser.write(buffer, readAmount, ec);
         if (ec) {
-            throw std::runtime_error(ERR "Stream parser write failed");
+            throw std::runtime_error("Stream parser write failed");
         }
     } while(!jsonStream.eof());
 
     jsonStreamParser.finish(ec);
     if (ec) {
-        throw std::runtime_error(ERR "Stream parser finish failed");
+        throw std::runtime_error("Stream parser finish failed");
     }
 
     jsonStream.clear();
     jsonStream.close();
     if (jsonStream.fail()) {
-        throw std::runtime_error(ERR "Failed to close json file: " + filename);
+        throw std::runtime_error("Failed to close json file: " + filename);
     }
 
     jsonValue = jsonStreamParser.release();
