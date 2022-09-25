@@ -1,4 +1,4 @@
-#include "tile.hpp"
+#include "Tile.hpp"
 
 Tile::~Tile()
 {
@@ -7,6 +7,7 @@ Tile::~Tile()
 Tile::Tile(
         const int _screenX,
         const int _screenY,
+        std::string _name,
         SDL_Texture* _texture,
         const int _sheetX,
         const int _sheetY,
@@ -15,6 +16,7 @@ Tile::Tile(
         :
             screenX{_screenX},
             screenY{_screenY},
+            name{_name},
             sheetTexture{_texture},
             sheetX{_sheetX},
             sheetY{_sheetY},
@@ -31,6 +33,11 @@ const int Tile::getScreenX() const
 const int Tile::getScreenY() const
 {
     return screenY;
+}
+
+const std::string Tile::getName() const
+{
+    return name;
 }
 
 SDL_Texture* Tile::getSheetTexture()

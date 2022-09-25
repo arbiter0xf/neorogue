@@ -2,14 +2,16 @@
 #define TILE_HPP_DEFINED
 
 #include <SDL2/SDL.h>
+#include <string>
 
 class Tile {
 public:
-    Tile() = delete;
+    Tile() = default;
     ~Tile();
     Tile(
             const int _screenX,
             const int _screenY,
+            std::string _name,
             SDL_Texture* _texture,
             const int _sheetX,
             const int _sheetY,
@@ -18,6 +20,7 @@ public:
 
     const int getScreenX() const;
     const int getScreenY() const;
+    const std::string getName() const;
     SDL_Texture* getSheetTexture();
     const int getSheetX() const;
     const int getSheetY() const;
@@ -26,6 +29,7 @@ public:
 
 private:
     SDL_Texture* sheetTexture;
+    std::string name;
     int screenX;
     int screenY;
     int sheetX;

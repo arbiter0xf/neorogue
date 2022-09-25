@@ -5,6 +5,7 @@ set -ex
 readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
 readonly INSTALL_BOOSTORG_JSON="TRUE"
+readonly INSTALL_GTEST="TRUE"
 
 cd $(dirname $0)
 
@@ -40,8 +41,6 @@ fi
 
 popd
 
-rm -r deps_install_workarea
-
 pushd ../
 if [ ! -d external ] ; then
 	mkdir external
@@ -70,3 +69,11 @@ fi
 popd
 
 popd
+
+pushd ./deps_install_workarea
+if [ "TRUE" == "${INSTALL_GTEST}" ] ; then
+	../install_gtest.sh
+fi
+popd
+
+rm -r ./deps_install_workarea
