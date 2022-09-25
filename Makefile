@@ -61,4 +61,4 @@ run: $(EXE_NAME_GAME)
 	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME_GAME)
 
 test: $(EXE_NAME_TEST)
-	./$(EXE_NAME_TEST)
+	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME_TEST)
