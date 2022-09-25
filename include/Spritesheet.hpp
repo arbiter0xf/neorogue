@@ -4,20 +4,25 @@
 #include <SDL2/SDL.h>
 #include <string>
 
+#include "Json.hpp"
+
 class Spritesheet {
 public:
-    Spritesheet() = delete;
+    Spritesheet() = default;
     ~Spritesheet();
-    Spritesheet(
-            std::string _name,
-            SDL_Texture* _texture);
+    Spritesheet(std::string _name);
 
-    std::string getName();
-    SDL_Texture* getTexture();
+    std::string getName(void);
+    SDL_Texture* getTexture(void);
+    boost::json::value getJson(void);
 
 private:
     std::string name;
     SDL_Texture* texture;
+    boost::json::value jsonValue;
+
+    void loadTexture(std::string pathImage);
+    void loadJson(std::string pathJson);
 };
 
 #endif

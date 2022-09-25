@@ -7,6 +7,39 @@
 #include "Log.hpp"
 #include "Sdlw.hpp"
 
+/*
+ * About singleton and static variable lifetime
+ * https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+ */
+Sdlw Sdlw::sharedInstance = Sdlw();
+
+#if 0
+// TODO: Remove this reference code when in use elsewhere
+
+Sdlw::Sdlw(Sdlw&& other)
+    : mainWindow(std::exchange(other.mainWindow, nullptr))
+    , mainRenderer(std::exchange(other.mainRenderer, nullptr))
+{
+}
+
+Sdlw& Sdlw::operator=(Sdlw&& other)
+{
+    std::swap(mainWindow, other.mainWindow);
+    std::swap(mainRenderer, other.mainRenderer);
+    return *this;
+}
+#endif
+
+Sdlw::~Sdlw()
+{
+    destroy();
+}
+
+Sdlw& Sdlw::getReference()
+{
+    return sharedInstance;
+}
+
 void Sdlw::init(std::uint32_t flags)
 {
     int ret = -1;
@@ -126,5 +159,15 @@ int Sdlw::renderCopy(
 
 SDL_Texture* Sdlw::imgLoadTexture(std::string file)
 {
-    return IMG_LoadTexture(mainRenderer, file.c_str());
+    SDL_Texture* texture = NULL;
+    std::string msg = "";
+
+    texture = IMG_LoadTexture(mainRenderer, file.c_str());
+    if (NULL == texture) {
+        msg = "Failed to load texture: ";
+        msg += SDL_GetError();
+        throw std::runtime_error(msg);
+    }
+
+    return texture;
 }

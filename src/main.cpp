@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 
+#include "Assets.hpp"
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
@@ -28,13 +29,15 @@ const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEI
 const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
                                  // pass by using -DTILE_POOL_SIZE=$(script)
 const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
-                                  // pass by using -TEXUTRE_POOL_SIZE=$(script)
+                                  // pass by using -DTEXUTRE_POOL_SIZE=$(script)
+const int SPRITESHEET_POOL_SIZE = 8;
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
 using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
 using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
+using spritesheet_pool = std::array<Spritesheet, SPRITESHEET_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -89,32 +92,19 @@ void renderScreenTiles(
 /*
  * \exception May throw std::exception
  */
-tile_pool generateTilesFrom(
-        Sdlw& sdlw,
-        std::string imagePathSpritesheet,
-        std::string dataPathSpritesheet)
+tile_pool generateTilesFrom(spritesheet_pool spritesheetPool)
 {
     int ret = -1;
 
-    boost::json::value tPackerJsonValue;
+    boost::json::value tPackerJsonValue = spritesheetPool[0].getJson();
     boost::json::object tPackerFramesObj;
     tile_pool tilePool;
 
-    SDL_Texture* textureSpritesheet = NULL;
-
-    Log::i("Reading JSON from file: " + dataPathSpritesheet);
-    Json::readFromFile(dataPathSpritesheet, tPackerJsonValue);
-
-    // TODO deallocate spritesheet
-    //
-    // Proposal: Add GraphicsPool that has a TexturePool
-    textureSpritesheet = sdlw.imgLoadTexture(imagePathSpritesheet);
-    if (NULL == textureSpritesheet) {
-        throw std::runtime_error("Failed to load texture" + imagePathSpritesheet);
-    }
+    Sdlw& sdlw = Sdlw::getReference();
+    SDL_Texture* textureSpritesheet = spritesheetPool[0].getTexture();
 
     if (boost::json::kind::object != tPackerJsonValue.kind()) {
-        throw std::runtime_error(ERR "JSON value top level is not an object");
+        throw std::runtime_error("JSON value top level is not an object");
     }
 
     auto const& topObj = tPackerJsonValue.get_object();
@@ -152,7 +142,7 @@ tile_pool generateTilesFrom(
 /*
  * \exception throws std::runtime_error on failure
  */
-void initRendering(Sdlw& sdlw)
+void initRendering(void)
 {
     int ret = -1;
     std::string msg = "";
@@ -160,6 +150,8 @@ void initRendering(Sdlw& sdlw)
     const int imgFlags = IMG_INIT_PNG;
     const int renderingDriver = -1; // -1 initializes the first driver
                                     // supporting requested flags
+
+    Sdlw& sdlw = Sdlw::getReference();
 
     sdlw.init(SDL_INIT_VIDEO);
 
@@ -182,51 +174,69 @@ void initRendering(Sdlw& sdlw)
     sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
+void loadSpritesheets(
+        std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames,
+        spritesheet_pool& spritesheetPool)
+{
+    std::transform(
+            spritesheetNames.cbegin(),
+            spritesheetNames.cend(),
+            spritesheetPool.begin(),
+            [](const std::string name) {
+                return Spritesheet(name);
+            });
+}
+
 int main(void)
 {
-    const std::string assetsPrefix = "assets/";
-    const std::string imagePathWallStoneGray1 =
-        assetsPrefix + "dc-dngn/wall/stone_gray1.png";
-    const std::string imagePathDngnSpritesheet =
-        assetsPrefix + "spritesheets/dc-dngn.png";
-    const std::string dataPathDngnSpritesheet =
-        assetsPrefix + "spritesheets/dc-dngn.json";
-
     int err = -1;
     int ret = -1;
     int cameraX = 0;
     int cameraY = 0;
     bool quitEventReceived = false;
 
-    Sdlw sdlw = Sdlw();
+    Sdlw& sdlw = Sdlw::getReference();
 
     SDL_Event event;
 
     tile_pool tilePool;
     texture_pool texturePool;
+    spritesheet_pool spritesheetPool;
 
     screen_tiles screenTiles = { 0 };
+
+    std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames = {
+        "dc-dngn",
+        "dc-misc",
+        "dc-mon",
+        "effect",
+        "gui",
+        "item",
+        "player",
+        "spells",
+    };
 
     Log::i("Loading test level");
     Level testLevel1 = Level("levels/test_level1.txt");
 
     Log::i("Initializing rendering");
     try {
-        initRendering(sdlw);
+        initRendering();
     } catch(std::exception& e) {
         std::cerr << "Exception while initializing rendering: " << e.what();
         return 1;
     }
 
+    Log::i("Loading spritesheets");
+    loadSpritesheets(
+            spritesheetNames,
+            spritesheetPool);
+
     Log::i("Generating tiles");
     try {
-        // TODO eventually generateTilesFrom(texturePool);
-        tilePool = generateTilesFrom(
-                sdlw,
-                imagePathDngnSpritesheet,
-                dataPathDngnSpritesheet);
+        tilePool = generateTilesFrom(spritesheetPool);
     } catch (std::exception const& e) {
-        std::cerr << ERR << "Exception while generating tiles from spritesheets"
+        std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";
         sdlw.destroy();
         return 1;

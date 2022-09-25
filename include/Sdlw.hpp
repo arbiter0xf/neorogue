@@ -1,8 +1,17 @@
 #ifndef SDLW_HPP_DEFINED
 #define SDLW_HPP_DEFINED
 
+#include <SDL2/SDL.h>
+
 class Sdlw {
 public:
+    Sdlw(const Sdlw& other) = delete;
+    Sdlw& operator=(const Sdlw& other) = delete;
+    Sdlw(Sdlw&& other) = delete;
+    Sdlw& operator=(Sdlw&& other) = delete;
+
+    ~Sdlw();
+
     void init(std::uint32_t flags);
     void setHint(std::string name, std::string value);
     void imgInit(int flags);
@@ -28,7 +37,13 @@ public:
             const SDL_Rect* dstrect);
     SDL_Texture* imgLoadTexture(std::string file);
 
+    static Sdlw& getReference(void);
+
 private:
+    Sdlw() = default;
+
+    static Sdlw sharedInstance;
+
     SDL_Window* mainWindow;
     SDL_Renderer* mainRenderer;
 };

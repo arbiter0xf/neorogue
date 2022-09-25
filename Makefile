@@ -1,7 +1,9 @@
 SRC_GAME_DIR := src
+HEADERS_GAME_DIR := include
 SRC_TEST_DIR := test
 
 SRC_GAME := $(shell find $(SRC_GAME_DIR)/ -name "*.cpp")
+HEADERS_GAME := $(shell find $(HEADERS_GAME_DIR)/ -name "*.hpp")
 SRC_TEST := \
 	    $(filter-out $(SRC_GAME_DIR)/main.cpp, $(SRC_GAME)) \
 	    $(shell find $(SRC_TEST_DIR)/ -name "*.cpp")
@@ -45,8 +47,8 @@ ALL_EXE_NAMES := \
 
 all: $(ALL_EXE_NAMES)
 
-$(EXE_NAME_GAME): $(SRC_GAME)
-	$(CXX) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
+$(EXE_NAME_GAME): $(SRC_GAME) $(HEADERS_GAME_DIR)
+	$(CXX) $(SRC_GAME) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
 
 $(EXE_NAME_MAP_EDITOR): $(SRC_MAP_EDITOR)
 	@echo "Map editor build placeholder"
