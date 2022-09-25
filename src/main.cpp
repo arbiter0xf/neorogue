@@ -210,10 +210,6 @@ int main(void)
     Log::i("Loading test level");
     Level testLevel1 = Level("levels/test_level1.txt");
 
-    Log::d("Printing from testLevel:");
-    Log::d(testLevel1.getTileDescription(10, 0));
-    Log::d(testLevel1.getTileDescription(0, 12));
-
     Log::i("Initializing rendering");
     try {
         initRendering(sdlw);
