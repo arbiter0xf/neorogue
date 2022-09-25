@@ -69,4 +69,6 @@ if [ "TRUE" == "$INSTALL_BOOSTORG_JSON" ] ; then
 fi
 popd
 
+./install_gtest.sh
+
 popd
