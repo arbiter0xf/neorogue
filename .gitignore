@@ -1,4 +1,5 @@
 *.swp
 *.swo
 rogue_forever
+rogue_forever_test
 examples_do_not_distribute

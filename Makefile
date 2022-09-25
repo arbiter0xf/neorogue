@@ -1,11 +1,10 @@
-SRC_GAME := \
-       src/main.cpp \
-       src/Tile.cpp \
-       src/Spritesheet.cpp \
-       src/Sdlw.cpp \
-       src/Json.cpp \
-       src/Log.cpp \
-       src/Level.cpp
+SRC_GAME_DIR := src
+SRC_TEST_DIR := test
+
+SRC_GAME := $(shell find $(SRC_GAME_DIR)/ -name "*.cpp")
+SRC_TEST := \
+	    $(filter-out $(SRC_GAME_DIR)/main.cpp, $(SRC_GAME)) \
+	    $(shell find $(SRC_TEST_DIR)/ -name "*.cpp")
 
 SRC_MAP_EDITOR := src/Log.cpp
 
@@ -24,26 +23,42 @@ INCLUDES := \
 	    -Iexternal/boostorg/mp11/include/ \
 	    -Iexternal/boostorg/align/include/ \
 	    -Iinclude
-COMPILER_FLAGS = $(INCLUDES) -w -std=c++17
+INCLUDES_TEST := -I/opt/gtest/include/
+COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
+COMPILER_FLAGS_TEST := \
+		      $(INCLUDES_TEST) \
+		      $(COMPILER_FLAGS) \
+		      -pthread
 LINKER_FLAGS = -lSDL2 -lSDL2_image
+LINKER_FLAGS_TEST := \
+		    $(LINKER_FLAGS) \
+		    -lgtest \
+		    -L/opt/gtest/lib
 EXE_NAME_GAME := rogue_forever
 EXE_NAME_MAP_EDITOR := rogue_forever_map_editor
+EXE_NAME_TEST := rogue_forever_test
 
-ALL_EXE_NAMES := $(EXE_NAME_GAME) $(EXE_NAME_MAP_EDITOR)
+ALL_EXE_NAMES := \
+		 $(EXE_NAME_GAME) \
+		 $(EXE_NAME_MAP_EDITOR) \
+		 $(EXE_NAME_TEST)
 
 all: $(ALL_EXE_NAMES)
 
 $(EXE_NAME_GAME): $(SRC_GAME)
-	$(CC) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
+	$(CXX) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
 
 $(EXE_NAME_MAP_EDITOR): $(SRC_MAP_EDITOR)
 	@echo "Map editor build placeholder"
 
-test: all
-	@echo "Test placeholder"
+$(EXE_NAME_TEST): $(SRC_TEST)
+	$(CXX) $^ $(COMPILER_FLAGS_TEST) $(LINKER_FLAGS_TEST) -o $@
 
 targets:
 	@echo $(ALL_EXE_NAMES)
 
 run: $(EXE_NAME_GAME)
 	LD_LIBRARY_PATH=/usr/local/lib ./$(EXE_NAME_GAME)
+
+test: $(EXE_NAME_TEST)
+	./$(EXE_NAME_TEST)
