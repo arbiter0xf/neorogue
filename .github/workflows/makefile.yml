@@ -19,6 +19,7 @@ jobs:
       
     - name: Install dependencies
       run: ./scripts/install_deps.sh
+      run: ./scripts/install_gtest.sh
 
     - name: Build
       run: make
