@@ -17,7 +17,7 @@ if [ -z "$(which TexturePacker)" ] ; then
 	exit 0
 fi
 
-readonly directories=$(ls -R1 | grep -v "${spritesheets_dir}" | grep : | tr -d ":")
+readonly directories=$(ls -1 | grep -v -e "${spritesheets_dir}" -e LICENSE.txt -e README.txt -e utility)
 
 for directory in ${directories} ; do
 	spritesheet_filename="$(echo ${directory} | sed 's|./||' | sed 's|/|_|g').png"
@@ -26,10 +26,6 @@ for directory in ${directories} ; do
 	spritesheet_coordinates_filename="${spritesheets_dir}/${spritesheet_coordinates_filename}"
 
 	if [ "." == "${directory}" ] ; then
-		continue
-	fi
-
-	if [ "" == "$(ls ${directory} | grep png)" ] ; then
 		continue
 	fi
 
