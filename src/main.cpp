@@ -96,45 +96,54 @@ tile_pool generateTilesFrom(spritesheet_pool spritesheetPool)
 {
     int ret = -1;
 
-    boost::json::value tPackerJsonValue = spritesheetPool[0].getJson();
     boost::json::object tPackerFramesObj;
     tile_pool tilePool;
 
     Sdlw& sdlw = Sdlw::getReference();
-    SDL_Texture* textureSpritesheet = spritesheetPool[0].getTexture();
 
-    if (boost::json::kind::object != tPackerJsonValue.kind()) {
-        throw std::runtime_error("JSON value top level is not an object");
+    auto tilePoolIter = tilePool.begin();
+
+    for (Spritesheet spritesheet : spritesheetPool) {
+        boost::json::value tPackerJsonValue = spritesheet.getJson();
+        SDL_Texture* textureSpritesheet = spritesheet.getTexture();
+
+        tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
+
+        // TODO See also:
+        // https://en.cppreference.com/w/cpp/algorithm/generate
+        std::transform(
+                tPackerFramesObj.cbegin(),
+                tPackerFramesObj.cend(),
+                tilePoolIter,
+                [&](const auto frameObj) {
+                    const auto& [tileName, tileConfig] = frameObj;
+                    const auto tileConfigObj = tileConfig.as_object();
+                    const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
+
+                    return Tile(
+                            -1,
+                            -1,
+                            tileName,
+                            textureSpritesheet,
+                            Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
+                            Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
+                            Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
+                            Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
+                });
+
+        // Iterator seemed to point to where it pointed before calling
+        // std::transform(). Make sure that iterator points to beginning of
+        // tilePool (as expected) and walk to first uninitialized Tile in
+        // tilePool.
+        tilePoolIter = tilePool.begin();
+        while (NULL != tilePoolIter->getSheetTexture()) {
+            if (tilePool.end() == tilePoolIter) {
+                throw std::runtime_error("Reached end of tile pool when generating tiles");
+            }
+
+            tilePoolIter++;
+        }
     }
-
-    auto const& topObj = tPackerJsonValue.get_object();
-    if (topObj.empty()) {
-        throw std::runtime_error("Empty top level JSON object");
-    }
-
-    auto iter = topObj.begin();
-    tPackerFramesObj = iter->value().get_object();
-
-    // TODO See also:
-    // https://en.cppreference.com/w/cpp/algorithm/generate
-    std::transform(
-            tPackerFramesObj.cbegin(),
-            tPackerFramesObj.cend(),
-            tilePool.begin(),
-            [&](const auto frameObj) {
-                const auto& [tileName, tileConfig] = frameObj;
-                const auto tileConfigObj = tileConfig.as_object();
-                const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
-                return Tile(
-                        -1,
-                        -1,
-                        tileName,
-                        textureSpritesheet,
-                        Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
-            });
 
     return tilePool;
 }

@@ -14,6 +14,7 @@ public:
     static boost::json::value getValueWithKey(
             const char* key,
             const boost::json::object& frameObject);
+    static boost::json::object getFirstInnerObject(boost::json::value& jsonValue);
 
 private:
 };
