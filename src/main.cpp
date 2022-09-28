@@ -90,7 +90,7 @@ void renderScreenTiles(
 /*
  * \exception May throw std::exception
  */
-tile_pool generateTilesFrom(spritesheet_pool spritesheetPool)
+tile_pool generateTilesFrom(spritesheet_pool& spritesheetPool)
 {
     int ret = -1;
 
@@ -101,9 +101,9 @@ tile_pool generateTilesFrom(spritesheet_pool spritesheetPool)
 
     auto tilePoolIter = tilePool.begin();
 
-    for (Spritesheet spritesheet : spritesheetPool) {
+    for (Spritesheet& spritesheet : spritesheetPool) {
         boost::json::value tPackerJsonValue = spritesheet.getJson();
-        SDL_Texture* textureSpritesheet = spritesheet.getTexture();
+        std::shared_ptr<SDL_Texture> textureSpritesheet = spritesheet.getTexture();
 
         tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
 

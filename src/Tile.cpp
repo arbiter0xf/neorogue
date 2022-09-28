@@ -8,7 +8,7 @@ Tile::Tile(
         const int _screenX,
         const int _screenY,
         std::string _name,
-        SDL_Texture* _texture,
+        std::shared_ptr<SDL_Texture> _texture,
         const int _sheetX,
         const int _sheetY,
         const int _sheetW,
@@ -40,7 +40,7 @@ const std::string Tile::getName() const
     return name;
 }
 
-SDL_Texture* Tile::getSheetTexture()
+std::shared_ptr<SDL_Texture> Tile::getSheetTexture()
 {
     return sheetTexture;
 }

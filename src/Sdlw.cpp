@@ -150,20 +150,24 @@ void Sdlw::renderPresent(void)
 }
 
 int Sdlw::renderCopy(
-        SDL_Texture* texture,
+        std::shared_ptr<SDL_Texture> texture,
         const SDL_Rect* srcrect,
         const SDL_Rect* dstrect)
 {
-    return SDL_RenderCopy(mainRenderer, texture, srcrect, dstrect);
+    return SDL_RenderCopy(mainRenderer, texture.get(), srcrect, dstrect);
 }
 
-SDL_Texture* Sdlw::imgLoadTexture(std::string file)
+std::shared_ptr<SDL_Texture> Sdlw::imgLoadTextureShared(std::string file)
 {
-    SDL_Texture* texture = NULL;
+    std::shared_ptr<SDL_Texture> texture = NULL;
     std::string msg = "";
 
-    texture = IMG_LoadTexture(mainRenderer, file.c_str());
-    if (NULL == texture) {
+    texture = std::shared_ptr<SDL_Texture>(
+            IMG_LoadTexture(mainRenderer, file.c_str()),
+            [](SDL_Texture* p) {
+                SDL_DestroyTexture(p);
+            });
+    if (NULL == texture.get()) {
         msg = "Failed to load texture: ";
         msg += SDL_GetError();
         throw std::runtime_error(msg);
@@ -172,7 +176,7 @@ SDL_Texture* Sdlw::imgLoadTexture(std::string file)
     return texture;
 }
 
-void Sdlw::destroyTexture(SDL_Texture* texture)
+void Sdlw::destroyTexture(std::shared_ptr<SDL_Texture> texture)
 {
-    SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(texture.get());
 }

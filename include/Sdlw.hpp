@@ -2,6 +2,7 @@
 #define SDLW_HPP_DEFINED
 
 #include <SDL2/SDL.h>
+#include <memory>
 
 class Sdlw {
 public:
@@ -32,11 +33,11 @@ public:
     void renderClear(void);
     void renderPresent(void);
     int renderCopy(
-            SDL_Texture* texture,
+            std::shared_ptr<SDL_Texture> texture,
             const SDL_Rect* srcrect,
             const SDL_Rect* dstrect);
-    SDL_Texture* imgLoadTexture(std::string file);
-    void destroyTexture(SDL_Texture* texture);
+    std::shared_ptr<SDL_Texture> imgLoadTextureShared(std::string file);
+    void destroyTexture(std::shared_ptr<SDL_Texture> texture);
 
     static Sdlw& getReference(void);
 

@@ -16,13 +16,6 @@ const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheetNam
     "spells",
 };
 
-Spritesheet::~Spritesheet()
-{
-    Sdlw& sdlw = Sdlw::getReference();
-
-    sdlw.destroyTexture(texture);
-}
-
 Spritesheet::Spritesheet(std::string _name)
 	: name {_name}
 {
@@ -35,7 +28,7 @@ std::string Spritesheet::getName(void)
     return name;
 }
 
-SDL_Texture* Spritesheet::getTexture(void)
+std::shared_ptr<SDL_Texture> Spritesheet::getTexture(void)
 {
     return texture;
 }
@@ -49,7 +42,7 @@ void Spritesheet::loadTexture(std::string pathImage)
 {
     Sdlw& sdlw = Sdlw::getReference();
 
-    texture = sdlw.imgLoadTexture(pathImage);
+    texture = sdlw.imgLoadTextureShared(pathImage);
     if (NULL == texture) {
         throw std::runtime_error("Failed to load texture: " + pathImage);
     }
