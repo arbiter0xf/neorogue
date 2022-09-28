@@ -63,10 +63,10 @@ void renderTile(
 }
 
 screen_tiles fillScreenTiles(
-		tile_pool& tilePool,
-		Level& level,
-		int cameraX,
-		int cameraY)
+        tile_pool& tilePool,
+        Level& level,
+        int cameraX,
+        int cameraY)
 {
     return { &tilePool[0] };
 }
