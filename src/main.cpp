@@ -132,10 +132,7 @@ tile_pool generateTilesFrom(spritesheet_pool spritesheetPool)
                 });
 
         // Iterator seemed to point to where it pointed before calling
-        // std::transform(). Make sure that iterator points to beginning of
-        // tilePool (as expected) and walk to first uninitialized Tile in
-        // tilePool.
-        tilePoolIter = tilePool.begin();
+        // std::transform(). Walk to first uninitialized Tile in tilePool.
         while (NULL != tilePoolIter->getSheetTexture()) {
             if (tilePool.end() == tilePoolIter) {
                 throw std::runtime_error("Reached end of tile pool when generating tiles");
