@@ -36,6 +36,7 @@ public:
             const SDL_Rect* srcrect,
             const SDL_Rect* dstrect);
     SDL_Texture* imgLoadTexture(std::string file);
+    void destroyTexture(SDL_Texture* texture);
 
     static Sdlw& getReference(void);
 

@@ -171,3 +171,8 @@ SDL_Texture* Sdlw::imgLoadTexture(std::string file)
 
     return texture;
 }
+
+void Sdlw::destroyTexture(SDL_Texture* texture)
+{
+    SDL_DestroyTexture(texture);
+}

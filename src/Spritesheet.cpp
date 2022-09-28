@@ -6,7 +6,9 @@
 
 Spritesheet::~Spritesheet()
 {
-    // TODO: implement
+    Sdlw& sdlw = Sdlw::getReference();
+
+    sdlw.destroyTexture(texture);
 }
 
 Spritesheet::Spritesheet(std::string _name)
