@@ -1,8 +1,20 @@
 #include <stdexcept>
 
 #include "Assets.hpp"
+#include "Log.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
+
+const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheetNames = {
+    "dc-dngn",
+    "dc-misc",
+    "dc-mon",
+    "effect",
+    "gui",
+    "item",
+    "player",
+    "spells",
+};
 
 Spritesheet::~Spritesheet()
 {
@@ -46,4 +58,15 @@ void Spritesheet::loadTexture(std::string pathImage)
 void Spritesheet::loadJson(std::string pathJson)
 {
     Json::readFromFile(pathJson, jsonValue);
+}
+
+void Spritesheet::loadSpritesheets(spritesheet_pool& spritesheetPool)
+{
+    std::transform(
+            Spritesheet::spritesheetNames.cbegin(),
+            Spritesheet::spritesheetNames.cend(),
+            spritesheetPool.begin(),
+            [](const std::string name) {
+                return Spritesheet(name);
+            });
 }

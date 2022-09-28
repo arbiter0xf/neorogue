@@ -30,14 +30,12 @@ const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
                                  // pass by using -DTILE_POOL_SIZE=$(script)
 const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
                                   // pass by using -DTEXUTRE_POOL_SIZE=$(script)
-const int SPRITESHEET_POOL_SIZE = 8;
 
 const char PROGRAM_NAME[] = "Rogue Forever";
 
 using screen_tiles = std::array<Tile*, SCREEN_TILES>;
 using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
 using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
-using spritesheet_pool = std::array<Spritesheet, SPRITESHEET_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -180,19 +178,6 @@ void initRendering(void)
     sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
-void loadSpritesheets(
-        std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames,
-        spritesheet_pool& spritesheetPool)
-{
-    std::transform(
-            spritesheetNames.cbegin(),
-            spritesheetNames.cend(),
-            spritesheetPool.begin(),
-            [](const std::string name) {
-                return Spritesheet(name);
-            });
-}
-
 int main(void)
 {
     int err = -1;
@@ -211,17 +196,6 @@ int main(void)
 
     screen_tiles screenTiles = { 0 };
 
-    std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames = {
-        "dc-dngn",
-        "dc-misc",
-        "dc-mon",
-        "effect",
-        "gui",
-        "item",
-        "player",
-        "spells",
-    };
-
     Log::i("Loading test level");
     Level testLevel1 = Level("levels/test_level1.txt");
 
@@ -234,9 +208,7 @@ int main(void)
     }
 
     Log::i("Loading spritesheets");
-    loadSpritesheets(
-            spritesheetNames,
-            spritesheetPool);
+    Spritesheet::loadSpritesheets(spritesheetPool);
 
     Log::i("Generating tiles");
     try {
