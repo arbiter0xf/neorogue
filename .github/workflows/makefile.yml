@@ -18,7 +18,10 @@ jobs:
       run: ./configure
       
     - name: Install dependencies
-      run: ./scripts/install_deps.sh
+      run:
+        - ./scripts/install_deps.sh
+        - ./scripts/download_assets.sh
+        - ./scripts/create_spritesheets.sh
 
     - name: Build
       run: make
