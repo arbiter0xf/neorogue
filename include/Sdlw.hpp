@@ -1,8 +1,19 @@
 #ifndef SDLW_HPP_DEFINED
 #define SDLW_HPP_DEFINED
 
+#include <SDL2/SDL.h>
+#include <cstdint>
+#include <memory>
+
 class Sdlw {
 public:
+    Sdlw(const Sdlw& other) = delete;
+    Sdlw& operator=(const Sdlw& other) = delete;
+    Sdlw(Sdlw&& other) = delete;
+    Sdlw& operator=(Sdlw&& other) = delete;
+
+    ~Sdlw();
+
     void init(std::uint32_t flags);
     void setHint(std::string name, std::string value);
     void imgInit(int flags);
@@ -23,12 +34,20 @@ public:
     void renderClear(void);
     void renderPresent(void);
     int renderCopy(
-            SDL_Texture* texture,
+            std::shared_ptr<SDL_Texture> texture,
             const SDL_Rect* srcrect,
             const SDL_Rect* dstrect);
-    SDL_Texture* imgLoadTexture(std::string file);
+    std::shared_ptr<SDL_Texture> imgLoadTextureShared(std::string file);
+    void destroyTexture(std::shared_ptr<SDL_Texture> texture);
+
+    static Sdlw& getReference(void);
+    static void initRendering(void);
 
 private:
+    Sdlw() = default;
+
+    static Sdlw sharedInstance;
+
     SDL_Window* mainWindow;
     SDL_Renderer* mainRenderer;
 };

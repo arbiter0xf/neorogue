@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+#include "Assets.hpp"
+#include "Constants.hpp"
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
@@ -20,21 +22,8 @@
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
 
-const int TILE_HEIGHT = 32;
-const int TILE_WIDTH = 32;
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
-const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
-                                 // pass by using -DTILE_POOL_SIZE=$(script)
-const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
-                                  // pass by using -TEXUTRE_POOL_SIZE=$(script)
-
-const char PROGRAM_NAME[] = "Rogue Forever";
-
-using screen_tiles = std::array<Tile*, SCREEN_TILES>;
-using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
-using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
+using screen_tiles = std::array<Tile*, g_constants::SCREEN_TILES>;
+using texture_pool = std::array<SDL_Texture*, g_constants::TEXTURE_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -62,10 +51,10 @@ void renderTile(
 }
 
 screen_tiles fillScreenTiles(
-		tile_pool& tilePool,
-		Level& level,
-		int cameraX,
-		int cameraY)
+        tile_pool& tilePool,
+        Level& level,
+        int cameraX,
+        int cameraY)
 {
     return { &tilePool[0] };
 }
@@ -86,124 +75,21 @@ void renderScreenTiles(
     }
 }
 
-/*
- * \exception May throw std::exception
- */
-tile_pool generateTilesFrom(
-        Sdlw& sdlw,
-        std::string imagePathSpritesheet,
-        std::string dataPathSpritesheet)
-{
-    int ret = -1;
-
-    boost::json::value tPackerJsonValue;
-    boost::json::object tPackerFramesObj;
-    tile_pool tilePool;
-
-    SDL_Texture* textureSpritesheet = NULL;
-
-    Log::i("Reading JSON from file: " + dataPathSpritesheet);
-    Json::readFromFile(dataPathSpritesheet, tPackerJsonValue);
-
-    // TODO deallocate spritesheet
-    //
-    // Proposal: Add GraphicsPool that has a TexturePool
-    textureSpritesheet = sdlw.imgLoadTexture(imagePathSpritesheet);
-    if (NULL == textureSpritesheet) {
-        throw std::runtime_error("Failed to load texture" + imagePathSpritesheet);
-    }
-
-    if (boost::json::kind::object != tPackerJsonValue.kind()) {
-        throw std::runtime_error(ERR "JSON value top level is not an object");
-    }
-
-    auto const& topObj = tPackerJsonValue.get_object();
-    if (topObj.empty()) {
-        throw std::runtime_error("Empty top level JSON object");
-    }
-
-    auto iter = topObj.begin();
-    tPackerFramesObj = iter->value().get_object();
-
-    // TODO See also:
-    // https://en.cppreference.com/w/cpp/algorithm/generate
-    std::transform(
-            tPackerFramesObj.cbegin(),
-            tPackerFramesObj.cend(),
-            tilePool.begin(),
-            [&](const auto frameObj) {
-                const auto& [tileName, tileConfig] = frameObj;
-                const auto tileConfigObj = tileConfig.as_object();
-                const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
-                return Tile(
-                        -1,
-                        -1,
-                        tileName,
-                        textureSpritesheet,
-                        Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
-                        Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
-            });
-
-    return tilePool;
-}
-
-/*
- * \exception throws std::runtime_error on failure
- */
-void initRendering(Sdlw& sdlw)
-{
-    int ret = -1;
-    std::string msg = "";
-
-    const int imgFlags = IMG_INIT_PNG;
-    const int renderingDriver = -1; // -1 initializes the first driver
-                                    // supporting requested flags
-
-    sdlw.init(SDL_INIT_VIDEO);
-
-    sdlw.setHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-
-    sdlw.imgInit(imgFlags);
-
-    sdlw.createMainWindow(
-            PROGRAM_NAME,
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN);
-
-    sdlw.createMainRenderer(
-            renderingDriver,
-            SDL_RENDERER_ACCELERATED);
-
-    sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
-}
-
 int main(void)
 {
-    const std::string assetsPrefix = "assets/";
-    const std::string imagePathWallStoneGray1 =
-        assetsPrefix + "dc-dngn/wall/stone_gray1.png";
-    const std::string imagePathDngnSpritesheet =
-        assetsPrefix + "spritesheets/dc-dngn.png";
-    const std::string dataPathDngnSpritesheet =
-        assetsPrefix + "spritesheets/dc-dngn.json";
-
     int err = -1;
     int ret = -1;
     int cameraX = 0;
     int cameraY = 0;
     bool quitEventReceived = false;
 
-    Sdlw sdlw = Sdlw();
+    Sdlw& sdlw = Sdlw::getReference();
 
     SDL_Event event;
 
     tile_pool tilePool;
     texture_pool texturePool;
+    spritesheet_pool spritesheetPool;
 
     screen_tiles screenTiles = { 0 };
 
@@ -212,23 +98,21 @@ int main(void)
 
     Log::i("Initializing rendering");
     try {
-        initRendering(sdlw);
+        Sdlw::initRendering();
     } catch(std::exception& e) {
         std::cerr << "Exception while initializing rendering: " << e.what();
         return 1;
     }
 
+    Log::i("Loading spritesheets");
+    Spritesheet::loadSpritesheets(spritesheetPool);
+
     Log::i("Generating tiles");
     try {
-        // TODO eventually generateTilesFrom(texturePool);
-        tilePool = generateTilesFrom(
-                sdlw,
-                imagePathDngnSpritesheet,
-                dataPathDngnSpritesheet);
+        tilePool = Tile::generateTilesFrom(spritesheetPool);
     } catch (std::exception const& e) {
-        std::cerr << ERR << "Exception while generating tiles from spritesheets"
+        std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";
-        sdlw.destroy();
         return 1;
     }
 
