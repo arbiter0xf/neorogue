@@ -20,15 +20,6 @@ jobs:
     - name: Install build dependencies
       run: ./scripts/install_deps.sh
 
-    - name: Install assets | Download assets
-      run: ./scripts/download_assets.sh
-
-    - name: Install assets | Install tools
-      run: ./scripts/install_tools.sh
-
-    - name: Install assets | Create spritesheets
-      run: ./scripts/create_spritesheets.sh
-
     - name: Build
       run: make
 
