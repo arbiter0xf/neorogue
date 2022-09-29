@@ -18,8 +18,7 @@ jobs:
       run: ./configure
       
     - name: Install build dependencies
-      run:
-        - ./scripts/install_deps.sh
+      run: ./scripts/install_deps.sh
 
     - name: Install assets | Download assets
       run: ./scripts/download_assets.sh
