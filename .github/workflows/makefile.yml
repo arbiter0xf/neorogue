@@ -17,11 +17,18 @@ jobs:
     - name: configure
       run: ./configure
       
-    - name: Install dependencies
+    - name: Install build dependencies
       run:
         - ./scripts/install_deps.sh
-        - ./scripts/download_assets.sh
-        - ./scripts/create_spritesheets.sh
+
+    - name: Install assets | Download assets
+      run: ./scripts/download_assets.sh
+
+    - name: Install assets | Install tools
+      run: ./scripts/install_tools.sh
+
+    - name: Install assets | Create spritesheets
+      run: ./scripts/create_spritesheets.sh
 
     - name: Build
       run: make
