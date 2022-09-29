@@ -26,11 +26,15 @@ INCLUDES := \
 	    -Iexternal/boostorg/align/include/ \
 	    -Iinclude
 INCLUDES_TEST := -I/opt/gtest/include/
-COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
+COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
+COMPILER_FLAGS_GAME := \
+		       $(COMMON_COMPILER_FLAGS) \
+		       -DGRAPHICS_ENABLED=1
 COMPILER_FLAGS_TEST := \
 		      $(INCLUDES_TEST) \
-		      $(COMPILER_FLAGS) \
+		      $(COMMON_COMPILER_FLAGS) \
 		      -pthread
+		      -DGRAPHICS_ENABLED=0
 LINKER_FLAGS = -lSDL2 -lSDL2_image
 LINKER_FLAGS_TEST := \
 		    $(LINKER_FLAGS) \
@@ -48,7 +52,7 @@ ALL_EXE_NAMES := \
 all: $(ALL_EXE_NAMES)
 
 $(EXE_NAME_GAME): $(SRC_GAME) $(HEADERS_GAME_DIR)
-	$(CXX) $(SRC_GAME) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
+	$(CXX) $(SRC_GAME) $(COMPILER_FLAGS_GAME) $(LINKER_FLAGS) -o $@
 
 $(EXE_NAME_MAP_EDITOR): $(SRC_MAP_EDITOR)
 	@echo "Map editor build placeholder"

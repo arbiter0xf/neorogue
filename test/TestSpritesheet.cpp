@@ -8,7 +8,6 @@ class TestSpritesheet : public ::testing::Test
 protected:
     void SetUp() override
     {
-        Sdlw::initRendering();
     }
 
     void TearDown() override
@@ -34,7 +33,7 @@ TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
         }
     }
 
-    EXPECT_NE(spritesheet.getTexture().get(), nullptr);
+    EXPECT_EQ(0, spritesheet.getName().compare("dc-mon"));
 
     tPackerJsonValue = spritesheet.getJson();
     tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);

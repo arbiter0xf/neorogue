@@ -16,12 +16,20 @@ const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheetNam
     "spells",
 };
 
+#if GRAPHICS_ENABLED
 Spritesheet::Spritesheet(std::string _name)
 	: name {_name}
 {
     loadTexture(Assets::spritesheetsDir + "/" + name + ".png");
     loadJson(Assets::spritesheetsDir + "/" + name + ".json");
 }
+#else
+Spritesheet::Spritesheet(std::string _name)
+	: name {_name}
+{
+    loadJson(Assets::spritesheetsDir + "/" + name + ".json");
+}
+#endif
 
 std::string Spritesheet::getName(void)
 {
