@@ -4,13 +4,14 @@
 #include <SDL2/SDL.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "Constants.hpp"
 #include "Spritesheet.hpp"
 
 class Tile;
 
-using tile_pool = std::array<Tile, g_constants::TILE_POOL_SIZE>;
+using tile_pool = std::unordered_map<std::string, Tile>;
 
 class Tile {
 public:
@@ -35,7 +36,7 @@ public:
     const int getSheetW() const;
     const int getSheetH() const;
 
-    static tile_pool generateTilesFrom(spritesheet_pool& spritesheetPool);
+    static void generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool);
 
 private:
     std::shared_ptr<SDL_Texture> sheetTexture;

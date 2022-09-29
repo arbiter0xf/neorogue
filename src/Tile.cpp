@@ -29,16 +29,11 @@ Tile::Tile(
 /*
  * \exception May throw std::exception
  */
-tile_pool Tile::generateTilesFrom(spritesheet_pool& spritesheetPool)
+void Tile::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
 {
     int ret = -1;
 
     boost::json::object tPackerFramesObj;
-    tile_pool tilePool;
-
-    Sdlw& sdlw = Sdlw::getReference();
-
-    auto tilePoolIter = tilePool.begin();
 
     for (Spritesheet& spritesheet : spritesheetPool) {
         boost::json::value tPackerJsonValue = spritesheet.getJson();
@@ -46,6 +41,23 @@ tile_pool Tile::generateTilesFrom(spritesheet_pool& spritesheetPool)
 
         tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
 
+	for (const auto& [tileName, tileConfig] : tPackerFramesObj) {
+            const auto tileConfigObj = tileConfig.as_object();
+            const auto tileConfigFrameObj =
+                Json::getValueWithKey("frame", tileConfigObj).as_object();
+
+            tilePool[tileName] = Tile(
+                    -1,
+                    -1,
+                    tileName,
+                    textureSpritesheet,
+                    Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
+                    Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
+                    Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
+                    Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
+	}
+
+#if 0
         // TODO See also:
         // https://en.cppreference.com/w/cpp/algorithm/generate
         std::transform(
@@ -77,9 +89,8 @@ tile_pool Tile::generateTilesFrom(spritesheet_pool& spritesheetPool)
 
             tilePoolIter++;
         }
+#endif
     }
-
-    return tilePool;
 }
 
 const int Tile::getScreenX() const

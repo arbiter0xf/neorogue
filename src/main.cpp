@@ -56,7 +56,7 @@ screen_tiles fillScreenTiles(
         int cameraX,
         int cameraY)
 {
-    return { &tilePool[0] };
+    return { &tilePool["altars/dngn_altar.png"] };
 }
 
 void renderScreenTiles(
@@ -75,7 +75,7 @@ void renderScreenTiles(
     }
 }
 
-int main(void)
+void game(void)
 {
     int err = -1;
     int ret = -1;
@@ -101,7 +101,7 @@ int main(void)
         Sdlw::initRendering();
     } catch(std::exception& e) {
         std::cerr << "Exception while initializing rendering: " << e.what();
-        return 1;
+        throw e;
     }
 
     Log::i("Loading spritesheets");
@@ -109,11 +109,11 @@ int main(void)
 
     Log::i("Generating tiles");
     try {
-        tilePool = Tile::generateTilesFrom(spritesheetPool);
+        Tile::generateTiles(spritesheetPool, tilePool);
     } catch (std::exception const& e) {
         std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";
-        return 1;
+        throw e;
     }
 
     Log::i("Entering main loop");
@@ -140,6 +140,15 @@ int main(void)
 #endif
 
     sdlw.destroy();
+}
 
-    return 0;
+int main(void)
+{
+    try {
+        game();
+    } catch(std::exception const& e) {
+        std::string msg = "Terminating due to unhandled exception: ";
+        msg += e.what();
+        Log::e(msg);
+    }
 }

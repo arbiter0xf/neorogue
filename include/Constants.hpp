@@ -12,8 +12,6 @@ namespace g_constants {
     inline constexpr int SCREEN_WIDTH = 640;
     inline constexpr int SCREEN_HEIGHT = 480;
     inline constexpr int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
-    inline constexpr int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
-                                                // pass by using -DTILE_POOL_SIZE=$(script)
     inline constexpr int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
                                                  // pass by using -DTEXUTRE_POOL_SIZE=$(script)
     inline constexpr char PROGRAM_NAME[] = "Rogue Forever";
