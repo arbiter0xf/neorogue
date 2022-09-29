@@ -22,7 +22,7 @@ TEST_F(TestLevel, GetTestLevel1TileDescriptions)
 
     Level testLevel1 = Level("levels/test_level1.txt");
 
-    ASSERT_EQ(descriptionX10Y0, testLevel1.getTileDescription(10, 0));
-    ASSERT_EQ(descriptionX0Y12, testLevel1.getTileDescription(0, 12));
-    ASSERT_EQ(descriptionX15Y8, testLevel1.getTileDescription(15, 8));
+    EXPECT_EQ(descriptionX10Y0, testLevel1.getTileDescription(10, 0));
+    EXPECT_EQ(descriptionX0Y12, testLevel1.getTileDescription(0, 12));
+    EXPECT_EQ(descriptionX15Y8, testLevel1.getTileDescription(15, 8));
 }
