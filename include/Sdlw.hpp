@@ -40,6 +40,7 @@ public:
     void destroyTexture(std::shared_ptr<SDL_Texture> texture);
 
     static Sdlw& getReference(void);
+    static void initRendering(void);
 
 private:
     Sdlw() = default;

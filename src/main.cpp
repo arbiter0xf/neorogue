@@ -14,6 +14,7 @@
 #include <string>
 
 #include "Assets.hpp"
+#include "Constants.hpp"
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
@@ -21,21 +22,9 @@
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
 
-const int TILE_HEIGHT = 32;
-const int TILE_WIDTH = 32;
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-const int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
-const int TILE_POOL_SIZE = 3137; // TODO write a script for getting this and
-                                 // pass by using -DTILE_POOL_SIZE=$(script)
-const int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and
-                                  // pass by using -DTEXUTRE_POOL_SIZE=$(script)
-
-const char PROGRAM_NAME[] = "Rogue Forever";
-
-using screen_tiles = std::array<Tile*, SCREEN_TILES>;
-using tile_pool = std::array<Tile, TILE_POOL_SIZE>;
-using texture_pool = std::array<SDL_Texture*, TEXTURE_POOL_SIZE>;
+using screen_tiles = std::array<Tile*, g_constants::SCREEN_TILES>;
+using tile_pool = std::array<Tile, g_constants::TILE_POOL_SIZE>;
+using texture_pool = std::array<SDL_Texture*, g_constants::TEXTURE_POOL_SIZE>;
 
 #if 0
 void mainLoop(void) {
@@ -143,41 +132,6 @@ tile_pool generateTilesFrom(spritesheet_pool& spritesheetPool)
     return tilePool;
 }
 
-/*
- * \exception throws std::runtime_error on failure
- */
-void initRendering(void)
-{
-    int ret = -1;
-    std::string msg = "";
-
-    const int imgFlags = IMG_INIT_PNG;
-    const int renderingDriver = -1; // -1 initializes the first driver
-                                    // supporting requested flags
-
-    Sdlw& sdlw = Sdlw::getReference();
-
-    sdlw.init(SDL_INIT_VIDEO);
-
-    sdlw.setHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-
-    sdlw.imgInit(imgFlags);
-
-    sdlw.createMainWindow(
-            PROGRAM_NAME,
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN);
-
-    sdlw.createMainRenderer(
-            renderingDriver,
-            SDL_RENDERER_ACCELERATED);
-
-    sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
-}
-
 int main(void)
 {
     int err = -1;
@@ -201,7 +155,7 @@ int main(void)
 
     Log::i("Initializing rendering");
     try {
-        initRendering();
+        Sdlw::initRendering();
     } catch(std::exception& e) {
         std::cerr << "Exception while initializing rendering: " << e.what();
         return 1;
@@ -216,7 +170,6 @@ int main(void)
     } catch (std::exception const& e) {
         std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";
-        sdlw.destroy();
         return 1;
     }
 

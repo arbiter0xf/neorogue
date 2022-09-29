@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 
+#include "Constants.hpp"
 #include "Log.hpp"
 #include "Sdlw.hpp"
 
@@ -38,6 +39,41 @@ Sdlw::~Sdlw()
 Sdlw& Sdlw::getReference()
 {
     return sharedInstance;
+}
+
+/*
+ * \exception throws std::runtime_error on failure
+ */
+void Sdlw::initRendering(void)
+{
+    int ret = -1;
+    std::string msg = "";
+
+    const int imgFlags = IMG_INIT_PNG;
+    const int renderingDriver = -1; // -1 initializes the first driver
+                                    // supporting requested flags
+
+    Sdlw& sdlw = Sdlw::getReference();
+
+    sdlw.init(SDL_INIT_VIDEO);
+
+    sdlw.setHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
+    sdlw.imgInit(imgFlags);
+
+    sdlw.createMainWindow(
+            g_constants::PROGRAM_NAME,
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            g_constants::SCREEN_WIDTH,
+            g_constants::SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN);
+
+    sdlw.createMainRenderer(
+            renderingDriver,
+            SDL_RENDERER_ACCELERATED);
+
+    sdlw.setRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
 }
 
 void Sdlw::init(std::uint32_t flags)
