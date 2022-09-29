@@ -23,7 +23,6 @@
 #include "Tile.hpp"
 
 using screen_tiles = std::array<Tile*, g_constants::SCREEN_TILES>;
-using tile_pool = std::array<Tile, g_constants::TILE_POOL_SIZE>;
 using texture_pool = std::array<SDL_Texture*, g_constants::TEXTURE_POOL_SIZE>;
 
 #if 0
@@ -76,62 +75,6 @@ void renderScreenTiles(
     }
 }
 
-/*
- * \exception May throw std::exception
- */
-tile_pool generateTilesFrom(spritesheet_pool& spritesheetPool)
-{
-    int ret = -1;
-
-    boost::json::object tPackerFramesObj;
-    tile_pool tilePool;
-
-    Sdlw& sdlw = Sdlw::getReference();
-
-    auto tilePoolIter = tilePool.begin();
-
-    for (Spritesheet& spritesheet : spritesheetPool) {
-        boost::json::value tPackerJsonValue = spritesheet.getJson();
-        std::shared_ptr<SDL_Texture> textureSpritesheet = spritesheet.getTexture();
-
-        tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
-
-        // TODO See also:
-        // https://en.cppreference.com/w/cpp/algorithm/generate
-        std::transform(
-                tPackerFramesObj.cbegin(),
-                tPackerFramesObj.cend(),
-                tilePoolIter,
-                [&](const auto frameObj) {
-                    const auto& [tileName, tileConfig] = frameObj;
-                    const auto tileConfigObj = tileConfig.as_object();
-                    const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
-
-                    return Tile(
-                            -1,
-                            -1,
-                            tileName,
-                            textureSpritesheet,
-                            Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
-                });
-
-        // Iterator seemed to point to where it pointed before calling
-        // std::transform(). Walk to first uninitialized Tile in tilePool.
-        while (NULL != tilePoolIter->getSheetTexture()) {
-            if (tilePool.end() == tilePoolIter) {
-                throw std::runtime_error("Reached end of tile pool when generating tiles");
-            }
-
-            tilePoolIter++;
-        }
-    }
-
-    return tilePool;
-}
-
 int main(void)
 {
     int err = -1;
@@ -166,7 +109,7 @@ int main(void)
 
     Log::i("Generating tiles");
     try {
-        tilePool = generateTilesFrom(spritesheetPool);
+        tilePool = Tile::generateTilesFrom(spritesheetPool);
     } catch (std::exception const& e) {
         std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";

@@ -5,6 +5,13 @@
 #include <memory>
 #include <string>
 
+#include "Constants.hpp"
+#include "Spritesheet.hpp"
+
+class Tile;
+
+using tile_pool = std::array<Tile, g_constants::TILE_POOL_SIZE>;
+
 class Tile {
 public:
     Tile() = default;
@@ -27,6 +34,8 @@ public:
     const int getSheetY() const;
     const int getSheetW() const;
     const int getSheetH() const;
+
+    static tile_pool generateTilesFrom(spritesheet_pool& spritesheetPool);
 
 private:
     std::shared_ptr<SDL_Texture> sheetTexture;

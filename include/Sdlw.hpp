@@ -2,6 +2,7 @@
 #define SDLW_HPP_DEFINED
 
 #include <SDL2/SDL.h>
+#include <cstdint>
 #include <memory>
 
 class Sdlw {
