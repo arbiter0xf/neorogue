@@ -11,7 +11,9 @@ namespace g_constants {
     inline constexpr int TILE_WIDTH = 32;
     inline constexpr int SCREEN_WIDTH = 640;
     inline constexpr int SCREEN_HEIGHT = 480;
-    inline constexpr int SCREEN_TILES = (SCREEN_WIDTH / TILE_WIDTH) * (SCREEN_HEIGHT / TILE_HEIGHT) + 1; // +1 for null termination
+    inline constexpr int TILES_HORIZONTAL = (SCREEN_WIDTH / TILE_WIDTH);
+    inline constexpr int TILES_VERTICAL = (SCREEN_HEIGHT / TILE_HEIGHT);
+    inline constexpr int SCREEN_TILES = TILES_HORIZONTAL * TILES_VERTICAL + 1; // +1 for null termination
     inline constexpr int TILE_AMOUNT = 3137; // TODO write a script for getting this and
                                              // pass by using -DTILE_POOL_SIZE=$(script)
     inline constexpr int TEXTURE_POOL_SIZE = 98; // TODO write a script for getting this and

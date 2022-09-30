@@ -23,7 +23,7 @@
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
 
-using screen_tiles = std::array<Tile*, g_constants::SCREEN_TILES>;
+using screen_tiles = std::array<std::array<Tile*, g_constants::TILES_HORIZONTAL>, g_constants::TILES_VERTICAL>;
 using texture_pool = std::array<SDL_Texture*, g_constants::TEXTURE_POOL_SIZE>;
 
 #if 0
@@ -51,28 +51,33 @@ void renderTile(
     sdlw.renderCopy(tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
-screen_tiles fillScreenTiles(
+void fillScreenTiles(
         tile_pool& tilePool,
         Level& level,
+        tile_id_map& tileIdMap,
         int cameraX,
-        int cameraY)
+        int cameraY,
+        screen_tiles& screenTiles)
 {
-    return { &tilePool["altars/dngn_altar.png"] };
+#if 0
+    screenX = cameraX - g_constants::TILES_HORIZONTAL / 2;
+    screenY = cameraY - g_constants::TILES_VERTICAL / 2;
+#endif
+    screenTiles[0][0] = &tilePool[tileIdMap[level.getTileId(0, 0)]];
 }
 
 void renderScreenTiles(
         Sdlw& sdlw,
-        screen_tiles screenTiles)
+        const screen_tiles& screenTiles)
 {
-    for (Tile* tile : screenTiles) {
-        if (NULL == tile) {
-            // screenTiles is assumed to contain valid tiles starting from
-            // index 0 and continuing until NULL ptr is met or end of
-            // screenTiles
-            break;
-        }
+    for (const auto tilesRow : screenTiles) {
+        for (Tile* tile : tilesRow) {
+            if (NULL == tile) {
+                continue;
+            }
 
-        renderTile(sdlw, tile);
+            renderTile(sdlw, tile);
+        }
     }
 }
 
@@ -80,8 +85,8 @@ void game(void)
 {
     int err = -1;
     int ret = -1;
-    int cameraX = 0;
-    int cameraY = 0;
+    int cameraX = 10;
+    int cameraY = 7;
     bool quitEventReceived = false;
 
     Sdlw& sdlw = Sdlw::getReference();
@@ -93,7 +98,11 @@ void game(void)
     texture_pool texturePool;
     spritesheet_pool spritesheetPool;
 
-    screen_tiles screenTiles = { 0 };
+    screen_tiles screenTiles;
+
+    for (auto tilesRow : screenTiles) {
+        tilesRow.fill(0);
+    }
 
     Log::i("Loading test level");
     Level testLevel1 = Level("levels/test_level1.txt");
@@ -134,7 +143,12 @@ void game(void)
 
         sdlw.renderClear();
 
-        screenTiles = fillScreenTiles(tilePool, testLevel1, cameraX, cameraY);
+        fillScreenTiles(tilePool,
+			testLevel1,
+			tileIdMap,
+			cameraX,
+			cameraY,
+			screenTiles);
 
         renderScreenTiles(sdlw, screenTiles);
 
