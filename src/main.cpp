@@ -15,6 +15,7 @@
 
 #include "Assets.hpp"
 #include "Constants.hpp"
+#include "GraphicsUtil.hpp"
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
@@ -88,6 +89,7 @@ void game(void)
     SDL_Event event;
 
     tile_pool tilePool;
+    tile_id_map tileIdMap;
     texture_pool texturePool;
     spritesheet_pool spritesheetPool;
 
@@ -105,16 +107,20 @@ void game(void)
     }
 
     Log::i("Loading spritesheets");
-    Spritesheet::loadSpritesheets(spritesheetPool);
+    GraphicsUtil::loadSpritesheets(spritesheetPool);
 
     Log::i("Generating tiles");
     try {
-        Tile::generateTiles(spritesheetPool, tilePool);
+        GraphicsUtil::generateTiles(spritesheetPool, tilePool);
     } catch (std::exception const& e) {
         std::cerr << ERR << "Exception while generating tiles from spritesheets: "
             << e.what() << "\n";
         throw e;
     }
+
+    Log::i("Generating tile ID map");
+    GraphicsUtil::generateTileIdMap(spritesheetPool, tileIdMap);
+    GraphicsUtil::generateTileIdMapFile(tileIdMap);
 
     Log::i("Entering main loop");
     while (!quitEventReceived) {

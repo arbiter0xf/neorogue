@@ -12,6 +12,7 @@
 class Tile;
 
 using tile_pool = std::unordered_map<std::string, Tile>;
+using tile_id_map = std::array<std::string, g_constants::TILE_AMOUNT>;
 
 class Tile {
 public:
@@ -35,8 +36,6 @@ public:
     const int getSheetY() const;
     const int getSheetW() const;
     const int getSheetH() const;
-
-    static void generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool);
 
 private:
     std::shared_ptr<SDL_Texture> sheetTexture;
