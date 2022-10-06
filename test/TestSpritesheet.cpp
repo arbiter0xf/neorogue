@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "GraphicsUtil.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 
@@ -24,7 +25,7 @@ TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
     boost::json::object tPackerFramesObj;
 
     spritesheet_pool spritesheetPool;
-    Spritesheet::loadSpritesheets(spritesheetPool);
+    GraphicsUtil::loadSpritesheets(spritesheetPool);
     Spritesheet spritesheet;
 
     for (Spritesheet s : spritesheetPool) {
