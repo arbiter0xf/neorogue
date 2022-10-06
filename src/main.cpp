@@ -33,7 +33,9 @@ void mainLoop(void) {
 
 void renderTile(
         Sdlw& sdlw,
-        Tile* tile)
+        Tile* tile,
+        int screenX,
+        int screenY)
 {
     SDL_Rect srcRect = {
         tile->getSheetX(),
@@ -42,8 +44,8 @@ void renderTile(
         tile->getSheetH(),
     };
     SDL_Rect dstRect = {
-        tile->getScreenX(),
-        tile->getScreenY(),
+        screenX,
+        screenY,
         tile->getSheetW(),
         tile->getSheetH()
     };
@@ -59,24 +61,76 @@ void fillScreenTiles(
         int cameraY,
         screen_tiles& screenTiles)
 {
-#if 0
-    screenX = cameraX - g_constants::TILES_HORIZONTAL / 2;
-    screenY = cameraY - g_constants::TILES_VERTICAL / 2;
-#endif
-    screenTiles[0][0] = &tilePool[tileIdMap[level.getTileId(0, 0)]];
+    const int screenTilesColumnSize = screenTiles.size();
+    const int screenTilesRowSize = screenTiles[0].size();
+
+    // Camera is considered to be in the center of the screen. Shift half a
+    // screen left and up and eventually draw level from there.
+    int levelY = cameraY - (g_constants::TILES_VERTICAL / 2);
+    int levelX = cameraX - (g_constants::TILES_HORIZONTAL / 2);
+    int levelYEnd = levelY + screenTilesColumnSize;
+    int levelXEnd = levelX + screenTilesRowSize;
+
+    if (levelYEnd > screenTilesColumnSize) {
+        levelYEnd = screenTilesColumnSize;
+    }
+
+    if (levelXEnd > screenTilesRowSize) {
+        levelXEnd = screenTilesRowSize;
+    }
+
+    for (auto& screenTilesRow : screenTiles) {
+        screenTilesRow.fill(&(tilePool["cloud_rain1.png"]));
+    }
+
+    for (int screenTileY = 0; screenTileY < screenTilesColumnSize; screenTileY++) {
+        if (levelY < 0) {
+            levelY++;
+            continue;
+        }
+
+        if (levelY >= levelYEnd) {
+            break;
+        }
+
+        levelX = cameraX - (g_constants::TILES_HORIZONTAL / 2);
+
+        for (int screenTileX = 0; screenTileX < screenTilesRowSize; screenTileX++) {
+            if (levelX < 0) {
+                levelX++;
+                continue;
+            }
+
+            if (levelX >= levelXEnd) {
+                break;
+            }
+
+            int tileId = level.getTileId(levelX, levelY);
+            std::string tileName = tileIdMap[tileId];
+            screenTiles[screenTileY][screenTileX] = &(tilePool[tileName]);
+
+            levelX++;
+        }
+
+        levelY++;
+    }
 }
 
 void renderScreenTiles(
         Sdlw& sdlw,
         const screen_tiles& screenTiles)
 {
-    for (const auto tilesRow : screenTiles) {
-        for (Tile* tile : tilesRow) {
-            if (NULL == tile) {
-                continue;
+    for (int screenY = 0; screenY < screenTiles.size(); screenY++) {
+        for (int screenX = 0; screenX < screenTiles[0].size(); screenX++) {
+            if (NULL == screenTiles[screenY][screenX]) {
+                throw std::runtime_error("Encountered NULL in screenTiles");
             }
 
-            renderTile(sdlw, tile);
+            renderTile(
+                    sdlw,
+                    screenTiles[screenY][screenX],
+                    screenX * g_constants::TILE_WIDTH,
+                    screenY * g_constants::TILE_HEIGHT);
         }
     }
 }
@@ -85,8 +139,10 @@ void game(void)
 {
     int err = -1;
     int ret = -1;
-    int cameraX = 10;
-    int cameraY = 7;
+
+    int cameraY = g_constants::TILES_VERTICAL / 2;
+    int cameraX = g_constants::TILES_HORIZONTAL / 2;
+
     bool quitEventReceived = false;
 
     Sdlw& sdlw = Sdlw::getReference();

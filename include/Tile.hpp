@@ -19,8 +19,6 @@ public:
     Tile() = default;
     ~Tile();
     Tile(
-            const int _screenX,
-            const int _screenY,
             std::string _name,
             std::shared_ptr<SDL_Texture> _texture,
             const int _sheetX,
@@ -40,8 +38,6 @@ public:
 private:
     std::shared_ptr<SDL_Texture> sheetTexture;
     std::string name;
-    int screenX;
-    int screenY;
     int sheetX;
     int sheetY;
     int sheetW;

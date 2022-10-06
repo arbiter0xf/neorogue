@@ -6,8 +6,6 @@ Tile::~Tile()
 }
 
 Tile::Tile(
-        const int _screenX,
-        const int _screenY,
         std::string _name,
         std::shared_ptr<SDL_Texture> _texture,
         const int _sheetX,
@@ -15,8 +13,6 @@ Tile::Tile(
         const int _sheetW,
         const int _sheetH)
         :
-            screenX{_screenX},
-            screenY{_screenY},
             name{_name},
             sheetTexture{_texture},
             sheetX{_sheetX},
@@ -24,16 +20,6 @@ Tile::Tile(
             sheetW{_sheetW},
             sheetH{_sheetH}
 {
-}
-
-const int Tile::getScreenX() const
-{
-    return screenX;
-}
-
-const int Tile::getScreenY() const
-{
-    return screenY;
 }
 
 const std::string Tile::getName() const

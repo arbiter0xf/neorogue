@@ -24,8 +24,6 @@ void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& t
                 Json::getValueWithKey("frame", tileConfigObj).as_object();
 
             tilePool[tileName] = Tile(
-                    -1,
-                    -1,
                     tileName,
                     textureSpritesheet,
                     Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
