@@ -33,8 +33,8 @@ COMPILER_FLAGS_GAME := \
 COMPILER_FLAGS_TEST := \
 		      $(INCLUDES_TEST) \
 		      $(COMMON_COMPILER_FLAGS) \
-		      -pthread
-		      -DGRAPHICS_ENABLED=0
+		      -pthread \
+		      -DBUILD_FOR_TESTS=1
 LINKER_FLAGS = -lSDL2 -lSDL2_image
 LINKER_FLAGS_TEST := \
 		    $(LINKER_FLAGS) \

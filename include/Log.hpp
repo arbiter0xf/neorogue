@@ -21,6 +21,7 @@ public:
     static void d(std::string msg);
 
 private:
+    static void log(std::string msg);
 };
 
 #endif LOG_HPP_DEFINED

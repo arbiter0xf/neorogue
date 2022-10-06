@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "GraphicsUtil.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 
@@ -15,7 +16,7 @@ protected:
     }
 };
 
-TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
+TEST_F(TestSpritesheet, SpritesheetJsonLoadsSuccessfully)
 {
     boost::json::object frameObjectToTest;
     boost::json::value configToTest;
@@ -24,12 +25,13 @@ TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
     boost::json::object tPackerFramesObj;
 
     spritesheet_pool spritesheetPool;
-    Spritesheet::loadSpritesheets(spritesheetPool);
+    GraphicsUtil::loadSpritesheets(spritesheetPool);
     Spritesheet spritesheet;
 
     for (Spritesheet s : spritesheetPool) {
         if (0 == s.getName().compare("dc-mon")) {
             spritesheet = s;
+            break;
         }
     }
 

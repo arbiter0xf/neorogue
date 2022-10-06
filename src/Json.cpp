@@ -100,10 +100,10 @@ void Json::texturepackerGetFrameObject(
     frameObjectOut = frameValue.get_object();
 }
 
-boost::json::object Json::getFirstInnerObject(boost::json::value& jsonValue)
+boost::json::object Json::getFirstInnerObject(const boost::json::value& jsonValue)
 {
     if (boost::json::kind::object != jsonValue.kind()) {
-        throw std::runtime_error("JSON value top level is not an object");
+        throw std::runtime_error("Top level JSON value is not an object");
     }
 
     auto const& outerObj = jsonValue.get_object();

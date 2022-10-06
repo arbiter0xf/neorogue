@@ -9,12 +9,12 @@ public:
     Level() = delete;
     Level(std::string path);
 
-    std::string getTileDescription(const int x, const int y);
+    int getTileId(const int x, const int y);
 
 private:
     void loadFromFile(std::string path);
 
-    std::vector<std::vector<std::string>> tileDescriptions;
+    std::vector<std::vector<int>> tileIds;
 };
 
 #endif // LEVEL_HPP_DEFINED

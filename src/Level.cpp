@@ -13,13 +13,14 @@ Level::Level(std::string path)
 
 void Level::loadFromFile(std::string path)
 {
+    int tileId = 0;
     const int lineSize = 256;
     const char delimiter = ' ';
     std::ifstream fileStream;
     std::string lineStr;
     std::string extracted;
     char line[lineSize] = {0};
-    std::vector<std::string> tileDescriptionRow;
+    std::vector<int> tileIdRow;
 
     fileStream.open(path, std::ifstream::in);
     if (fileStream.fail()) {
@@ -36,13 +37,14 @@ void Level::loadFromFile(std::string path)
             std::getline(lineStream, extracted, delimiter);
             // Multiple spaces produce empty strings, so check them before push.
             if ("" != extracted) {
-                tileDescriptionRow.push_back(extracted);
+                tileId = std::stoi(extracted);
+                tileIdRow.push_back(tileId);
             }
         } while(!lineStream.eof());
 
-        tileDescriptions.push_back(tileDescriptionRow);
+        tileIds.push_back(tileIdRow);
 
-        tileDescriptionRow.clear();
+        tileIdRow.clear();
     } while(!fileStream.eof());
 
     fileStream.clear();
@@ -52,7 +54,15 @@ void Level::loadFromFile(std::string path)
     }
 }
 
-std::string Level::getTileDescription(const int x, const int y)
+int Level::getTileId(const int x, const int y)
 {
-    return tileDescriptions[y][x];
+    if (y >= tileIds.size()) {
+        throw std::runtime_error("y value out of bounds when trying to access tileIds");
+    }
+
+    if (x >= tileIds[y].size()) {
+        throw std::runtime_error("x value out of bounds when trying to access tileIds");
+    }
+
+    return tileIds[y][x];
 }

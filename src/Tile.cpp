@@ -6,8 +6,6 @@ Tile::~Tile()
 }
 
 Tile::Tile(
-        const int _screenX,
-        const int _screenY,
         std::string _name,
         std::shared_ptr<SDL_Texture> _texture,
         const int _sheetX,
@@ -15,8 +13,6 @@ Tile::Tile(
         const int _sheetW,
         const int _sheetH)
         :
-            screenX{_screenX},
-            screenY{_screenY},
             name{_name},
             sheetTexture{_texture},
             sheetX{_sheetX},
@@ -24,72 +20,6 @@ Tile::Tile(
             sheetW{_sheetW},
             sheetH{_sheetH}
 {
-}
-
-/*
- * \exception May throw std::exception
- */
-tile_pool Tile::generateTilesFrom(spritesheet_pool& spritesheetPool)
-{
-    int ret = -1;
-
-    boost::json::object tPackerFramesObj;
-    tile_pool tilePool;
-
-    Sdlw& sdlw = Sdlw::getReference();
-
-    auto tilePoolIter = tilePool.begin();
-
-    for (Spritesheet& spritesheet : spritesheetPool) {
-        boost::json::value tPackerJsonValue = spritesheet.getJson();
-        std::shared_ptr<SDL_Texture> textureSpritesheet = spritesheet.getTexture();
-
-        tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
-
-        // TODO See also:
-        // https://en.cppreference.com/w/cpp/algorithm/generate
-        std::transform(
-                tPackerFramesObj.cbegin(),
-                tPackerFramesObj.cend(),
-                tilePoolIter,
-                [&](const auto frameObj) {
-                    const auto& [tileName, tileConfig] = frameObj;
-                    const auto tileConfigObj = tileConfig.as_object();
-                    const auto tileConfigFrameObj = Json::getValueWithKey("frame", tileConfigObj).as_object();
-
-                    return Tile(
-                            -1,
-                            -1,
-                            tileName,
-                            textureSpritesheet,
-                            Json::getValueWithKey("x", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("y", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("w", tileConfigFrameObj).as_int64(),
-                            Json::getValueWithKey("h", tileConfigFrameObj).as_int64());
-                });
-
-        // Iterator seemed to point to where it pointed before calling
-        // std::transform(). Walk to first uninitialized Tile in tilePool.
-        while (NULL != tilePoolIter->getSheetTexture()) {
-            if (tilePool.end() == tilePoolIter) {
-                throw std::runtime_error("Reached end of tile pool when generating tiles");
-            }
-
-            tilePoolIter++;
-        }
-    }
-
-    return tilePool;
-}
-
-const int Tile::getScreenX() const
-{
-    return screenX;
-}
-
-const int Tile::getScreenY() const
-{
-    return screenY;
 }
 
 const std::string Tile::getName() const

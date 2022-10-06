@@ -23,12 +23,14 @@ Spritesheet::Spritesheet(std::string _name)
     loadTexture(Assets::spritesheetsDir + "/" + name + ".png");
     loadJson(Assets::spritesheetsDir + "/" + name + ".json");
 }
-#else
+#elif BUILD_FOR_TESTS
 Spritesheet::Spritesheet(std::string _name)
 	: name {_name}
 {
-    loadJson(Assets::spritesheetsDir + "/" + name + ".json");
+    loadJson(Assets::testDataDir + "/" + name + ".json");
 }
+#else
+#error "Unknown build type"
 #endif
 
 std::string Spritesheet::getName(void)
@@ -41,9 +43,14 @@ std::shared_ptr<SDL_Texture> Spritesheet::getTexture(void)
     return texture;
 }
 
-boost::json::value Spritesheet::getJson(void)
+const boost::json::value& Spritesheet::getJson(void)
 {
     return jsonValue;
+}
+
+boost::json::object Spritesheet::getTPackerFramesObject(void)
+{
+    return Json::getFirstInnerObject(getJson());
 }
 
 void Spritesheet::loadTexture(std::string pathImage)
@@ -59,15 +66,4 @@ void Spritesheet::loadTexture(std::string pathImage)
 void Spritesheet::loadJson(std::string pathJson)
 {
     Json::readFromFile(pathJson, jsonValue);
-}
-
-void Spritesheet::loadSpritesheets(spritesheet_pool& spritesheetPool)
-{
-    std::transform(
-            Spritesheet::spritesheetNames.cbegin(),
-            Spritesheet::spritesheetNames.cend(),
-            spritesheetPool.begin(),
-            [](const std::string name) {
-                return Spritesheet(name);
-            });
 }

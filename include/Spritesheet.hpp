@@ -21,9 +21,8 @@ public:
 
     std::string getName(void);
     std::shared_ptr<SDL_Texture> getTexture(void);
-    boost::json::value getJson(void);
-
-    static void loadSpritesheets(spritesheet_pool& spritesheetPool);
+    const boost::json::value& getJson(void);
+    boost::json::object getTPackerFramesObject(void);
 
     static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames;
 
