@@ -23,12 +23,14 @@ Spritesheet::Spritesheet(std::string _name)
     loadTexture(Assets::spritesheetsDir + "/" + name + ".png");
     loadJson(Assets::spritesheetsDir + "/" + name + ".json");
 }
-#else
+#elif BUILD_FOR_TESTS
 Spritesheet::Spritesheet(std::string _name)
 	: name {_name}
 {
-    loadJson(Assets::spritesheetsDir + "/" + name + ".json");
+    loadJson(Assets::testDataDir + "/" + name + ".json");
 }
+#else
+#error "Unknown build type"
 #endif
 
 std::string Spritesheet::getName(void)

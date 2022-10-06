@@ -16,7 +16,7 @@ protected:
     }
 };
 
-TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
+TEST_F(TestSpritesheet, SpritesheetJsonLoadsSuccessfully)
 {
     boost::json::object frameObjectToTest;
     boost::json::value configToTest;
@@ -31,6 +31,7 @@ TEST_F(TestSpritesheet, RetrieveJsonObjectCoordinatesOfAFrame)
     for (Spritesheet s : spritesheetPool) {
         if (0 == s.getName().compare("dc-mon")) {
             spritesheet = s;
+            break;
         }
     }
 
