@@ -9,9 +9,6 @@
 #define ERR "[E] "
 #define DBG "[D] "
 
-#define DEBUG 1
-#define DEBUG_VERBOSE 0
-
 class Log
 {
 public:

@@ -1,8 +1,12 @@
 SRC_GAME_DIR := src
+SRC_PUGIXML_DIR := external/pugixml/src
+HEADERS_PUGIXML_DIR := external/pugixml/include
 HEADERS_GAME_DIR := include
 SRC_TEST_DIR := test
 
-SRC_GAME := $(shell find $(SRC_GAME_DIR)/ -name "*.cpp")
+SRC_GAME := \
+	    $(shell find $(SRC_GAME_DIR)/ -name "*.cpp") \
+	    $(shell find $(SRC_PUGIXML_DIR)/ -name "*.cpp")
 HEADERS_GAME := $(shell find $(HEADERS_GAME_DIR)/ -name "*.hpp")
 SRC_TEST := \
 	    $(filter-out $(SRC_GAME_DIR)/main.cpp, $(SRC_GAME)) \
@@ -24,6 +28,7 @@ INCLUDES := \
 	    -Iexternal/boostorg/system/include/ \
 	    -Iexternal/boostorg/mp11/include/ \
 	    -Iexternal/boostorg/align/include/ \
+	    -I$(HEADERS_PUGIXML_DIR) \
 	    -Iinclude
 INCLUDES_TEST := -I/opt/gtest/include/
 COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17

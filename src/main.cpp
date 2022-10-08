@@ -19,11 +19,13 @@
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
+#include "Map.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
 
 using screen_tiles = std::array<std::array<Tile*, g_constants::TILES_HORIZONTAL>, g_constants::TILES_VERTICAL>;
+using screen_tiles_layers = std::vector<screen_tiles>;
 using texture_pool = std::array<SDL_Texture*, g_constants::TEXTURE_POOL_SIZE>;
 
 #if 0
@@ -50,17 +52,25 @@ void renderTile(
         tile->getSheetH()
     };
 
+#if DEBUG_VERBOSE
+    Log::d("Dumping tile which is getting rendered:");
+    std::string msg = tile->getDump();
+    Log::d(msg);
+#endif
+
     sdlw.renderCopy(tile->getSheetTexture(), &srcRect, &dstRect);
 }
 
 void fillScreenTiles(
         tile_pool& tilePool,
-        Level& level,
+        Map& map,
         tile_id_map& tileIdMap,
         int cameraX,
         int cameraY,
-        screen_tiles& screenTiles)
+        screen_tiles_layers& screenTilesLayers)
 {
+    screen_tiles screenTiles;
+
     const int screenTilesColumnSize = screenTiles.size();
     const int screenTilesRowSize = screenTiles[0].size();
 
@@ -71,6 +81,10 @@ void fillScreenTiles(
     int levelYEnd = levelY + screenTilesColumnSize;
     int levelXEnd = levelX + screenTilesRowSize;
 
+    const int layerAmount = map.getLayerAmount();
+
+    screenTilesLayers.clear();
+
     if (levelYEnd > screenTilesColumnSize) {
         levelYEnd = screenTilesColumnSize;
     }
@@ -79,40 +93,48 @@ void fillScreenTiles(
         levelXEnd = screenTilesRowSize;
     }
 
-    for (auto& screenTilesRow : screenTiles) {
-        screenTilesRow.fill(&(tilePool["cloud_rain1.png"]));
-    }
-
-    for (int screenTileY = 0; screenTileY < screenTilesColumnSize; screenTileY++) {
-        if (levelY < 0) {
-            levelY++;
-            continue;
+    for (int layerNum = 0; layerNum < layerAmount; ++layerNum) {
+        for (auto& tilesRow : screenTiles) {
+            tilesRow.fill(0);
         }
 
-        if (levelY >= levelYEnd) {
-            break;
-        }
+        levelY = cameraY - (g_constants::TILES_VERTICAL / 2);
 
-        levelX = cameraX - (g_constants::TILES_HORIZONTAL / 2);
-
-        for (int screenTileX = 0; screenTileX < screenTilesRowSize; screenTileX++) {
-            if (levelX < 0) {
-                levelX++;
+        for (int screenTileY = 0; screenTileY < screenTilesColumnSize; ++screenTileY) {
+            if (levelY < 0) {
+                ++levelY;
                 continue;
             }
 
-            if (levelX >= levelXEnd) {
+            if (levelY >= levelYEnd) {
                 break;
             }
 
-            int tileId = level.getTileId(levelX, levelY);
-            std::string tileName = tileIdMap[tileId];
-            screenTiles[screenTileY][screenTileX] = &(tilePool[tileName]);
+            levelX = cameraX - (g_constants::TILES_HORIZONTAL / 2);
 
-            levelX++;
+            for (int screenTileX = 0; screenTileX < screenTilesRowSize; ++screenTileX) {
+                if (levelX < 0) {
+                    ++levelX;
+                    continue;
+                }
+
+                if (levelX >= levelXEnd) {
+                    break;
+                }
+
+                std::uint32_t tiledGid = map.getTiledGid(levelX, levelY, layerNum);
+                // Leave as null if gid zero
+                if (0 != tiledGid) {
+                    screenTiles[screenTileY][screenTileX] = &(tilePool[tiledGid]);
+                }
+
+                ++levelX;
+            }
+
+            ++levelY;
         }
 
-        levelY++;
+        screenTilesLayers.push_back(screenTiles);
     }
 }
 
@@ -123,7 +145,7 @@ void renderScreenTiles(
     for (int screenY = 0; screenY < screenTiles.size(); screenY++) {
         for (int screenX = 0; screenX < screenTiles[0].size(); screenX++) {
             if (NULL == screenTiles[screenY][screenX]) {
-                throw std::runtime_error("Encountered NULL in screenTiles");
+                continue;
             }
 
             renderTile(
@@ -134,6 +156,69 @@ void renderScreenTiles(
         }
     }
 }
+
+void renderScreenTilesLayers(
+        Sdlw& sdlw,
+        const screen_tiles_layers& screenTilesLayers)
+{
+    for (const screen_tiles& screenTiles : screenTilesLayers) {
+        renderScreenTiles(sdlw, screenTiles);
+    }
+}
+
+#if DEBUG_VERBOSE
+void printScreenTilesLayers(screen_tiles_layers& screenTilesLayers)
+{
+    Log::d("Printing screenTilesLayers:");
+    for (auto& screenTiles : screenTilesLayers) {
+        Log::d("Printing screenTiles:");
+        for (auto& tilesRow : screenTiles) {
+            for (Tile* tilePtr : tilesRow) {
+                if (NULL == tilePtr) {
+                    std::cout << 0;
+                    std::cout << ", ";
+                } else {
+                    std::cout << tilePtr->getTiledGid();
+                    std::cout << ", ";
+                }
+            }
+
+            std::cout << "\n";
+        }
+    }
+}
+#endif
+
+#if DEBUG_VERBOSE
+void printTilesFromTilePool(tile_pool& tilePool)
+{
+    Log::d("Printing 10 first tiles:");
+    for (int i = 0; i < 10; ++i) {
+        std::string msg = "\n" + tilePool[i].getDump();
+        Log::d(msg);
+    }
+
+    Log::d("Printing specific tiles:");
+    std::string tempMsg = "\n" + tilePool[580].getDump();
+    Log::d(tempMsg);
+    tempMsg = "\n" + tilePool[700].getDump();
+    Log::d(tempMsg);
+}
+#endif
+
+#if DEBUG
+void printConstructedSpritesheets(const spritesheet_pool& spritesheetPool)
+{
+    for (const Spritesheet& spritesheet : spritesheetPool) {
+        std::string msg = "Constructed spritesheet: ";
+        msg += spritesheet.getName();
+        msg += " (";
+        msg += std::to_string(spritesheet.getTiledFirstgid());
+        msg += ")";
+        Log::d(msg);
+    }
+}
+#endif
 
 void game(void)
 {
@@ -154,14 +239,10 @@ void game(void)
     texture_pool texturePool;
     spritesheet_pool spritesheetPool;
 
-    screen_tiles screenTiles;
+    screen_tiles_layers screenTilesLayers;
 
-    for (auto tilesRow : screenTiles) {
-        tilesRow.fill(0);
-    }
-
-    Log::i("Loading test level");
-    Level testLevel1 = Level("levels/test_level1.txt");
+    Log::i("Loading map2");
+    Map currentMap = Map("maps/map2_16x16_redone.tmj");
 
     Log::i("Initializing rendering");
     try {
@@ -172,7 +253,11 @@ void game(void)
     }
 
     Log::i("Loading spritesheets");
-    GraphicsUtil::loadSpritesheets(spritesheetPool);
+    GraphicsUtil::loadSpritesheets(spritesheetPool, currentMap);
+
+#if DEBUG
+    printConstructedSpritesheets(spritesheetPool);
+#endif
 
     Log::i("Generating tiles");
     try {
@@ -183,9 +268,9 @@ void game(void)
         throw e;
     }
 
-    Log::i("Generating tile ID map");
-    GraphicsUtil::generateTileIdMap(spritesheetPool, tileIdMap);
-    GraphicsUtil::generateTileIdMapFile(tileIdMap);
+#if DEBUG_VERBOSE
+    printTilesFromTilePool(tilePool);
+#endif
 
     Log::i("Entering main loop");
     while (!quitEventReceived) {
@@ -200,15 +285,24 @@ void game(void)
         sdlw.renderClear();
 
         fillScreenTiles(tilePool,
-			testLevel1,
+			currentMap,
 			tileIdMap,
 			cameraX,
 			cameraY,
-			screenTiles);
+			screenTilesLayers);
 
-        renderScreenTiles(sdlw, screenTiles);
+#if DEBUG_VERBOSE
+        printScreenTilesLayers(screenTilesLayers);
+#endif
+
+        renderScreenTilesLayers(sdlw, screenTilesLayers);
 
         sdlw.renderPresent();
+
+        if (g_constants::DEBUG_FRAME_STEPPING) {
+            std::string readHere = "";
+            std::getline(std::cin, readHere);
+        }
     }
 
 #if 0

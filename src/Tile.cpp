@@ -11,14 +11,18 @@ Tile::Tile(
         const int _sheetX,
         const int _sheetY,
         const int _sheetW,
-        const int _sheetH)
+        const int _sheetH,
+        const int _tiledGid,
+        const int _tiledId)
         :
             name{_name},
             sheetTexture{_texture},
             sheetX{_sheetX},
             sheetY{_sheetY},
             sheetW{_sheetW},
-            sheetH{_sheetH}
+            sheetH{_sheetH},
+            tiledGid{_tiledGid},
+            tiledId{_tiledId}
 {
 }
 
@@ -50,4 +54,29 @@ const int Tile::getSheetW() const
 const int Tile::getSheetH() const
 {
     return sheetH;
+}
+
+const int Tile::getTiledGid() const
+{
+    return tiledGid;
+}
+
+const int Tile::getTiledId() const
+{
+    return tiledId;
+}
+
+std::string Tile::getDump()
+{
+    std::string dump;
+
+    dump += "name: " + getName() + "\n";
+    dump += "x: " + std::to_string(getSheetX()) + "\n";
+    dump += "y: " + std::to_string(getSheetY()) + "\n";
+    dump += "w: " + std::to_string(getSheetW()) + "\n";
+    dump += "h: " + std::to_string(getSheetH()) + "\n";
+    dump += "tiledGid: " + std::to_string(getTiledGid()) + "\n";
+    dump += "tiledId: " + std::to_string(getTiledId()) + "\n";
+
+    return dump;
 }
