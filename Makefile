@@ -1,4 +1,4 @@
-SRC_GAME_DIR := src
+SRC_GAME_DIR := src/game
 SRC_PUGIXML_DIR := external/pugixml/src
 HEADERS_PUGIXML_DIR := external/pugixml/include
 HEADERS_GAME_DIR := include

@@ -241,6 +241,8 @@ void game(void)
 
     screen_tiles_layers screenTilesLayers;
 
+    // TODO check file existence
+
     Log::i("Loading map2");
     Map currentMap = Map("maps/map2_16x16_redone.tmj");
 
