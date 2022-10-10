@@ -26,7 +26,4 @@ mkdir build
 cd build
 cmake ../
 make
-
-sudo cp -a ../googletest/include/gtest /opt/gtest/include
-sudo cp -a lib/libgtest.a /opt/gtest/lib
-sudo cp -a lib/libgtest_main.a /opt/gtest/lib
+sudo make install

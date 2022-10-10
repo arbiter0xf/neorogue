@@ -20,11 +20,17 @@ jobs:
     - name: Install build dependencies
       run: ./scripts/install_deps.sh
 
-    - name: Build
-      run: make
+    - name: Install tools
+      run: ./scripts/install_tools.sh
+
+    - name: Build - prepare
+      run: ./create_meson_build_dir.sh
+
+    - name: Build - build
+      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson compile
 
     - name: Test
-      run: make test
+      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson test
 
     # - name: Run tests
     #   run: make check
