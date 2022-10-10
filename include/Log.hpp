@@ -21,4 +21,4 @@ private:
     static void log(std::string msg);
 };
 
-#endif LOG_HPP_DEFINED
+#endif // LOG_HPP_DEFINED
