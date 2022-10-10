@@ -1,14 +1,16 @@
-SRC_GAME_DIR := src
+SRC_GAME_DIR := src/game
+SRC_PUGIXML_DIR := external/pugixml/src
+HEADERS_PUGIXML_DIR := external/pugixml/include
 HEADERS_GAME_DIR := include
 SRC_TEST_DIR := test
 
-SRC_GAME := $(shell find $(SRC_GAME_DIR)/ -name "*.cpp")
+SRC_GAME := \
+	    $(shell find $(SRC_GAME_DIR)/ -name "*.cpp") \
+	    $(shell find $(SRC_PUGIXML_DIR)/ -name "*.cpp")
 HEADERS_GAME := $(shell find $(HEADERS_GAME_DIR)/ -name "*.hpp")
 SRC_TEST := \
 	    $(filter-out $(SRC_GAME_DIR)/main.cpp, $(SRC_GAME)) \
 	    $(shell find $(SRC_TEST_DIR)/ -name "*.cpp")
-
-SRC_MAP_EDITOR := src/Log.cpp
 
 CC = g++
 INCLUDES := \
@@ -24,6 +26,7 @@ INCLUDES := \
 	    -Iexternal/boostorg/system/include/ \
 	    -Iexternal/boostorg/mp11/include/ \
 	    -Iexternal/boostorg/align/include/ \
+	    -I$(HEADERS_PUGIXML_DIR) \
 	    -Iinclude
 INCLUDES_TEST := -I/opt/gtest/include/
 COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
@@ -41,21 +44,16 @@ LINKER_FLAGS_TEST := \
 		    -lgtest \
 		    -L/opt/gtest/lib
 EXE_NAME_GAME := rogue_forever
-EXE_NAME_MAP_EDITOR := rogue_forever_map_editor
 EXE_NAME_TEST := rogue_forever_test
 
 ALL_EXE_NAMES := \
 		 $(EXE_NAME_GAME) \
-		 $(EXE_NAME_MAP_EDITOR) \
 		 $(EXE_NAME_TEST)
 
 all: $(ALL_EXE_NAMES)
 
 $(EXE_NAME_GAME): $(SRC_GAME) $(HEADERS_GAME_DIR)
 	$(CXX) $(SRC_GAME) $(COMPILER_FLAGS_GAME) $(LINKER_FLAGS) -o $@
-
-$(EXE_NAME_MAP_EDITOR): $(SRC_MAP_EDITOR)
-	@echo "Map editor build placeholder"
 
 $(EXE_NAME_TEST): $(SRC_TEST)
 	$(CXX) $^ $(COMPILER_FLAGS_TEST) $(LINKER_FLAGS_TEST) -o $@

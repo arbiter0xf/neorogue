@@ -6,6 +6,7 @@ readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
 readonly INSTALL_BOOSTORG_JSON="TRUE"
 readonly INSTALL_GTEST="TRUE"
+readonly INSTALL_PUGIXML="TRUE"
 
 cd $(dirname $0)
 
@@ -74,6 +75,29 @@ pushd ./deps_install_workarea
 if [ "TRUE" == "${INSTALL_GTEST}" ] ; then
 	../install_gtest.sh
 fi
+popd
+
+pushd ../
+if [ ! -d external/pugixml ] ; then
+	mkdir external/pugixml
+fi
+
+pushd external/pugixml
+if [ "TRUE" == "${INSTALL_PUGIXML}" ] ; then
+	wget https://github.com/zeux/pugixml/releases/download/v1.12/pugixml-1.12.tar.gz
+	tar -xzvf pugixml-1.12.tar.gz
+	if [ ! -d src ] ; then
+		mkdir src
+	fi
+	if [ ! -d include ] ; then
+		mkdir include
+	fi
+	mv pugixml-1.12/src/pugixml.cpp ./src/
+	mv pugixml-1.12/src/pugiconfig.hpp ./include/
+	mv pugixml-1.12/src/pugixml.hpp ./include/
+fi
+popd
+
 popd
 
 rm -r ./deps_install_workarea

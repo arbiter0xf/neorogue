@@ -11,7 +11,7 @@
 
 class Tile;
 
-using tile_pool = std::unordered_map<std::string, Tile>;
+using tile_pool = std::unordered_map<int, Tile>;
 using tile_id_map = std::array<std::string, g_constants::TILE_AMOUNT>;
 
 class Tile {
@@ -24,7 +24,9 @@ public:
             const int _sheetX,
             const int _sheetY,
             const int _sheetW,
-            const int _sheetH);
+            const int _sheetH,
+            const int _tiledGid,
+            const int _tiledId);
 
     const int getScreenX() const;
     const int getScreenY() const;
@@ -34,6 +36,9 @@ public:
     const int getSheetY() const;
     const int getSheetW() const;
     const int getSheetH() const;
+    const int getTiledGid() const;
+    const int getTiledId() const;
+    std::string getDump();
 
 private:
     std::shared_ptr<SDL_Texture> sheetTexture;
@@ -42,6 +47,8 @@ private:
     int sheetY;
     int sheetW;
     int sheetH;
+    int tiledGid;
+    int tiledId;
 };
 
 #endif
