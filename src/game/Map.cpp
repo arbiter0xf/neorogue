@@ -31,6 +31,12 @@ std::uint32_t Map::getTiledGid(const int x, const int y, const int layerNum)
     std::uint32_t tiledGid = 0;
     int layerWidth = 0;
     int layerHeight = 0;
+    bool outOfBounds = true;
+
+    outOfBounds = layerNum < 0 || layerNum >= getLayerAmount();
+    if (outOfBounds) {
+        return 0;
+    }
 
     boost::json::value layersArray = getLayers();
     boost::json::value layer = layersArray.as_array()[layerNum];
@@ -43,7 +49,7 @@ std::uint32_t Map::getTiledGid(const int x, const int y, const int layerNum)
     layerWidth = layer.as_object().find("width")->value().as_int64();
     layerHeight = layer.as_object().find("height")->value().as_int64();
 
-    bool outOfBounds =
+    outOfBounds =
         x < 0 || x > (layerWidth - 1) ||
         y < 0 || y > (layerHeight - 1);
     if (outOfBounds) {

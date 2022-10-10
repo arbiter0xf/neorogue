@@ -25,10 +25,11 @@ Spritesheet::Spritesheet(std::string _name, Map& map)
     fetchFirstgid(map);
 }
 #elif BUILD_FOR_TESTS
-Spritesheet::Spritesheet(std::string _name)
+Spritesheet::Spritesheet(std::string _name, Map& map)
 	: name {_name}
 {
-    loadJson(Assets::testDataDir + "/" + name + ".json");
+    loadJson(Assets::testDataDir + "/" + name + ".tmj");
+    fetchFirstgid(map);
 }
 #else
 #error "Unknown build type"

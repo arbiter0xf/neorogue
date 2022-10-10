@@ -16,59 +16,56 @@ protected:
     }
 };
 
-TEST_F(TestSpritesheet, SpritesheetJsonLoadsSuccessfully)
+TEST_F(TestSpritesheet, SpritesheetGetsFirstgid)
 {
-    boost::json::object frameObjectToTest;
-    boost::json::value configToTest;
-    boost::json::object configToTestObj;
-    boost::json::value tPackerJsonValue;
-    boost::json::object tPackerFramesObj;
-
     spritesheet_pool spritesheetPool;
-    GraphicsUtil::loadSpritesheets(spritesheetPool);
-    Spritesheet spritesheet;
+    Map testMap = Map("test_data/map2_16x16_redone.tmj");
 
-    for (Spritesheet s : spritesheetPool) {
-        if (0 == s.getName().compare("dc-mon")) {
-            spritesheet = s;
+    GraphicsUtil::loadSpritesheets(spritesheetPool, testMap);
+
+    Spritesheet& testSpritesheet = spritesheetPool[0];
+
+    for (Spritesheet& s : spritesheetPool) {
+        if (0 == s.getName().compare("dc-misc-collection-spritesheet")) {
+            testSpritesheet = s;
             break;
         }
     }
 
-    EXPECT_EQ(0, spritesheet.getName().compare("dc-mon"));
+    EXPECT_EQ(testSpritesheet.getTiledFirstgid(), 560);
+}
 
-    tPackerJsonValue = spritesheet.getJson();
-    tPackerFramesObj = Json::getFirstInnerObject(tPackerJsonValue);
+TEST_F(TestSpritesheet, SpritesheetLoadsExpectedTmjData)
+{
+    spritesheet_pool spritesheetPool;
+    Map testMap = Map("test_data/map2_16x16_redone.tmj");
 
-    auto framesIter = tPackerFramesObj.cbegin();
-    auto framesIterEnd = tPackerFramesObj.cend();
+    GraphicsUtil::loadSpritesheets(spritesheetPool, testMap);
 
-    while (framesIter != framesIterEnd) {
-        const auto& [tileName, tileConfig] = *framesIter;
+    Spritesheet& testSpritesheet = spritesheetPool[0];
 
-        if (0 == tileName.compare("animals/butterfly5.png")) {
-            configToTest = tileConfig;
+    for (Spritesheet& s : spritesheetPool) {
+        if (0 == s.getName().compare("dc-mon-collection-spritesheet")) {
+            testSpritesheet = s;
             break;
         }
-
-        framesIter++;
     }
 
-    EXPECT_NE(framesIter, framesIterEnd);
+    boost::json::value tmj = testSpritesheet.getJson();
 
-    configToTestObj = configToTest.as_object();
-    frameObjectToTest = Json::getValueWithKey("frame", configToTestObj).as_object();
+    boost::json::value layersArray = tmj
+        .get_object()
+        .find("layers")
+        ->value();
 
-    // "animals/butterfly5.png":
-    // {
-    //     "frame": {"x":302,"y":545,"w":29,"h":30},
-    //     "rotated": false,
-    //     "trimmed": true,
-    //     "spriteSourceSize": {"x":3,"y":2,"w":29,"h":30},
-    //     "sourceSize": {"w":32,"h":32}
-    // },
-    EXPECT_EQ(Json::getValueWithKey("x", frameObjectToTest).as_int64(), 302);
-    EXPECT_EQ(Json::getValueWithKey("y", frameObjectToTest).as_int64(), 545);
-    EXPECT_EQ(Json::getValueWithKey("w", frameObjectToTest).as_int64(), 29);
-    EXPECT_EQ(Json::getValueWithKey("h", frameObjectToTest).as_int64(), 30);
+    if (layersArray.as_array().size() > 1) {
+        throw std::runtime_error("More than 1 layer in a spritesheet JSON");
+    }
+
+    boost::json::value layerData = layersArray.as_array()[0]
+        .get_object()
+        .find("data")
+        ->value();
+
+    EXPECT_EQ(layerData.as_array()[82].as_int64(), 83);
 }
