@@ -5,13 +5,15 @@ project('rogue_forever', 'cpp',
 dependencies_game = [
   dependency('sdl2'),
   dependency('sdl2_image'),
+  dependency('boost'),
 ]
 
 dependencies_test = [
   dependency('sdl2'),
   dependency('sdl2_image'),
+  dependency('boost'),
   dependency('threads'),
-  dependency('gtest')
+  dependency('gtest'),
 ]
 
 common_includes_dirs = [
@@ -27,7 +29,9 @@ common_includes_dirs = [
   'external/boostorg/system/include/',
   'external/boostorg/mp11/include/',
   'external/boostorg/align/include/',
-  'include/'
+  'external/boostorg/winapi/include/',
+  'external/boostorg/predef/include/',
+  'include/',
 ]
 
 common_includes = include_directories([
@@ -68,13 +72,13 @@ game_exe = executable('rogue_forever',
   game_sources,
   include_directories : includes_game,
   dependencies : dependencies_game,
-  cpp_args : '-DGRAPHICS_ENABLED',
+  cpp_args : '-DGRAPHICS_ENABLED=1',
   install : true)
 
 test_exe = executable('rogue_forever_test',
   test_sources,
   include_directories : includes_test,
   dependencies : dependencies_test,
-  cpp_args : '-DBUILD_FOR_TESTS')
+  cpp_args : '-DBUILD_FOR_TESTS=1')
 
 test('Main unit tests', test_exe, workdir : meson.source_root())
