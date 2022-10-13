@@ -1,9 +1,17 @@
 #ifndef SDLW_HPP_DEFINED
 #define SDLW_HPP_DEFINED
 
+#ifdef linux
 #include <SDL2/SDL.h>
+#endif
+
+#ifdef _WIN32
+#include <SDL.h>
+#endif
+
 #include <cstdint>
 #include <memory>
+#include <string>
 
 class Sdlw {
 public:

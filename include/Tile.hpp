@@ -1,7 +1,14 @@
 #ifndef TILE_HPP_DEFINED
 #define TILE_HPP_DEFINED
 
+#ifdef linux
 #include <SDL2/SDL.h>
+#endif
+
+#ifdef _WIN32
+#include <SDL.h>
+#endif
+
 #include <memory>
 #include <string>
 #include <unordered_map>

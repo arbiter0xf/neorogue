@@ -4,9 +4,6 @@
 // must then include boost/json.hpp.
 #include <boost/json/src.hpp>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include <stdio.h>
 
 #include <array>
@@ -314,7 +311,9 @@ void game(void)
     sdlw.destroy();
 }
 
-int main(void)
+// Disable name mangling so that SDL can find and redefine main.
+// https://djrollins.com/2016/10/02/sdl-on-windows/
+extern "C" int main(int argc, char* argv[])
 {
     try {
         game();
@@ -323,4 +322,6 @@ int main(void)
         msg += e.what();
         Log::e(msg);
     }
+
+    return 0;
 }
