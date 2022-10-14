@@ -29,14 +29,24 @@ common_includes_dirs = [
   'external/boostorg/system/include/',
   'external/boostorg/mp11/include/',
   'external/boostorg/align/include/',
-  'external/boostorg/winapi/include/',
-  'external/boostorg/predef/include/',
   'include/',
 ]
 
-common_includes = include_directories([
-  common_includes_dirs
-])
+common_includes_dirs_windows = [
+  'external/boostorg/winapi/include/',
+  'external/boostorg/predef/include/',
+]
+
+if host_machine.system() == 'windows'
+  common_includes = include_directories([
+    common_includes_dirs,
+    common_includes_dirs_windows,
+  ])
+elif host_machine.system() == 'linux'
+  common_includes = include_directories([
+    common_includes_dirs
+  ])
+endif
 
 includes_game = common_includes
 if host_machine.system() == 'windows'
