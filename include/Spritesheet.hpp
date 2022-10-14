@@ -1,7 +1,14 @@
 #ifndef SPRITESHEET_HPP_DEFINED
 #define SPRITESHEET_HPP_DEFINED
 
+#ifdef __linux__
 #include <SDL2/SDL.h>
+#endif
+
+#ifdef _WIN32
+#include <SDL.h>
+#endif
+
 #include <memory>
 #include <string>
 

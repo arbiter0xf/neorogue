@@ -1,5 +1,10 @@
-#include <SDL2/SDL.h>
+#ifdef __linux__
 #include <SDL2/SDL_image.h>
+#endif
+
+#ifdef _WIN32
+#include <SDL_image.h>
+#endif
 
 #include <iostream>
 #include <string>

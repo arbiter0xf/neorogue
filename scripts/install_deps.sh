@@ -5,6 +5,7 @@ set -ex
 readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
 readonly INSTALL_BOOSTORG_JSON="TRUE"
+readonly INSTALL_BOOSTORG_ALL="TRUE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_PUGIXML="TRUE"
 
@@ -66,6 +67,10 @@ if [ "TRUE" == "$INSTALL_BOOSTORG_JSON" ] ; then
 	git clone https://github.com/boostorg/system.git
 	git clone https://github.com/boostorg/mp11.git
 	git clone https://github.com/boostorg/align.git
+fi
+if [ "TRUE" == "${INSTALL_BOOSTORG_ALL}" ] ; then
+    sudo apt-get update
+    sudo apt-get install libboost-all-dev
 fi
 popd
 
