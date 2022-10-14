@@ -39,10 +39,16 @@ common_includes = include_directories([
 ])
 
 includes_game = common_includes
-includes_test = include_directories([
-  common_includes_dirs,
-  '/usr/local/include/gtest/'
-])
+if host_machine.system() == 'windows'
+  includes_test = include_directories([
+    common_includes_dirs,
+  ])
+elif host_machine.system() == 'linux'
+  includes_test = include_directories([
+    common_includes_dirs,
+    '/usr/local/include/gtest/'
+  ])
+endif
 
 game_sources_shared = [
   'src/game/Json.cpp',
