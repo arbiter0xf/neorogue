@@ -92,7 +92,6 @@ if ("TRUE" -ceq "$install_boostorg_full") {
         mkdir $boostorg_dest_dir
     }
 
-    # https://nav.dl.sourceforge.net/project/boost/boost-binaries/1.80.0/boost_1_80_0-msvc-14.1-64.exe
     Invoke-WebRequest -Uri https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/$boostorg_full_zip -OutFile $boostorg_dest_dir\$boostorg_full_zip
     Expand-Archive $boostorg_dest_dir\$boostorg_full_zip -DestinationPath $boostorg_dest_dir
 }
