@@ -1,4 +1,4 @@
-#ifdef linux
+#ifdef __linux__
 #include <SDL2/SDL_image.h>
 #endif
 

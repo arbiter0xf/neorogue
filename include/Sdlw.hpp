@@ -1,7 +1,7 @@
 #ifndef SDLW_HPP_DEFINED
 #define SDLW_HPP_DEFINED
 
-#ifdef linux
+#ifdef __linux__
 #include <SDL2/SDL.h>
 #endif
 

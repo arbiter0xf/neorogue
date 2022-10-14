@@ -1,7 +1,7 @@
 #ifndef TILE_HPP_DEFINED
 #define TILE_HPP_DEFINED
 
-#ifdef linux
+#ifdef __linux__
 #include <SDL2/SDL.h>
 #endif
 
