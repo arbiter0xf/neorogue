@@ -17,6 +17,9 @@ fi
 
 pushd deps_install_workarea
 
+sudo apt update
+sudo apt install cmake
+
 if [ "TRUE" == "$INSTALL_SDL" ] ; then
 	sudo apt install libx11-dev libxext-dev
 
