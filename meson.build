@@ -2,20 +2,46 @@ project('rogue_forever', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3', 'cpp_std=c++17'])
 
-dependencies_game = [
+common_dependencies_game = [
   dependency('sdl2'),
   dependency('sdl2_image'),
-  dependency('boost'),
 ]
 
-dependencies_test = [
+common_dependencies_test = [
   dependency('sdl2'),
   dependency('sdl2_image'),
-  dependency('boost'),
   dependency('threads'),
   dependency('gtest'),
 ]
 
+if host_machine.system() == 'windows'
+  dependencies_game = [
+    common_dependencies_game,
+    dependency('boost')
+  ]
+elif host_machine.system() == 'linux'
+  dependencies_game = [
+    common_dependencies_game
+  ]
+endif
+
+if host_machine.system() == 'windows'
+  dependencies_test = [
+    common_dependencies_test,
+    dependency('boost')
+  ]
+elif host_machine.system() == 'linux'
+  dependencies_test = [
+    common_dependencies_test,
+  ]
+endif
+
+# TODO install boostorg from a release tar package. JSON functionality is
+# supposedly introduced in version 1.75, so that or a later release is
+# required. Would preferably need to find out how depencensy('boost') can be
+# used for both Linux and Windows. When installed from tar package, not sure if
+# boost will be detected as a dependency. Apt installed version 1.74 on Pop-OS,
+# which would otherwise have been a valid way to get boost.
 common_includes_dirs = [
   'external/boostorg/json/include/',
   'external/boostorg/config/include/',
@@ -29,6 +55,7 @@ common_includes_dirs = [
   'external/boostorg/system/include/',
   'external/boostorg/mp11/include/',
   'external/boostorg/align/include/',
+  'external/boostorg/variant2/include/',
   'include/',
 ]
 

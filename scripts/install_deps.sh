@@ -67,10 +67,7 @@ if [ "TRUE" == "$INSTALL_BOOSTORG_JSON" ] ; then
 	git clone https://github.com/boostorg/system.git
 	git clone https://github.com/boostorg/mp11.git
 	git clone https://github.com/boostorg/align.git
-fi
-if [ "TRUE" == "${INSTALL_BOOSTORG_ALL}" ] ; then
-    sudo apt-get update
-    sudo apt-get install libboost-all-dev
+	git clone https://github.com/boostorg/variant2.git
 fi
 popd
 
