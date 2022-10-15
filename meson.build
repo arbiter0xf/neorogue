@@ -1,6 +1,20 @@
+# If 'buildtype' not defined, on Windows 'meson compile' needs to be ran
+# multiple times until it finally succeeds. There seem to be some issues with
+# generated debug information. The following are examples of errors which are
+# seen:
+# [401/656] Linking target subprojects/SDL2-2.24.1/test/testaudiohotplug.exe
+# FAILED: subprojects/SDL2-2.24.1/test/testaudiohotplug.exe subprojects/SDL2-2.24.1/test/testaudiohotplug.pdb
+# LINK : fatal error LNK1102: out of memory
+# [411/656] Linking target subprojects/SDL2-2.24.1/test/testerror.exe
+# FAILED: subprojects/SDL2-2.24.1/test/testerror.exe subprojects/SDL2-2.24.1/test/testerror.pdb
+# Creating library subprojects\SDL2-2.24.1\test\testerror.lib and object subprojects\SDL2-2.24.1\test\testerror.exp
+# libsdl2_test.a(src_thread_windows_SDL_sysmutex.c.obj) : fatal error LNK1103: debugging information corrupt; recompile module
 project('rogue_forever', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=3', 'cpp_std=c++17'])
+  default_options : [
+    'warning_level=3',
+    'cpp_std=c++17',
+    'buildtype=debug'])
 
 common_dependencies_game = [
   dependency('sdl2'),
