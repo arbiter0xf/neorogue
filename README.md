@@ -24,7 +24,7 @@ run_rogue_forever.bat
 How to get required assets
 ==========================
 Ask the owner of the repo for the assets. In the future asset getting is to be
-done automatically by client on startup.
+done automatically by client on startup.<br/>
 See progress from:
-	* https://github.com/arbiter0xf/rogue_forever/issues/18
-	* https://github.com/arbiter0xf/rogue_forever/tree/initial_asset_server
+* https://github.com/arbiter0xf/rogue_forever/issues/18
+* https://github.com/arbiter0xf/rogue_forever/tree/initial_asset_server
