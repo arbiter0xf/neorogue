@@ -43,7 +43,7 @@ INCLUDES := \
 	    -I$(HEADERS_PUGIXML_DIR) \
 	    -Iinclude
 INCLUDES_TEST := -I/opt/gtest/include/
-COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++20
+COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
 COMPILER_FLAGS_GAME := \
 		       $(COMMON_COMPILER_FLAGS) \
 		       -DGRAPHICS_ENABLED=1
