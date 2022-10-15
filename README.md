@@ -3,15 +3,17 @@ A dungeon crawler
 
 How to run
 ==========
-```
 Linux
 -----
+```
 ./create_meson_build_dir.sh
 cd build && PATH="${PATH}:${HOME}.local/bin" meson compile && cd ..
 ./run_rogue_forever.sh
+```
 
 Windows
 -------
+```
 create_meson_build_dir.bat
 cd build
 meson compile
