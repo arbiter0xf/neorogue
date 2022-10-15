@@ -16,8 +16,6 @@ SRC_SERVER_ROUTE := src/server_route/main.cpp
 SRC_SERVER_ROUTE_TEST_CLIENT := src/server_route/test_client.cpp
 
 CC := g++
-# CC := clang++-14
-# CXX := clang++-14
 INCLUDES := \
 	    -Iexternal/boostorg/json/include/ \
 	    -Iexternal/boostorg/config/include/ \
@@ -56,10 +54,6 @@ COMPILER_FLAGS_TEST := \
 		      -DBUILD_FOR_TESTS=1
 COMPILER_FLAGS_SERVER_ROUTE := \
 			       $(COMMON_COMPILER_FLAGS)
-#			       -fcoroutines \
-#			       -pthread \
-#			       -DBOOST_ASIO_HAS_CO_AWAIT=1 \
-#			       -DBOOST_ASIO_HAS_STD_COROUTINE=1
 COMPILER_FLAGS_SERVER_ROUTE_TEST_CLIENT := $(COMPILER_FLAGS_SERVER_ROUTE)
 LINKER_FLAGS = -lSDL2 -lSDL2_image
 LINKER_FLAGS_TEST := \
