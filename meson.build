@@ -50,12 +50,6 @@ elif host_machine.system() == 'linux'
   ]
 endif
 
-# TODO install boostorg from a release tar package. JSON functionality is
-# supposedly introduced in version 1.75, so that or a later release is
-# required. Would preferably need to find out how depencensy('boost') can be
-# used for both Linux and Windows. When installed from tar package, not sure if
-# boost will be detected as a dependency. Apt installed version 1.74 on Pop-OS,
-# which would otherwise have been a valid way to get boost.
 common_includes_dirs = [
   'include/',
 ]
