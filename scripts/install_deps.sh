@@ -136,4 +136,4 @@ popd # external/pugixml
 
 popd # ../
 
-rm -rf ./deps_install_workarea
+sudo rm -rf ./deps_install_workarea
