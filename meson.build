@@ -28,6 +28,10 @@ common_dependencies_test = [
   dependency('gtest'),
 ]
 
+dependencies_asset_server = [
+  dependency('boost')
+]
+
 if host_machine.system() == 'windows'
   dependencies_game = [
     common_dependencies_game,
@@ -71,6 +75,7 @@ elif host_machine.system() == 'linux'
 endif
 
 includes_game = common_includes
+includes_asset_server = common_includes
 if host_machine.system() == 'windows'
   includes_test = include_directories([
     common_includes_dirs,
@@ -98,6 +103,10 @@ game_sources = files([
   'src/game/main.cpp',
 ])
 
+asset_server_sources = files([
+  'src/server/asset/main.cpp'
+])
+
 test_sources = files([
   game_sources_shared,
   'test/main.cpp',
@@ -112,6 +121,11 @@ game_exe = executable('rogue_forever',
   dependencies : dependencies_game,
   cpp_args : '-DGRAPHICS_ENABLED=1',
   install : true)
+
+asset_server_exe = executable('rogue_forever_asset_server',
+  asset_server_sources,
+  include_directories : includes_asset_server,
+  dependencies : dependencies_asset_server)
 
 test_exe = executable('rogue_forever_test',
   test_sources,
