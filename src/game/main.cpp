@@ -1,3 +1,5 @@
+#include <boost/asio.hpp>
+
 // Header-only with multiple translation units
 // https://www.boost.org/doc/libs/1_69_0/libs/test/doc/html/boost_test/adv_scenarios/single_header_customizations/multiple_translation_units.html
 // Must to include boost/json/src.hpp in only one source file and other files
@@ -217,6 +219,54 @@ void printConstructedSpritesheets(const spritesheet_pool& spritesheetPool)
 }
 #endif
 
+void maybeDownloadContent()
+{
+    const int SERVER_CONTENT_PORT = 9002;
+    const char* REQUEST_GET_MAPS = "get maps";
+    const char* REQUEST_GET_MAP_ASSETS = "get map assets";
+    const char END_OF_TRANSMISSION = (char) 4;
+    boost::asio::io_context io_context;
+    boost::system::error_code error;
+    std::size_t bytesTransferred = 0;
+    std::string errorMsg;
+
+    std::string dynBuf;
+
+    // TODO check file existence
+
+    Log::i("Downloading content");
+
+    try {
+        boost::asio::ip::tcp::resolver resolver(io_context);
+        boost::asio::ip::tcp::resolver::results_type endpoints =
+            resolver.resolve("localhost", std::to_string(SERVER_CONTENT_PORT));
+
+        boost::asio::ip::tcp::socket socket(io_context);
+        boost::asio::connect(socket, endpoints);
+
+        dynBuf = REQUEST_GET_MAPS;
+        dynBuf.append(1, END_OF_TRANSMISSION);
+
+        Log::i("Getting maps");
+        bytesTransferred = write(socket, boost::asio::dynamic_buffer(dynBuf), error);
+        if (bytesTransferred <= 0) {
+            errorMsg = "Failed to write to socket: ";
+            errorMsg += error.value();
+            Log::e(errorMsg);
+            return;
+        }
+
+        if (socket.is_open()) {
+            socket.shutdown(tcp::socket::shutdown_type::shutdown_both);
+        }
+        socket.close();
+    } catch(std::exception& e) {
+        errorMsg = "Exception while downloading content: ";
+        errorMsg += e.what();
+        Log::e(errorMsg);
+    }
+}
+
 void game(void)
 {
     int err = -1;
@@ -238,7 +288,7 @@ void game(void)
 
     screen_tiles_layers screenTilesLayers;
 
-    // TODO check file existence
+    maybeDownloadContent();
 
     Log::i("Loading map2");
     Map currentMap = Map("maps/map2_16x16_redone.tmj");
