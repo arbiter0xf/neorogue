@@ -57,19 +57,6 @@ endif
 # boost will be detected as a dependency. Apt installed version 1.74 on Pop-OS,
 # which would otherwise have been a valid way to get boost.
 common_includes_dirs = [
-  'external/boostorg/json/include/',
-  'external/boostorg/config/include/',
-  'external/boostorg/assert/include/',
-  'external/boostorg/throw_exception/include/',
-  'external/boostorg/core/include/',
-  'external/boostorg/container/include/',
-  'external/boostorg/move/include/',
-  'external/boostorg/static_assert/include/',
-  'external/boostorg/intrusive/include/',
-  'external/boostorg/system/include/',
-  'external/boostorg/mp11/include/',
-  'external/boostorg/align/include/',
-  'external/boostorg/variant2/include/',
   'include/',
 ]
 
