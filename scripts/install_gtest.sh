@@ -2,8 +2,8 @@
 
 set -ex
 
-if [ ! -d libs ] ; then
-	mkdir libs
+if [ ! -d libs_temp ] ; then
+	mkdir libs_temp
 fi
 
 if [ ! -d /opt/gtest/include ] ; then
@@ -14,7 +14,7 @@ if [ ! -d /opt/gtest/lib ] ; then
 	sudo mkdir -p /opt/gtest/lib
 fi
 
-cd libs
+cd libs_temp
 
 gtest_file="release-1.12.1.tar.gz"
 extracted_file="googletest-release-1.12.1"

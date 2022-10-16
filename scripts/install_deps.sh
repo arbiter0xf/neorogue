@@ -4,9 +4,9 @@ set -ex
 
 readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
-readonly INSTALL_BOOSTORG_JSON="TRUE"
+readonly INSTALL_BOOSTORG_JSON="FALSE"
 readonly INSTALL_BOOSTORG_ALL="TRUE"
-readonly INSTALL_BOOSTORG_ASIO="TRUE"
+readonly INSTALL_BOOSTORG_ASIO="FALSE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_PUGIXML="TRUE"
 
@@ -45,7 +45,7 @@ if [ "TRUE" == "$INSTALL_SDL_IMAGE" ] ; then
 	popd
 fi
 
-popd
+popd # deps_install_workarea
 
 pushd ../
 if [ ! -d external ] ; then
@@ -87,20 +87,36 @@ if [ "TRUE" == "${INSTALL_BOOSTORG_ASIO}" ] ; then
 	test -d regex || git clone https://github.com/boostorg/regex.git
 	test -d predef || git clone https://github.com/boostorg/predef.git
 fi
-popd
+popd # external/boostorg
+popd # ../
 
-popd
+pushd  ./deps_install_workarea
+if [ "TRUE" == ${INSTALL_BOOSTORG_ALL} ] ; then
+	boost_name="boost_1_80_0"
+	boost_tar="${boost_name}.tar.gz"
+	wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/${boost_tar}
+	tar -xvzf ${boost_tar}
+	pushd ${boost_name}
+	# ./bootstrap.sh --with-libraries='asio json'
+	# asio currently not detected as a library. See libraries
+	# with --show-libraries
+	./bootstrap.sh
+	sudo ./b2 install
+	popd # ${boost_name}
+	rm ${boost_tar}
+fi
+popd # ./deps_install_workarea
 
 pushd ./deps_install_workarea
 if [ "TRUE" == "${INSTALL_GTEST}" ] ; then
 	../install_gtest.sh
 fi
-popd
+popd # ./deps_install_workarea
 
 pushd ../
 if [ ! -d external/pugixml ] ; then
 	mkdir external/pugixml
-fi
+fi # ../
 
 pushd external/pugixml
 if [ "TRUE" == "${INSTALL_PUGIXML}" ] ; then
@@ -116,8 +132,8 @@ if [ "TRUE" == "${INSTALL_PUGIXML}" ] ; then
 	mv pugixml-1.12/src/pugiconfig.hpp ./include/
 	mv pugixml-1.12/src/pugixml.hpp ./include/
 fi
-popd
+popd # external/pugixml
 
-popd
+popd # ../
 
-rm -r ./deps_install_workarea
+sudo rm -rf ./deps_install_workarea

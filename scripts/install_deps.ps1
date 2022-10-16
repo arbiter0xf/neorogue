@@ -1,7 +1,7 @@
 $install_sdl = 'TRUE'
 $install_gtest = 'TRUE'
-$install_boostorg_win = 'TRUE'
-$install_boostorg_json = 'TRUE'
+$install_boostorg_win = 'FALSE'
+$install_boostorg_json = 'FALSE'
 $install_boostorg_full = 'TRUE'
 
 $sdl_release_name = 'SDL2-devel-2.24.1-VC'
