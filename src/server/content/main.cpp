@@ -65,6 +65,9 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     std::size_t bytesRead = 0;
     std::string data;
 
+    const char* GET_MAPS_RAW = "get maps";
+    const char* GET_MAP_ASSETS_RAW = "get map assets";
+
     try {
 #if NETCAT_TESTABLE
         bytesRead = read_until(
@@ -89,11 +92,11 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     protectedPrint(testMsg);
 #endif // DEBUG
 
-    if (data.compare("get maps")) {
+    if (data.compare(GET_MAPS_RAW)) {
         return ClientRequest::getMaps;
     }
 
-    if (data.compare("get map assets")) {
+    if (data.compare(GET_MAP_ASSETS_RAW)) {
         return ClientRequest::getMapAssets;
     }
 
