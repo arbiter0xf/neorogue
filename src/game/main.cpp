@@ -249,15 +249,35 @@ void maybeDownloadContent()
 
         Log::i("Getting maps");
         bytesTransferred = write(socket, boost::asio::dynamic_buffer(dynBuf), error);
-        if (bytesTransferred <= 0) {
+        if (error == boost::asio::error::eof) {
+            // Connection closed cleanly by peer
+        } else if (error) {
             errorMsg = "Failed to write to socket: ";
             errorMsg += error.value();
             Log::e(errorMsg);
-            return;
+            throw boost::system::system_error(error); // Some other error.
         }
 
+        bytesTransferred = read_until(
+                socket,
+                boost::asio::dynamic_buffer(dynBuf),
+                END_OF_TRANSMISSION,
+                error);
+        if (error == boost::asio::error::eof) {
+            // Connection closed cleanly by peer
+        } else if (error) {
+            errorMsg = "Failed to read from socket: ";
+            errorMsg += error.value();
+            Log::e(errorMsg);
+            throw boost::system::system_error(error); // Some other error.
+        }
+
+        std::string msg = "dynBuf is: ";
+        msg += dynBuf;
+        Log::i(msg);
+
         if (socket.is_open()) {
-            socket.shutdown(tcp::socket::shutdown_type::shutdown_both);
+            socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
         }
         socket.close();
     } catch(std::exception& e) {

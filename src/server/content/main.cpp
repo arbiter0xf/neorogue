@@ -100,24 +100,41 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     return ClientRequest::unknown;
 }
 
-void sendMaps()
+void sendMaps(boost::asio::ip::tcp::socket& socket)
 {
+    boost::system::error_code error;
+    std::size_t bytesTransferred = 0;
+    std::string errorMsg;
+    std::string dynBuf;
+
     protectedPrint("Sending maps");
+
+    dynBuf = "map send test";
+
+    bytesTransferred = write(socket, boost::asio::dynamic_buffer(dynBuf), error);
+    if (error == boost::asio::error::eof) {
+        // Connection closed cleanly by peer
+    } else if (error) {
+        errorMsg = "Failed to write to socket: ";
+        errorMsg += error.value();
+        protectedPrint(errorMsg);
+        throw boost::system::system_error(error); // Some other error.
+    }
 }
 
-void sendMapAssets()
+void sendMapAssets(boost::asio::ip::tcp::socket& socket)
 {
     protectedPrint("Sending map assets");
 }
 
-void handleRequest(ClientRequest request)
+void handleRequest(ClientRequest request, boost::asio::ip::tcp::socket& socket)
 {
     if (ClientRequest::getMaps == request) {
-        sendMaps();
+        sendMaps(socket);
     }
 
     if (ClientRequest::getMapAssets == request) {
-        sendMapAssets();
+        sendMapAssets(socket);
     }
 }
 
@@ -141,7 +158,7 @@ void serveBlocking(boost::asio::io_context& ioContext)
             continue;
         }
 
-        handleRequest(request);
+        handleRequest(request, socket);
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
         socket.close();
