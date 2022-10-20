@@ -54,35 +54,59 @@ elif host_machine.system() == 'linux'
   ]
 endif
 
-common_includes_dirs = [
-  'include/',
+common_include_dirs = [
+  'include/common/',
 ]
 
-common_includes_dirs_windows = [
+game_include_dirs = [
+  'include/game/'
+]
+
+server_include_dirs = [
+  'include/server/'
+]
+
+common_include_dirs_windows = [
   'external/boostorg/winapi/include/',
   'external/boostorg/predef/include/',
 ]
 
 if host_machine.system() == 'windows'
-  common_includes = include_directories([
-    common_includes_dirs,
-    common_includes_dirs_windows,
-  ])
+  common_includes = [
+    common_include_dirs,
+    common_include_dirs_windows,
+  ]
 elif host_machine.system() == 'linux'
   common_includes = include_directories([
-    common_includes_dirs
+    common_include_dirs
   ])
 endif
 
-includes_game = common_includes
-includes_content_server = common_includes
+game_includes = [
+  game_include_dirs
+]
+
+server_includes = [
+  server_include_dirs
+]
+
+includes_rogue_forever = include_directories([
+  common_includes,
+  game_includes,
+])
+includes_content_server = include_directories([
+  common_includes,
+  server_includes,
+])
 if host_machine.system() == 'windows'
   includes_test = include_directories([
-    common_includes_dirs,
+    common_includes,
+    game_includes,
   ])
 elif host_machine.system() == 'linux'
   includes_test = include_directories([
-    common_includes_dirs,
+    common_includes,
+    game_includes,
     '/usr/local/include/gtest/'
   ])
 endif
@@ -117,7 +141,7 @@ test_sources = files([
 
 game_exe = executable('rogue_forever',
   game_sources,
-  include_directories : includes_game,
+  include_directories : includes_rogue_forever,
   dependencies : dependencies_game,
   cpp_args : '-DGRAPHICS_ENABLED=1',
   install : true)
