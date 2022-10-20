@@ -103,18 +103,21 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     return ClientRequest::unknown;
 }
 
-void sendMaps(boost::asio::ip::tcp::socket& socket)
+void sendMaps(
+        boost::asio::ip::tcp::socket& socket,
+        const std::string& contentRoot)
 {
     boost::system::error_code error;
     std::size_t bytesTransferred = 0;
     std::string errorMsg;
-    std::string dynBuf;
+    std::string sendBuf;
+    char fileContentBuffer[4096] = {0};
 
     protectedPrint("Sending maps");
 
-    dynBuf = "map send test";
+    sendBuf = "map send test";
 
-    bytesTransferred = write(socket, boost::asio::dynamic_buffer(dynBuf), error);
+    bytesTransferred = write(socket, boost::asio::dynamic_buffer(sendBuf), error);
     if (error == boost::asio::error::eof) {
         // Connection closed cleanly by peer
     } else if (error) {
@@ -123,25 +126,43 @@ void sendMaps(boost::asio::ip::tcp::socket& socket)
         protectedPrint(errorMsg);
         throw boost::system::system_error(error); // Some other error.
     }
+
+    // TODO handle source file containing byte 0x4 (end of transmission)
+    // options:
+    //   * Encode file content as base64.
+    //   * Before sending file content, tell client how much data is going to
+    //     be sent.
+    //   * In each packet, inform if it is the last one.
+    //     * Data needs to be sent until read() of client returns.
+    //       * Fixed size packets with 'data size', 'data' and 'padding'
+    //         * Data size of less than maximum indicates the last packet. Data
+    //           size can be 0 if the previous was a full sized packet and
+    //           there is no more data to send.
+
 }
 
-void sendMapAssets(boost::asio::ip::tcp::socket& socket)
+void sendMapAssets(
+        boost::asio::ip::tcp::socket& socket,
+        const std::string& contentRoot)
 {
     protectedPrint("Sending map assets");
 }
 
-void handleRequest(ClientRequest request, boost::asio::ip::tcp::socket& socket)
+void handleRequest(
+        ClientRequest request,
+        boost::asio::ip::tcp::socket& socket,
+        const std::string& contentRoot)
 {
     if (ClientRequest::getMaps == request) {
-        sendMaps(socket);
+        sendMaps(socket, contentRoot);
     }
 
     if (ClientRequest::getMapAssets == request) {
-        sendMapAssets(socket);
+        sendMapAssets(socket, contentRoot);
     }
 }
 
-void serveBlocking(boost::asio::io_context& ioContext)
+void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
 {
 
     protectedPrint("Serving");
@@ -161,7 +182,7 @@ void serveBlocking(boost::asio::io_context& ioContext)
             continue;
         }
 
-        handleRequest(request, socket);
+        handleRequest(request, socket, contentRoot);
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
         socket.close();
@@ -200,7 +221,7 @@ int main(int argc, char* argv[])
         });
 
         for (int i = 0; i < servingThreadsAmount; ++i) {
-            servingThreads.push_back(std::thread([&ioContext](){ serveBlocking(ioContext); }));
+            servingThreads.push_back(std::thread([&ioContext, &contentRoot](){ serveBlocking(ioContext, contentRoot); }));
         }
 
         ioContext.run();
