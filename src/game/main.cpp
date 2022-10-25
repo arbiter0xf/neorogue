@@ -19,6 +19,7 @@
 #include "Level.hpp"
 #include "Log.hpp"
 #include "Map.hpp"
+#include "MessageHandshake.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
@@ -231,6 +232,9 @@ void maybeDownloadContent()
     std::string errorMsg;
 
     std::string dynBuf;
+    std::string msg;
+
+    char sendBuffer[MESSAGE_HANDSHAKE_SIZE] = {0};
 
     // TODO check file existence
 
@@ -244,9 +248,25 @@ void maybeDownloadContent()
         boost::asio::ip::tcp::socket socket(io_context);
         boost::asio::connect(socket, endpoints);
 
+#if 0
         dynBuf = REQUEST_GET_MAPS;
         dynBuf.append(1, END_OF_TRANSMISSION);
+#endif
 
+        msg = "Performing handshake with handshake message version: ";
+        msg += MessageHandshake::version;
+        Log::i(msg);
+
+        MessageHandshake messageHandshake = MessageHandshake(
+                MessageHandshake::payloadVersion,
+                strlen(MessageHandshake::payloadVersion));
+        messageHandshake.getMessage(sendBuffer);
+
+        // TODO hex print utility for inspecting buffer contents
+
+        bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
+#if 0
         Log::i("Getting maps");
         bytesTransferred = write(socket, boost::asio::dynamic_buffer(dynBuf), error);
         if (error == boost::asio::error::eof) {
@@ -275,6 +295,7 @@ void maybeDownloadContent()
         std::string msg = "dynBuf is: ";
         msg += dynBuf;
         Log::i(msg);
+#endif
 
         if (socket.is_open()) {
             socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);

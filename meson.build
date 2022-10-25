@@ -111,6 +111,14 @@ elif host_machine.system() == 'linux'
   ])
 endif
 
+common_sources = [
+  'src/common/Log.cpp',
+  'src/common/Message.cpp',
+  'src/common/MessageFileTransfer.cpp',
+  'src/common/MessageFileTransferControl.cpp',
+  'src/common/MessageHandshake.cpp',
+]
+
 game_sources_shared = [
   'src/game/Json.cpp',
   'src/game/Tile.cpp',
@@ -119,10 +127,10 @@ game_sources_shared = [
   'src/game/Level.cpp',
   'src/game/Sdlw.cpp',
   'src/game/Map.cpp',
-  'src/game/Log.cpp'
 ]
 
 game_sources = files([
+  common_sources,
   game_sources_shared,
   'src/game/main.cpp',
 ])

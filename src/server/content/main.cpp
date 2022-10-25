@@ -1,6 +1,8 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+#include "MessageHandshake.hpp"
+
 #define DEBUG 1
 #define NETCAT_TESTABLE 0
 
@@ -24,6 +26,67 @@ void protectedPrint(std::string msg)
         << std::this_thread::get_id()
         << "] "
         << msg
+        << "\n"
+        << std::flush;
+}
+
+void protectedPrintBufferAsDec(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
+    std::lock_guard<std::mutex> acceptLock(g_stdout_mutex);
+
+    std::cout
+        << "[tid:"
+        << std::this_thread::get_id()
+        << "] ";
+
+    for (std::size_t i = 0; i < bufferToPrintSize; ++i) {
+        std::cout << std::to_string(bufferToPrint[i]);
+    }
+
+    std::cout
+        << "\n"
+        << std::flush;
+}
+
+// TODO protectedPrintBufferAsHex
+#if 0
+void protectedPrintBufferAsHex(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
+}
+#endif
+
+bool isVisibleCharacter(char character)
+{
+    if (character >= 32 && character <= 126) {
+        return true;
+    }
+
+    return false;
+}
+
+void protectedPrintBufferAsChar(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
+    std::lock_guard<std::mutex> acceptLock(g_stdout_mutex);
+
+    std::cout
+        << "[tid:"
+        << std::this_thread::get_id()
+        << "] "
+        << std::flush;
+
+    for (std::size_t i = 0; i < bufferToPrintSize; ++i) {
+        if (isVisibleCharacter(bufferToPrint[i])) {
+            std::cout << bufferToPrint[i];
+        }
+    }
+
+    std::cout
         << "\n"
         << std::flush;
 }
@@ -103,6 +166,36 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     return ClientRequest::unknown;
 }
 
+void readHandshake(boost::asio::ip::tcp::socket& socket)
+{
+    std::string msg;
+    std::size_t bytesRead;
+    char data[MESSAGE_HANDSHAKE_SIZE] = {0};
+
+    try {
+        bytesRead = read(
+                socket,
+                boost::asio::buffer(data));
+
+        msg = "Successfully read ";
+        msg += std::to_string(bytesRead);
+        msg += " bytes. Data: ";
+        protectedPrint(msg);
+
+        protectedPrintBufferAsDec(data, sizeof(data));
+        protectedPrintBufferAsChar(data, sizeof(data)); // NOTE should only print payload as char
+
+        // TODO
+        // * Construct MessageHandshake from payload?
+        //   * Could provide constructor which takes data as a parameter (size
+        //     needs to be MESSAGE_HANDSHAKE_SIZE).
+    } catch(std::exception& e) {
+        msg = "Exception while reading handshake: ";
+        msg += e.what();
+        protectedPrint(msg);
+    }
+}
+
 void sendMaps(
         boost::asio::ip::tcp::socket& socket,
         const std::string& contentRoot)
@@ -122,7 +215,7 @@ void sendMaps(
         // Connection closed cleanly by peer
     } else if (error) {
         errorMsg = "Failed to write to socket: ";
-        errorMsg += error.value();
+        errorMsg += std::to_string(error.value());
         protectedPrint(errorMsg);
         throw boost::system::system_error(error); // Some other error.
     }
@@ -174,6 +267,9 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
             return;
         }
 
+        readHandshake(socket);
+
+#if 0
         ClientRequest request = readRequest(socket);
 
         if (ClientRequest::unknown == request) {
@@ -183,6 +279,7 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
         }
 
         handleRequest(request, socket, contentRoot);
+#endif
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
         socket.close();
