@@ -254,13 +254,13 @@ void maybeDownloadContent()
 #endif
 
         msg = "Performing handshake with handshake message version: ";
-        msg += MessageHandshake::version;
+        msg += MESSAGE_HANDSHAKE_VERSION;
         Log::i(msg);
 
         MessageHandshake messageHandshake = MessageHandshake(
                 MessageHandshake::payloadVersion,
                 strlen(MessageHandshake::payloadVersion));
-        messageHandshake.getMessage(sendBuffer);
+        messageHandshake.getRawMessage(sendBuffer);
 
         // TODO hex print utility for inspecting buffer contents
 

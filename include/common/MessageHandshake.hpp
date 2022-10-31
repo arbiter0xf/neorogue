@@ -1,6 +1,8 @@
 #ifndef MESSAGE_HANDSHAKE_HPP_DEFINED
 #define MESSAGE_HANDSHAKE_HPP_DEFINED
 
+#include <string>
+
 #include "Message.hpp"
 
 /*
@@ -23,23 +25,29 @@
     - MESSAGE_HANDSHAKE_SIZE_SIZE
 
 #define MESSAGE_HANDSHAKE_VERSION "0.0.1"
+#define MESSAGE_HANDSHAKE_VERSION_PREFIX "version"
+#define MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER ":"
 
 class MessageHandshake {
 public:
+    MessageHandshake() = default;
     MessageHandshake(
             const char payload[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE],
             size_t payloadSize);
+    MessageHandshake(
+            char message[MESSAGE_HANDSHAKE_SIZE]);
 
     char getSize(void);
     char getType(void);
-    void getPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE]);
-    void getMessage(char dest[MESSAGE_HANDSHAKE_SIZE]);
+    void getRawPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE]);
+    void getRawMessage(char dest[MESSAGE_HANDSHAKE_SIZE]);
+    std::string getMessage(void);
+    std::string getPayload(void);
+    std::string getVersion(void);
 
     static const int indexType;
     static const int indexSize;
     static const int indexPayload;
-
-    inline static const char version[] = MESSAGE_HANDSHAKE_VERSION;
 
     static const char payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
 

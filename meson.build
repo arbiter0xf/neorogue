@@ -136,6 +136,7 @@ game_sources = files([
 ])
 
 content_server_sources = files([
+  common_sources,
   'src/server/content/main.cpp'
 ])
 

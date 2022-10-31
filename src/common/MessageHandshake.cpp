@@ -9,8 +9,10 @@ const int MessageHandshake::indexType = 0;
 const int MessageHandshake::indexSize = 1;
 const int MessageHandshake::indexPayload = 2;
 
-const char MessageHandshake::payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE]
-    = "version:" MESSAGE_HANDSHAKE_VERSION;
+const char MessageHandshake::payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] =
+    MESSAGE_HANDSHAKE_VERSION_PREFIX
+    MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER
+    MESSAGE_HANDSHAKE_VERSION;
 
 // TODO tests for MessageHandshake
 
@@ -22,7 +24,7 @@ MessageHandshake::MessageHandshake(
         size_t payloadSize)
 {
     if (payloadSize > MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE) {
-        throw std::runtime_error("Trying to construct handshake message with too large payload");
+        throw std::runtime_error("Trying to construct handshake message from payload with too large size");
     }
 
     rawMessage[MessageHandshake::indexType] = Message::typeHandshake;
@@ -41,6 +43,19 @@ MessageHandshake::MessageHandshake(
     }
 }
 
+MessageHandshake::MessageHandshake(char message[MESSAGE_HANDSHAKE_SIZE])
+{
+    char payloadSize = 0;
+
+    payloadSize = message[MessageHandshake::indexSize];
+
+    if (payloadSize > MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE) {
+        throw std::runtime_error("Trying to construct handshake message from message with too large payload size");
+    }
+
+    std::memcpy(rawMessage, message, sizeof(rawMessage));
+}
+
 char MessageHandshake::getType(void)
 {
     return rawMessage[MessageHandshake::indexType];
@@ -51,7 +66,7 @@ char MessageHandshake::getSize(void)
     return rawMessage[MessageHandshake::indexSize];
 }
 
-void MessageHandshake::getPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE])
+void MessageHandshake::getRawPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE])
 {
     size_t payloadSize = (size_t) getSize();
 
@@ -65,7 +80,7 @@ void MessageHandshake::getPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE])
             payloadSize);
 }
 
-void MessageHandshake::getMessage(char dest[MESSAGE_HANDSHAKE_SIZE])
+void MessageHandshake::getRawMessage(char dest[MESSAGE_HANDSHAKE_SIZE])
 {
     std::string msg = "Copying rawMessage: ";
     msg += rawMessage;
@@ -76,4 +91,45 @@ void MessageHandshake::getMessage(char dest[MESSAGE_HANDSHAKE_SIZE])
     Log::d(msg);
 
     std::memcpy(dest, rawMessage, sizeof(rawMessage));
+}
+
+std::string MessageHandshake::getMessage(void)
+{
+    std::string message = std::string(rawMessage);
+
+    return message;
+}
+
+std::string MessageHandshake::getPayload(void)
+{
+    char rawPayload[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] = {0};
+
+    getRawPayload(rawPayload);
+    std::string payload = std::string(rawPayload);
+
+    return payload;
+}
+
+std::string MessageHandshake::getVersion(void)
+{
+    std::string payload = getPayload();
+    std::string delimiter = std::string(MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER);
+    std::string version;
+    const int findStart = 0;
+    std::size_t versionStart = 0;
+    std::size_t versionLen = 0;
+
+    versionStart = payload.find(delimiter, findStart) + 1;
+    if (std::string::npos == versionStart) {
+        throw std::runtime_error("Failed to find start of version from payload");
+    }
+
+    versionLen =
+        MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE -
+        std::strlen(MESSAGE_HANDSHAKE_VERSION_PREFIX) -
+        std::strlen(MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER);
+
+    version = payload.substr(versionStart, versionLen);
+
+    return version;
 }

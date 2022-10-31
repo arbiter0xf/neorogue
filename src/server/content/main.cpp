@@ -166,34 +166,27 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     return ClientRequest::unknown;
 }
 
-void readHandshake(boost::asio::ip::tcp::socket& socket)
+MessageHandshake readHandshake(boost::asio::ip::tcp::socket& socket)
 {
     std::string msg;
     std::size_t bytesRead;
     char data[MESSAGE_HANDSHAKE_SIZE] = {0};
 
-    try {
-        bytesRead = read(
-                socket,
-                boost::asio::buffer(data));
+    bytesRead = read(
+            socket,
+            boost::asio::buffer(data));
 
-        msg = "Successfully read ";
-        msg += std::to_string(bytesRead);
-        msg += " bytes. Data: ";
-        protectedPrint(msg);
+#if DEBUG
+    msg = "Successfully read ";
+    msg += std::to_string(bytesRead);
+    msg += " bytes. Data: ";
+    protectedPrint(msg);
 
-        protectedPrintBufferAsDec(data, sizeof(data));
-        protectedPrintBufferAsChar(data, sizeof(data)); // NOTE should only print payload as char
+    protectedPrintBufferAsDec(data, sizeof(data));
+    protectedPrintBufferAsChar(data, sizeof(data)); // NOTE should only print payload as char
+#endif // DEBUG
 
-        // TODO
-        // * Construct MessageHandshake from payload?
-        //   * Could provide constructor which takes data as a parameter (size
-        //     needs to be MESSAGE_HANDSHAKE_SIZE).
-    } catch(std::exception& e) {
-        msg = "Exception while reading handshake: ";
-        msg += e.what();
-        protectedPrint(msg);
-    }
+    return MessageHandshake(data);
 }
 
 void sendMaps(
@@ -257,17 +250,58 @@ void handleRequest(
 
 void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
 {
+    std::string msg;
+    std::string ownHandshakeVersion;
+    std::string receivedHandshakeVersion;
+    MessageHandshake messageHandshake;
+    boost::asio::ip::tcp::socket socket(ioContext);
 
     protectedPrint("Serving");
 
     for (;;) {
-        boost::asio::ip::tcp::socket socket = protectedAccept(ioContext);
+        if (socket.is_open()) {
+            socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
+            socket.close();
+        }
+
+        socket = protectedAccept(ioContext);
 
         if (shouldStop) {
             return;
         }
 
-        readHandshake(socket);
+        try {
+            messageHandshake = readHandshake(socket);
+        } catch(std::runtime_error& e) {
+            msg = "Exception while reading handshake: ";
+            msg += e.what();
+            protectedPrint(msg);
+            continue;
+        }
+
+        try {
+            receivedHandshakeVersion = messageHandshake.getVersion();
+
+#if DEBUG
+            msg = "Received handshake message with version: ";
+            msg += receivedHandshakeVersion;
+            protectedPrint(msg);
+#endif // DEBUG
+
+            ownHandshakeVersion = std::string(MESSAGE_HANDSHAKE_VERSION);
+            if (0 != receivedHandshakeVersion.compare(ownHandshakeVersion)) {
+                msg = "Unsupported handshake version: ";
+                msg += receivedHandshakeVersion;
+                throw std::runtime_error(msg);
+            }
+        } catch(std::runtime_error& e) {
+            msg = "Exception while handling handshake version: ";
+            msg += e.what();
+            protectedPrint(msg);
+            continue;
+        }
+
+        // TODO continue handshake with protocol switch
 
 #if 0
         ClientRequest request = readRequest(socket);
@@ -280,9 +314,6 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
 
         handleRequest(request, socket, contentRoot);
 #endif
-
-        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_type::shutdown_both);
-        socket.close();
     }
 }
 
