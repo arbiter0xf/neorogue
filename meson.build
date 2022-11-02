@@ -112,6 +112,7 @@ elif host_machine.system() == 'linux'
 endif
 
 common_sources = [
+  'src/common/DebugUtil.cpp',
   'src/common/Log.cpp',
   'src/common/Message.cpp',
   'src/common/MessageFileTransfer.cpp',

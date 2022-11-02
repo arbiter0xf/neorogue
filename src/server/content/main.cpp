@@ -1,6 +1,7 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+#include "DebugUtil.hpp"
 #include "MessageHandshake.hpp"
 
 #define DEBUG 1
@@ -17,80 +18,6 @@ enum class ClientRequest {
     getMapAssets,
 };
 
-void protectedPrint(std::string msg)
-{
-    std::lock_guard<std::mutex> acceptLock(g_stdout_mutex);
-
-    std::cout
-        << "[tid:"
-        << std::this_thread::get_id()
-        << "] "
-        << msg
-        << "\n"
-        << std::flush;
-}
-
-void protectedPrintBufferAsDec(
-        const char bufferToPrint[],
-        std::size_t bufferToPrintSize)
-{
-    std::lock_guard<std::mutex> acceptLock(g_stdout_mutex);
-
-    std::cout
-        << "[tid:"
-        << std::this_thread::get_id()
-        << "] ";
-
-    for (std::size_t i = 0; i < bufferToPrintSize; ++i) {
-        std::cout << std::to_string(bufferToPrint[i]);
-    }
-
-    std::cout
-        << "\n"
-        << std::flush;
-}
-
-// TODO protectedPrintBufferAsHex
-#if 0
-void protectedPrintBufferAsHex(
-        const char bufferToPrint[],
-        std::size_t bufferToPrintSize)
-{
-}
-#endif
-
-bool isVisibleCharacter(char character)
-{
-    if (character >= 32 && character <= 126) {
-        return true;
-    }
-
-    return false;
-}
-
-void protectedPrintBufferAsChar(
-        const char bufferToPrint[],
-        std::size_t bufferToPrintSize)
-{
-    std::lock_guard<std::mutex> acceptLock(g_stdout_mutex);
-
-    std::cout
-        << "[tid:"
-        << std::this_thread::get_id()
-        << "] "
-        << std::flush;
-
-    for (std::size_t i = 0; i < bufferToPrintSize; ++i) {
-        if (isVisibleCharacter(bufferToPrint[i])) {
-            std::cout << bufferToPrint[i];
-        }
-    }
-
-    std::cout
-        << "\n"
-        << std::flush;
-}
-
 boost::asio::ip::tcp::socket protectedAccept(boost::asio::io_context& ioContext)
 {
     const int SERVER_ROUTE_PORT = 9002;
@@ -98,7 +25,7 @@ boost::asio::ip::tcp::socket protectedAccept(boost::asio::io_context& ioContext)
     boost::asio::ip::tcp::socket socket(ioContext);
     boost::asio::socket_base::reuse_address optionReuseAddress(true);
 
-    protectedPrint("Locking");
+    DebugUtil::protectedPrint("Locking", g_stdout_mutex);
     g_accept_mutex.lock();
 
     if (shouldStop) {
@@ -114,7 +41,7 @@ boost::asio::ip::tcp::socket protectedAccept(boost::asio::io_context& ioContext)
                 boost::asio::ip::tcp::v4(),
                 SERVER_ROUTE_PORT));
 
-    protectedPrint("Accepting connection");
+    DebugUtil::protectedPrint("Accepting connection", g_stdout_mutex);
     socket = acceptor.accept();
 
     g_accept_mutex.unlock();
@@ -146,13 +73,13 @@ ClientRequest readRequest(boost::asio::ip::tcp::socket& socket)
     } catch(std::exception& e) {
         std::string msg = "Exception while reading request: ";
         msg += e.what();
-        protectedPrint(msg);
+        DebugUtil::protectedPrint(msg, g_stdout_mutex);
         return ClientRequest::unknown;
     }
 
 #if DEBUG
     std::string testMsg = "Received data from client: " + data;
-    protectedPrint(testMsg);
+    DebugUtil::protectedPrint(testMsg, g_stdout_mutex);
 #endif // DEBUG
 
     if (data.compare(GET_MAPS_RAW)) {
@@ -180,10 +107,10 @@ MessageHandshake readHandshake(boost::asio::ip::tcp::socket& socket)
     msg = "Successfully read ";
     msg += std::to_string(bytesRead);
     msg += " bytes. Data: ";
-    protectedPrint(msg);
+    DebugUtil::protectedPrint(msg, g_stdout_mutex);
 
-    protectedPrintBufferAsDec(data, sizeof(data));
-    protectedPrintBufferAsChar(data, sizeof(data)); // NOTE should only print payload as char
+    DebugUtil::protectedPrintBufferAsDec(data, sizeof(data), g_stdout_mutex);
+    DebugUtil::protectedPrintBufferAsChar(data, sizeof(data), g_stdout_mutex); // NOTE should only print payload as char
 #endif // DEBUG
 
     return MessageHandshake(data);
@@ -199,7 +126,7 @@ void sendMaps(
     std::string sendBuf;
     char fileContentBuffer[4096] = {0};
 
-    protectedPrint("Sending maps");
+    DebugUtil::protectedPrint("Sending maps", g_stdout_mutex);
 
     sendBuf = "map send test";
 
@@ -209,7 +136,7 @@ void sendMaps(
     } else if (error) {
         errorMsg = "Failed to write to socket: ";
         errorMsg += std::to_string(error.value());
-        protectedPrint(errorMsg);
+        DebugUtil::protectedPrint(errorMsg, g_stdout_mutex);
         throw boost::system::system_error(error); // Some other error.
     }
 
@@ -231,7 +158,7 @@ void sendMapAssets(
         boost::asio::ip::tcp::socket& socket,
         const std::string& contentRoot)
 {
-    protectedPrint("Sending map assets");
+    DebugUtil::protectedPrint("Sending map assets", g_stdout_mutex);
 }
 
 void handleRequest(
@@ -256,7 +183,7 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
     MessageHandshake messageHandshake;
     boost::asio::ip::tcp::socket socket(ioContext);
 
-    protectedPrint("Serving");
+    DebugUtil::protectedPrint("Serving", g_stdout_mutex);
 
     for (;;) {
         if (socket.is_open()) {
@@ -275,7 +202,7 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
         } catch(std::runtime_error& e) {
             msg = "Exception while reading handshake: ";
             msg += e.what();
-            protectedPrint(msg);
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
             continue;
         }
 
@@ -285,9 +212,10 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
 #if DEBUG
             msg = "Received handshake message with version: ";
             msg += receivedHandshakeVersion;
-            protectedPrint(msg);
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
 #endif // DEBUG
 
+            // Currently require identical protocol version from client.
             ownHandshakeVersion = std::string(MESSAGE_HANDSHAKE_VERSION);
             if (0 != receivedHandshakeVersion.compare(ownHandshakeVersion)) {
                 msg = "Unsupported handshake version: ";
@@ -297,11 +225,21 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
         } catch(std::runtime_error& e) {
             msg = "Exception while handling handshake version: ";
             msg += e.what();
-            protectedPrint(msg);
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
             continue;
         }
 
+#if 0
         // TODO continue handshake with protocol switch
+        try {
+            messageHandshake = readHandshake(socket);
+        } catch(std::runtime_error& e) {
+            msg = "Exception while reading handshake: ";
+            msg += e.what();
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
+            continue;
+        }
+#endif
 
 #if 0
         ClientRequest request = readRequest(socket);
@@ -343,7 +281,7 @@ int main(int argc, char* argv[])
 
         boost::asio::signal_set signals(ioContext, SIGINT, SIGTERM);
         signals.async_wait([&](auto, auto) {
-            protectedPrint("Stopping");
+            DebugUtil::protectedPrint("Stopping", g_stdout_mutex);
             shouldStop = true;
             ioContext.stop();
         });
@@ -354,7 +292,7 @@ int main(int argc, char* argv[])
 
         ioContext.run();
 
-        protectedPrint("Joining threads");
+        DebugUtil::protectedPrint("Joining threads", g_stdout_mutex);
         for (std::thread& thread : servingThreads) {
             thread.join();
         }
