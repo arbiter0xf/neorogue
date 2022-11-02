@@ -13,6 +13,9 @@ const char MessageHandshake::payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] 
     MESSAGE_HANDSHAKE_VERSION_PREFIX
     MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER
     MESSAGE_HANDSHAKE_VERSION;
+const char MessageHandshake::payloadSwitchToFileTransfer[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] =
+    MESSAGE_HANDSHAKE_SWITCH_MESSAGE_PREFIX
+    MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER;
 
 // TODO tests for MessageHandshake
 
@@ -54,6 +57,19 @@ MessageHandshake::MessageHandshake(char message[MESSAGE_HANDSHAKE_SIZE])
     }
 
     std::memcpy(rawMessage, message, sizeof(rawMessage));
+}
+
+std::string MessageHandshake::getPayloadVersion(void)
+{
+    std::string str(MessageHandshake::payloadVersion);
+    return str;
+}
+
+std::string MessageHandshake::getPayloadSwitchToFileTransfer(void)
+{
+    std::string str(MessageHandshake::payloadSwitchToFileTransfer);
+    str += Message::typeFileTransfer;
+    return str;
 }
 
 char MessageHandshake::getType(void)
@@ -121,7 +137,7 @@ std::string MessageHandshake::getVersion(void)
 
     versionStart = payload.find(delimiter, findStart) + 1;
     if (std::string::npos == versionStart) {
-        throw std::runtime_error("Failed to find start of version from payload");
+        throw std::runtime_error("Failed to find start of version value from payload");
     }
 
     versionLen =
@@ -132,4 +148,34 @@ std::string MessageHandshake::getVersion(void)
     version = payload.substr(versionStart, versionLen);
 
     return version;
+}
+
+bool MessageHandshake::canSwitchToMessage(char messageType)
+{
+    return messageType == Message::typeFileTransfer;
+}
+
+char MessageHandshake::getMessageSwitch(void)
+{
+    std::string msg;
+    std::string payload = getPayload();
+    std::string delimiter = std::string(MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER);
+    const int findStart = 0;
+    std::size_t messageSwitchStart = 0;
+    char messageSwitch = 0;
+
+    messageSwitchStart = payload.find(delimiter, findStart) + 1;
+    if (std::string::npos == messageSwitchStart) {
+        throw std::runtime_error("Failed to find start of message switch value from payload");
+    }
+
+    messageSwitch = payload[messageSwitchStart];
+
+    if (!canSwitchToMessage(messageSwitch)) {
+        msg = "Unsupported message switch. Trying to switch from handshake to: ";
+        msg += messageSwitch;
+        throw std::runtime_error(msg);
+    }
+
+    return messageSwitch;
 }

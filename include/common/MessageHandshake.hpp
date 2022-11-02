@@ -26,6 +26,9 @@
 
 #define MESSAGE_HANDSHAKE_VERSION "0.0.1"
 #define MESSAGE_HANDSHAKE_VERSION_PREFIX "version"
+
+#define MESSAGE_HANDSHAKE_SWITCH_MESSAGE_PREFIX "switch_to_message"
+
 #define MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER ":"
 
 class MessageHandshake {
@@ -44,14 +47,21 @@ public:
     std::string getMessage(void);
     std::string getPayload(void);
     std::string getVersion(void);
+    char getMessageSwitch(void);
+
+    bool canSwitchToMessage(char messageType);
+
+    static std::string getPayloadVersion(void);
+    static std::string getPayloadSwitchToFileTransfer(void);
 
     static const int indexType;
     static const int indexSize;
     static const int indexPayload;
 
-    static const char payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
-
 private:
+    static const char payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
+    static const char payloadSwitchToFileTransfer[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
+
     char rawMessage[MESSAGE_HANDSHAKE_SIZE];
 };
 

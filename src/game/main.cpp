@@ -6,9 +6,8 @@
 // must then include boost/json.hpp.
 #include <boost/json/src.hpp>
 
-#include <stdio.h>
-
 #include <array>
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -257,12 +256,19 @@ void maybeDownloadContent()
         msg += MESSAGE_HANDSHAKE_VERSION;
         Log::i(msg);
 
-        MessageHandshake messageHandshake = MessageHandshake(
-                MessageHandshake::payloadVersion,
-                strlen(MessageHandshake::payloadVersion));
-        messageHandshake.getRawMessage(sendBuffer);
+        std::string payloadVersion = MessageHandshake::getPayloadVersion();
+        MessageHandshake messageVersion = MessageHandshake(
+                payloadVersion.c_str(),
+                std::strlen(payloadVersion.c_str()));
+        messageVersion.getRawMessage(sendBuffer);
 
-        // TODO hex print utility for inspecting buffer contents
+        bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
+        std::string payloadSwitchToFileTransfer = MessageHandshake::getPayloadSwitchToFileTransfer();
+        MessageHandshake messageMessageSwitch = MessageHandshake(
+                payloadSwitchToFileTransfer.c_str(),
+                std::strlen(payloadSwitchToFileTransfer.c_str()));
+        messageMessageSwitch.getRawMessage(sendBuffer);
 
         bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
 

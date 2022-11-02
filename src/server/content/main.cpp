@@ -180,6 +180,7 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
     std::string msg;
     std::string ownHandshakeVersion;
     std::string receivedHandshakeVersion;
+    char receivedSwitchValue[1] = {0};
     MessageHandshake messageHandshake;
     boost::asio::ip::tcp::socket socket(ioContext);
 
@@ -215,7 +216,7 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
             DebugUtil::protectedPrint(msg, g_stdout_mutex);
 #endif // DEBUG
 
-            // Currently require identical protocol version from client.
+            // Currently require identical version from client.
             ownHandshakeVersion = std::string(MESSAGE_HANDSHAKE_VERSION);
             if (0 != receivedHandshakeVersion.compare(ownHandshakeVersion)) {
                 msg = "Unsupported handshake version: ";
@@ -229,8 +230,6 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
             continue;
         }
 
-#if 0
-        // TODO continue handshake with protocol switch
         try {
             messageHandshake = readHandshake(socket);
         } catch(std::runtime_error& e) {
@@ -239,7 +238,20 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
             DebugUtil::protectedPrint(msg, g_stdout_mutex);
             continue;
         }
-#endif
+
+        try {
+#if DEBUG
+            msg = "Received handshake message with message switch: ";
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
+            receivedSwitchValue[0] = messageHandshake.getMessageSwitch();
+            DebugUtil::protectedPrintBufferAsDec(receivedSwitchValue, 1, g_stdout_mutex);
+#endif // DEBUG
+        } catch(std::runtime_error& e) {
+            msg = "Exception while handling handshake message switch: ";
+            msg += e.what();
+            DebugUtil::protectedPrint(msg, g_stdout_mutex);
+            continue;
+        }
 
 #if 0
         ClientRequest request = readRequest(socket);
