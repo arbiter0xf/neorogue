@@ -8,15 +8,22 @@ class DebugUtil
 {
 public:
     static void protectedPrint(std::string msg, std::mutex& stdoutMutex);
+    static void print(std::string msg);
     static void protectedPrintBufferAsDec(
         const char bufferToPrint[],
         std::size_t bufferToPrintSize,
         std::mutex& stdoutMutex);
+    static void printBufferAsDec(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize);
     static bool isVisibleCharacter(char character);
     static void protectedPrintBufferAsChar(
             const char bufferToPrint[],
             std::size_t bufferToPrintSize,
             std::mutex& stdoutMutex);
+    static void printBufferAsChar(
+            const char bufferToPrint[],
+            std::size_t bufferToPrintSize);
 
 private:
 };

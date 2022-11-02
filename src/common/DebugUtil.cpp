@@ -5,7 +5,11 @@
 void DebugUtil::protectedPrint(std::string msg, std::mutex& stdoutMutex)
 {
     std::lock_guard<std::mutex> stdoutLock(stdoutMutex);
+    print(msg);
+}
 
+void DebugUtil::print(std::string msg)
+{
     std::cout
         << "[tid:"
         << std::this_thread::get_id()
@@ -21,7 +25,13 @@ void DebugUtil::protectedPrintBufferAsDec(
         std::mutex& stdoutMutex)
 {
     std::lock_guard<std::mutex> stdoutLock(stdoutMutex);
+    printBufferAsDec(bufferToPrint, bufferToPrintSize);
+}
 
+void DebugUtil::printBufferAsDec(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
     std::cout
         << "[tid:"
         << std::this_thread::get_id()
@@ -60,7 +70,13 @@ void DebugUtil::protectedPrintBufferAsChar(
         std::mutex& stdoutMutex)
 {
     std::lock_guard<std::mutex> stdoutLock(stdoutMutex);
+    printBufferAsChar(bufferToPrint, bufferToPrintSize);
+}
 
+void DebugUtil::printBufferAsChar(
+        const char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
     std::cout
         << "[tid:"
         << std::this_thread::get_id()
