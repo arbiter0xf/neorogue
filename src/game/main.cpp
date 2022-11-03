@@ -264,10 +264,10 @@ void maybeDownloadContent()
 
         bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
 
-        std::string payloadSwitchToFileTransfer = MessageHandshake::getPayloadSwitchToFileTransfer();
+        std::string payloadSwitchToFileTransferControl = MessageHandshake::getPayloadSwitchToFileTransferControl();
         MessageHandshake messageMessageSwitch = MessageHandshake(
-                payloadSwitchToFileTransfer.c_str(),
-                std::strlen(payloadSwitchToFileTransfer.c_str()));
+                payloadSwitchToFileTransferControl.c_str(),
+                std::strlen(payloadSwitchToFileTransferControl.c_str()));
         messageMessageSwitch.getRawMessage(sendBuffer);
 
         bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);

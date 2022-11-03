@@ -13,7 +13,7 @@ const char MessageHandshake::payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] 
     MESSAGE_HANDSHAKE_VERSION_PREFIX
     MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER
     MESSAGE_HANDSHAKE_VERSION;
-const char MessageHandshake::payloadSwitchToFileTransfer[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] =
+const char MessageHandshake::payloadSwitchToFileTransferControl[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE] =
     MESSAGE_HANDSHAKE_SWITCH_MESSAGE_PREFIX
     MESSAGE_HANDSHAKE_PAYLOAD_DELIMITER;
 
@@ -65,10 +65,10 @@ std::string MessageHandshake::getPayloadVersion(void)
     return str;
 }
 
-std::string MessageHandshake::getPayloadSwitchToFileTransfer(void)
+std::string MessageHandshake::getPayloadSwitchToFileTransferControl(void)
 {
-    std::string str(MessageHandshake::payloadSwitchToFileTransfer);
-    str += Message::typeFileTransfer;
+    std::string str(MessageHandshake::payloadSwitchToFileTransferControl);
+    str += Message::typeFileTransferControl;
     return str;
 }
 
@@ -152,7 +152,7 @@ std::string MessageHandshake::getVersion(void)
 
 bool MessageHandshake::canSwitchToMessage(char messageType)
 {
-    return messageType == Message::typeFileTransfer;
+    return messageType == Message::typeFileTransferControl;
 }
 
 char MessageHandshake::getMessageSwitch(void)

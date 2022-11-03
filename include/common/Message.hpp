@@ -5,6 +5,7 @@ class Message {
 public:
     static const char typeHandshake;
     static const char typeFileTransfer;
+    static const char typeFileTransferControl;
 
 private:
 };

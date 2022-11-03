@@ -52,7 +52,7 @@ public:
     bool canSwitchToMessage(char messageType);
 
     static std::string getPayloadVersion(void);
-    static std::string getPayloadSwitchToFileTransfer(void);
+    static std::string getPayloadSwitchToFileTransferControl(void);
 
     static const int indexType;
     static const int indexSize;
@@ -60,7 +60,7 @@ public:
 
 private:
     static const char payloadVersion[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
-    static const char payloadSwitchToFileTransfer[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
+    static const char payloadSwitchToFileTransferControl[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE];
 
     char rawMessage[MESSAGE_HANDSHAKE_SIZE];
 };
