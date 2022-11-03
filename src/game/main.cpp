@@ -219,6 +219,42 @@ void printConstructedSpritesheets(const spritesheet_pool& spritesheetPool)
 }
 #endif
 
+void sendHandshakeVersion(boost::asio::ip::tcp::socket& socket)
+{
+    char sendBuffer[MESSAGE_HANDSHAKE_SIZE] = {0};
+    std::size_t bytesTransferred = 0;
+    boost::system::error_code error;
+    std::string payloadVersion = MessageHandshake::getPayloadVersion();
+    MessageHandshake messageVersion = MessageHandshake(
+            payloadVersion.c_str(),
+            std::strlen(payloadVersion.c_str()));
+    messageVersion.getRawMessage(sendBuffer);
+
+    bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
+    if (bytesTransferred != sizeof(sendBuffer)) {
+        throw std::runtime_error("Failed to send full sendBuffer");
+    }
+}
+
+void sendHandshakeSwitchToFileTransferControl(boost::asio::ip::tcp::socket& socket)
+{
+    char sendBuffer[MESSAGE_HANDSHAKE_SIZE] = {0};
+    std::size_t bytesTransferred = 0;
+    boost::system::error_code error;
+    std::string payloadSwitchToFileTransferControl = MessageHandshake::getPayloadSwitchToFileTransferControl();
+    MessageHandshake messageMessageSwitch = MessageHandshake(
+            payloadSwitchToFileTransferControl.c_str(),
+            std::strlen(payloadSwitchToFileTransferControl.c_str()));
+    messageMessageSwitch.getRawMessage(sendBuffer);
+
+    bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
+    if (bytesTransferred != sizeof(sendBuffer)) {
+        throw std::runtime_error("Failed to send full sendBuffer");
+    }
+}
+
 void maybeDownloadContent()
 {
     const int SERVER_CONTENT_PORT = 9002;
@@ -256,21 +292,9 @@ void maybeDownloadContent()
         msg += MESSAGE_HANDSHAKE_VERSION;
         Log::i(msg);
 
-        std::string payloadVersion = MessageHandshake::getPayloadVersion();
-        MessageHandshake messageVersion = MessageHandshake(
-                payloadVersion.c_str(),
-                std::strlen(payloadVersion.c_str()));
-        messageVersion.getRawMessage(sendBuffer);
+        sendHandshakeVersion(socket);
 
-        bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
-
-        std::string payloadSwitchToFileTransferControl = MessageHandshake::getPayloadSwitchToFileTransferControl();
-        MessageHandshake messageMessageSwitch = MessageHandshake(
-                payloadSwitchToFileTransferControl.c_str(),
-                std::strlen(payloadSwitchToFileTransferControl.c_str()));
-        messageMessageSwitch.getRawMessage(sendBuffer);
-
-        bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+        sendHandshakeSwitchToFileTransferControl(socket);
 
 #if 0
         Log::i("Getting maps");
