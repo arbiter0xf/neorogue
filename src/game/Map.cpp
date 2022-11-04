@@ -1,6 +1,8 @@
 #include "Log.hpp"
 #include "Map.hpp"
 
+const std::string Map::mapFileDirectory = "maps";
+
 Map::Map(std::string path)
 {
     loadJson(path);

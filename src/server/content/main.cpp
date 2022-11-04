@@ -1,8 +1,10 @@
 #include <boost/asio.hpp>
+#include <filesystem>
 #include <iostream>
 
 #include "DebugUtil.hpp"
 #include "MessageHandshake.hpp"
+#include "MessageFileTransfer.hpp"
 #include "MessageFileTransferControl.hpp"
 
 #define DEBUG 1
@@ -134,13 +136,30 @@ void sendMaps(
     boost::system::error_code error;
     std::size_t bytesTransferred = 0;
     std::string errorMsg;
-    std::string sendBuf;
-    char fileContentBuffer[4096] = {0};
+    const unsigned char testPayload[] = "map send test";
+    unsigned char sendBuffer[MESSAGE_FILE_TRANSFER_SIZE] = {0};
+    std::string msg;
+
+    const std::filesystem::path distributeRootDir{contentRoot};
+    const std::filesystem::path distributeMapsDir{contentRoot + "/maps"};
 
     DebugUtil::protectedPrint("Sending maps", g_stdout_mutex);
+
+    DebugUtil::protectedPrint("Printing detected maps:", g_stdout_mutex);
+    for (auto const& directoryEntry : std::filesystem::directory_iterator{distributeMapsDir})
+    {
+        msg = directoryEntry.path().string();
+        DebugUtil::protectedPrint(msg, g_stdout_mutex);
+    }
+
+    MessageFileTransfer messageFileTransfer(testPayload, sizeof(testPayload));
+    messageFileTransfer.getMessage(sendBuffer);
+    bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
     DebugUtil::protectedPrint("[FOR_DEBUGGING] Returning early", g_stdout_mutex);
     return;
 
+#if 0
     sendBuf = "map send test";
 
     // TODO use fixed buffer instead of dynamic buffer
@@ -165,7 +184,7 @@ void sendMaps(
     //         * Data size of less than maximum indicates the last packet. Data
     //           size can be 0 if the previous was a full sized packet and
     //           there is no more data to send.
-
+#endif
 }
 
 void sendMapAssets(

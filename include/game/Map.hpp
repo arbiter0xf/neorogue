@@ -14,6 +14,8 @@ public:
     int getLayerAmount(void);
     std::uint32_t getTiledGid(const int x, const int y, const int layerNum);
 
+    static const std::string mapFileDirectory;
+
 private:
     void loadJson(std::string path);
 

@@ -46,6 +46,15 @@ void DebugUtil::printBufferAsDec(
         << std::flush;
 }
 
+void DebugUtil::printBufferAsDec(
+        const unsigned char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
+    printBufferAsDec(
+            (const char*) bufferToPrint,
+            bufferToPrintSize);
+}
+
 // TODO protectedPrintBufferAsHex
 #if 0
 void protectedPrintBufferAsHex(
@@ -92,4 +101,13 @@ void DebugUtil::printBufferAsChar(
     std::cout
         << "\n"
         << std::flush;
+}
+
+void DebugUtil::printBufferAsChar(
+        const unsigned char bufferToPrint[],
+        std::size_t bufferToPrintSize)
+{
+    printBufferAsChar(
+            (const char*) bufferToPrint,
+            bufferToPrintSize);
 }

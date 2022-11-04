@@ -16,6 +16,9 @@ public:
     static void printBufferAsDec(
         const char bufferToPrint[],
         std::size_t bufferToPrintSize);
+    static void printBufferAsDec(
+            const unsigned char bufferToPrint[],
+            std::size_t bufferToPrintSize);
     static bool isVisibleCharacter(char character);
     static void protectedPrintBufferAsChar(
             const char bufferToPrint[],
@@ -23,6 +26,9 @@ public:
             std::mutex& stdoutMutex);
     static void printBufferAsChar(
             const char bufferToPrint[],
+            std::size_t bufferToPrintSize);
+    static void printBufferAsChar(
+            const unsigned char bufferToPrint[],
             std::size_t bufferToPrintSize);
 
 private:

@@ -8,17 +8,20 @@
 
 #include <array>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
 #include "Assets.hpp"
 #include "Constants.hpp"
+#include "DebugUtil.hpp"
 #include "GraphicsUtil.hpp"
 #include "Json.hpp"
 #include "Level.hpp"
 #include "Log.hpp"
 #include "Map.hpp"
 #include "MessageHandshake.hpp"
+#include "MessageFileTransfer.hpp"
 #include "MessageFileTransferControl.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
@@ -278,6 +281,27 @@ void sendFtcGetMaps(boost::asio::ip::tcp::socket& socket)
     }
 }
 
+std::string receiveMapName(boost::asio::ip::tcp::socket& socket)
+{
+    std::string mapName = "";
+
+    std::string msg;
+    std::size_t bytesRead;
+    unsigned char data[MESSAGE_FILE_TRANSFER_SIZE] = {0};
+    unsigned char debugPayload[MESSAGE_FILE_TRANSFER_PAYLOAD_MAX_SIZE] = {0};
+    MessageFileTransfer messageFileTransfer;
+
+    do {
+        bytesRead = read(socket, boost::asio::buffer(data));
+        messageFileTransfer = MessageFileTransfer(data);
+        mapName += messageFileTransfer.getPayloadStr();
+
+        // TODO test for map name exceeding payload max size
+    } while(MESSAGE_FILE_TRANSFER_PAYLOAD_MAX_SIZE == messageFileTransfer.getSize());
+
+    return mapName;
+}
+
 void maybeDownloadContent()
 {
     const int SERVER_CONTENT_PORT = 9002;
@@ -318,7 +342,17 @@ void maybeDownloadContent()
         sendHandshakeSwitchToFileTransferControl(socket);
 
         Log::i("Getting maps: ");
+        const std::filesystem::path dirMaps = {Map::mapFileDirectory};
+        if (!std::filesystem::exists(dirMaps)) {
+            std::filesystem::create_directory(dirMaps);
+        }
+
         sendFtcGetMaps(socket);
+
+        std::string mapName = receiveMapName(socket);
+        msg = "Received mapName: ";
+        msg += mapName;
+        Log::d(msg);
 
 #if 0
         Log::i("Getting maps");
