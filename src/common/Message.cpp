@@ -1,5 +1,5 @@
 #include "Message.hpp"
 
 const char Message::typeHandshake = 0;
-const char Message::typeFileTransfer = 1;
-const char Message::typeFileTransferControl = 2;
+const unsigned char Message::typeFileTransfer = 1;
+const unsigned char Message::typeFileTransferControl = 2;

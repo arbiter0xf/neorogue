@@ -3,6 +3,7 @@
 
 #include "DebugUtil.hpp"
 #include "MessageHandshake.hpp"
+#include "MessageFileTransferControl.hpp"
 
 #define DEBUG 1
 #define NETCAT_TESTABLE 0
@@ -116,6 +117,16 @@ MessageHandshake readHandshake(boost::asio::ip::tcp::socket& socket)
     return MessageHandshake(data);
 }
 
+MessageFileTransferControl readFileTransferControl(boost::asio::ip::tcp::socket& socket)
+{
+    std::size_t bytesRead;
+    unsigned char data[MESSAGE_FTC_SIZE] = {0};
+
+    bytesRead = read(socket, boost::asio::buffer(data));
+
+    return MessageFileTransferControl(data);
+}
+
 void sendMaps(
         boost::asio::ip::tcp::socket& socket,
         const std::string& contentRoot)
@@ -127,9 +138,12 @@ void sendMaps(
     char fileContentBuffer[4096] = {0};
 
     DebugUtil::protectedPrint("Sending maps", g_stdout_mutex);
+    DebugUtil::protectedPrint("[FOR_DEBUGGING] Returning early", g_stdout_mutex);
+    return;
 
     sendBuf = "map send test";
 
+    // TODO use fixed buffer instead of dynamic buffer
     bytesTransferred = write(socket, boost::asio::dynamic_buffer(sendBuf), error);
     if (error == boost::asio::error::eof) {
         // Connection closed cleanly by peer
@@ -175,13 +189,43 @@ void handleRequest(
     }
 }
 
-void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
+bool isLegalSwitch(unsigned char messageTypeFrom, unsigned char messageTypeTo)
+{
+    if ((unsigned char) Message::typeHandshake == messageTypeFrom
+            && Message::typeFileTransferControl == messageTypeTo) {
+        return true;
+    }
+
+    return false;
+}
+
+void handleFtcRequest(FtcRequest& ftcRequest, boost::asio::ip::tcp::socket& socket, std::string& contentRoot)
+{
+    if (FtcRequest::unknown == ftcRequest) {
+        throw std::runtime_error("Received ftc request with unknown type");
+    }
+
+    if (FtcRequest::getMaps == ftcRequest) {
+        sendMaps(socket, contentRoot);
+        return;
+    }
+
+    if (FtcRequest::getMapAssets == ftcRequest) {
+        sendMapAssets(socket, contentRoot);
+        return;
+    }
+}
+
+void serveBlocking(boost::asio::io_context& ioContext, std::string& contentRoot)
 {
     std::string msg;
     std::string ownHandshakeVersion;
     std::string receivedHandshakeVersion;
     char receivedSwitchValue[1] = {0};
+    unsigned char currentMessageType = 0;
+    char requestedMessageType = 0;
     MessageHandshake messageHandshake;
+    MessageFileTransferControl messageFileTransferControl;
     boost::asio::ip::tcp::socket socket(ioContext);
 
     DebugUtil::protectedPrint("Serving", g_stdout_mutex);
@@ -197,6 +241,8 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
         if (shouldStop) {
             return;
         }
+
+        currentMessageType = (unsigned char) Message::typeHandshake;
 
         try {
             messageHandshake = readHandshake(socket);
@@ -240,16 +286,50 @@ void serveBlocking(boost::asio::io_context& ioContext, std::string contentRoot)
         }
 
         try {
+            requestedMessageType = messageHandshake.getMessageSwitch();
+
+            if (!isLegalSwitch(currentMessageType, (unsigned char) requestedMessageType)) {
+                msg = "Unsupported message switch. Trying to switch from handshake to: ";
+                msg += std::to_string((int) requestedMessageType);
+                throw std::runtime_error(msg);
+            }
+
+            currentMessageType = (unsigned char) requestedMessageType;
+
 #if DEBUG
+            receivedSwitchValue[0] = messageHandshake.getMessageSwitch();
             msg = "Received handshake message with message switch: ";
             DebugUtil::protectedPrint(msg, g_stdout_mutex);
-            receivedSwitchValue[0] = messageHandshake.getMessageSwitch();
             DebugUtil::protectedPrintBufferAsDec(receivedSwitchValue, 1, g_stdout_mutex);
 #endif // DEBUG
         } catch(std::runtime_error& e) {
             msg = "Exception while handling handshake message switch: ";
             msg += e.what();
             DebugUtil::protectedPrint(msg, g_stdout_mutex);
+            continue;
+        }
+
+        try {
+            if (currentMessageType != Message::typeFileTransferControl) {
+                msg = "Unexpected message type when intending to read file transfer control. Message type: ";
+                msg += std::to_string((int) currentMessageType);
+                throw std::runtime_error(msg);
+            }
+
+            messageFileTransferControl = readFileTransferControl(socket);
+        } catch(std::runtime_error& e) {
+            msg = "Exception while reading file transfer control: ";
+            msg += e.what();
+            continue;
+        }
+
+        FtcRequest ftcRequest = messageFileTransferControl.matchToRequest();
+
+        try {
+            handleFtcRequest(ftcRequest, socket, contentRoot);
+        } catch(std::runtime_error& e) {
+            msg = "Exception while handling ftc request: ";
+            msg += e.what();
             continue;
         }
 

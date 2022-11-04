@@ -49,9 +49,16 @@ MessageHandshake::MessageHandshake(
 MessageHandshake::MessageHandshake(char message[MESSAGE_HANDSHAKE_SIZE])
 {
     char payloadSize = 0;
+    char messageType = 0; // Initialized to the type of handshake message (0)
+
+    messageType = message[MessageHandshake::indexType];
+    if (messageType != Message::typeHandshake) {
+        std::string msg = "Trying to construct handshake message with incorrect type: ";
+        msg += std::to_string((int) messageType);
+        throw std::runtime_error(msg);
+    }
 
     payloadSize = message[MessageHandshake::indexSize];
-
     if (payloadSize > MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE) {
         throw std::runtime_error("Trying to construct handshake message from message with too large payload size");
     }
@@ -109,10 +116,9 @@ void MessageHandshake::getRawMessage(char dest[MESSAGE_HANDSHAKE_SIZE])
     std::memcpy(dest, rawMessage, sizeof(rawMessage));
 }
 
-std::string MessageHandshake::getMessage(void)
+std::string MessageHandshake::getMessageStr(void)
 {
     std::string message = std::string(rawMessage);
-
     return message;
 }
 
@@ -150,11 +156,6 @@ std::string MessageHandshake::getVersion(void)
     return version;
 }
 
-bool MessageHandshake::canSwitchToMessage(char messageType)
-{
-    return messageType == Message::typeFileTransferControl;
-}
-
 char MessageHandshake::getMessageSwitch(void)
 {
     std::string msg;
@@ -170,12 +171,6 @@ char MessageHandshake::getMessageSwitch(void)
     }
 
     messageSwitch = payload[messageSwitchStart];
-
-    if (!canSwitchToMessage(messageSwitch)) {
-        msg = "Unsupported message switch. Trying to switch from handshake to: ";
-        msg += messageSwitch;
-        throw std::runtime_error(msg);
-    }
 
     return messageSwitch;
 }

@@ -9,7 +9,7 @@
  * Handshake message structure:
  * [ message type : size  : payload : padding ]
  * [ 1byte        : 1byte : xbytes  : ybytes  ]
- * handshake size = 32bytes
+ * total size = 32bytes
  * message type identifies this message as a handshake message
  * size tells the size of payload
  * xbytes = at maximum 'handshake size' - 'size' - 'message type'
@@ -44,7 +44,7 @@ public:
     char getType(void);
     void getRawPayload(char dest[MESSAGE_HANDSHAKE_PAYLOAD_MAX_SIZE]);
     void getRawMessage(char dest[MESSAGE_HANDSHAKE_SIZE]);
-    std::string getMessage(void);
+    std::string getMessageStr(void);
     std::string getPayload(void);
     std::string getVersion(void);
     char getMessageSwitch(void);

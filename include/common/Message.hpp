@@ -4,8 +4,8 @@
 class Message {
 public:
     static const char typeHandshake;
-    static const char typeFileTransfer;
-    static const char typeFileTransferControl;
+    static const unsigned char typeFileTransfer;
+    static const unsigned char typeFileTransferControl;
 
 private:
 };

@@ -19,6 +19,7 @@
 #include "Log.hpp"
 #include "Map.hpp"
 #include "MessageHandshake.hpp"
+#include "MessageFileTransferControl.hpp"
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 #include "Tile.hpp"
@@ -255,6 +256,28 @@ void sendHandshakeSwitchToFileTransferControl(boost::asio::ip::tcp::socket& sock
     }
 }
 
+void sendFtcGetMaps(boost::asio::ip::tcp::socket& socket)
+{
+    unsigned char sendBuffer[MESSAGE_FTC_SIZE] = {0};
+    unsigned char payloadGetMaps[MESSAGE_FTC_PAYLOAD_MAX_SIZE] = {0};
+    std::size_t bytesTransferred = 0;
+    boost::system::error_code error;
+
+    MessageFileTransferControl::getPayloadGetMaps(payloadGetMaps);
+
+    MessageFileTransferControl messageGetMaps(
+            payloadGetMaps,
+            sizeof(payloadGetMaps));
+
+    messageGetMaps.getRawMessage(sendBuffer);
+
+    bytesTransferred = write(socket, boost::asio::buffer(sendBuffer), error);
+
+    if (bytesTransferred != sizeof(sendBuffer)) {
+        throw std::runtime_error("Failed to send full sendBuffer");
+    }
+}
+
 void maybeDownloadContent()
 {
     const int SERVER_CONTENT_PORT = 9002;
@@ -291,10 +314,11 @@ void maybeDownloadContent()
         msg = "Performing handshake with handshake message version: ";
         msg += MESSAGE_HANDSHAKE_VERSION;
         Log::i(msg);
-
         sendHandshakeVersion(socket);
-
         sendHandshakeSwitchToFileTransferControl(socket);
+
+        Log::i("Getting maps: ");
+        sendFtcGetMaps(socket);
 
 #if 0
         Log::i("Getting maps");
