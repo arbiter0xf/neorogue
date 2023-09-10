@@ -1,3 +1,6 @@
+# TODO do renaming if going to actually use. "Makefile CI" & makefile.yml could
+# be better.
+
 name: Makefile CI
 
 on:
@@ -14,23 +17,29 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: configure
-      run: ./configure
+    # - name: configure
+    #   run: ./configure
       
     - name: Install build dependencies
       run: ./scripts/install_deps.sh
 
-    - name: Install tools
-      run: ./scripts/install_tools.sh
+    - name: Build unit tests
+      run: make utest
 
-    - name: Build - prepare
-      run: ./create_meson_build_dir.sh
+    - name: Run unit tests
+      run: ./utest
 
-    - name: Build - build
-      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson compile
+    # - name: Install tools
+    #   run: ./scripts/install_tools.sh
 
-    - name: Test
-      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson test
+    # - name: Build - prepare
+    #   run: ./create_meson_build_dir.sh
+
+    # - name: Build - build
+    #   run: cd build && PATH="${PATH}:${HOME}.local/bin" meson compile
+
+    # - name: Test
+    #   run: cd build && PATH="${PATH}:${HOME}.local/bin" meson test
 
     # - name: Run tests
     #   run: make check
