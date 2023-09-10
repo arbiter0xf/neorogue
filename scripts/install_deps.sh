@@ -2,6 +2,7 @@
 
 set -ex
 
+readonly INSTALL_CHECK_UNIT_TEST_FRAMEWORK="TRUE"
 readonly INSTALL_SDL="FALSE"
 readonly INSTALL_SDL_IMAGE="FALSE"
 readonly INSTALL_BOOSTORG_JSON="FALSE"
@@ -133,6 +134,15 @@ if [ "TRUE" == "${INSTALL_PUGIXML}" ] ; then
 	mv pugixml-1.12/src/pugixml.hpp ./include/
 fi
 popd # external/pugixml
+
+if [ "TRUE" == "${INSTALL_CHECK_UNIT_TEST_FRAMEWORK}" ] ; then
+	echo "Updating and upgrading packages"
+	sudo apt update
+	sudo apt -y upgrade
+
+	echo "Installing Check unit test framework"
+	sudo apt -y install check
+fi
 
 popd # ../
 
