@@ -10,6 +10,7 @@ readonly INSTALL_CPP_COMPILER="TRUE"
 readonly INSTALL_CJSON="TRUE"
 readonly INSTALL_WGET="TRUE"
 readonly INSTALL_GIT="TRUE"
+readonly INSTALL_UNZIP="TRUE"
 
 main() {
     if [ ! -d deps_install_workarea ] ; then
@@ -36,6 +37,11 @@ main() {
     if [ "TRUE" == "${INSTALL_GIT}" ] ; then
         sudo apt update
         sudo apt install -y git
+    fi
+
+    if [ "TRUE" == "${INSTALL_UNZIP}" ] ; then
+        sudo apt update
+        sudo apt install -y unzip
     fi
 
     if [ "TRUE" == "$INSTALL_SDL" ] ; then
