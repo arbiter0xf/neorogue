@@ -20,26 +20,26 @@ main() {
 
     if [ "TRUE" == "${INSTALL_CMAKE}" ] ; then
         sudo apt update
-        sudo apt install cmake
+        sudo apt install -y cmake
     fi
 
     if [ "TRUE" == "${INSTALL_CPP_COMPILER}" ] ; then
         sudo apt update
-        sudo apt install g++
+        sudo apt install -y g++
     fi
 
     if [ "TRUE" == "${INSTALL_WGET}" ] ; then
         sudo apt update
-        sudo apt install wget
+        sudo apt install -y wget
     fi
 
     if [ "TRUE" == "${INSTALL_GIT}" ] ; then
         sudo apt update
-        sudo apt install git
+        sudo apt install -y git
     fi
 
     if [ "TRUE" == "$INSTALL_SDL" ] ; then
-        sudo apt install libx11-dev libxext-dev
+        sudo apt install -y libx11-dev libxext-dev
 
         wget https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.24.0.zip
         unzip release-2.24.0.zip
@@ -51,7 +51,7 @@ main() {
     fi
 
     if [ "TRUE" == "$INSTALL_SDL_IMAGE" ] ; then
-        sudo apt install libx11-dev libxext-dev
+        sudo apt install -y libx11-dev libxext-dev
 
         wget https://github.com/libsdl-org/SDL_image/archive/refs/tags/release-2.6.2.zip
         unzip release-2.6.2.zip
