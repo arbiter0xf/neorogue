@@ -6,6 +6,7 @@ readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_CMAKE="TRUE"
+readonly INSTALL_CPP_COMPILER="TRUE"
 
 cd $(dirname $0)
 
@@ -18,6 +19,11 @@ pushd deps_install_workarea
 if [ "TRUE" == "${INSTALL_CMAKE}" ] ; then
     sudo apt update
     sudo apt install cmake
+fi
+
+if [ "TRUE" == "${INSTALL_CPP_COMPILER}" ] ; then
+    sudo apt update
+    sudo apt install g++
 fi
 
 if [ "TRUE" == "$INSTALL_SDL" ] ; then
