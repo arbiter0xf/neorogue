@@ -9,6 +9,7 @@ readonly INSTALL_BOOSTORG_ALL="FALSE"
 readonly INSTALL_BOOSTORG_ASIO="FALSE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_PUGIXML="FALSE"
+readonly INSTALL_CMAKE="TRUE"
 
 cd $(dirname $0)
 
@@ -18,8 +19,10 @@ fi
 
 pushd deps_install_workarea
 
-sudo apt update
-sudo apt install cmake
+if [ "TRUE" == "${INSTALL_CMAKE}" ] ; then
+    sudo apt update
+    sudo apt install cmake
+fi
 
 if [ "TRUE" == "$INSTALL_SDL" ] ; then
     sudo apt install libx11-dev libxext-dev
