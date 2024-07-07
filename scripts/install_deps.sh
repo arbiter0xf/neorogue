@@ -7,6 +7,7 @@ readonly INSTALL_SDL_IMAGE="TRUE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_CMAKE="TRUE"
 readonly INSTALL_CPP_COMPILER="TRUE"
+readonly INSTALL_CJSON="TRUE"
 
 main() {
     if [ ! -d deps_install_workarea ] ; then
@@ -55,8 +56,11 @@ main() {
     if [ ! -d external ] ; then
         mkdir external
     fi
-
     popd # ../
+
+    if [ "TRUE" == ${INSTALL_CJSON}] ; then
+        install_cjson
+    fi
 
     pushd ./deps_install_workarea
     if [ "TRUE" == "${INSTALL_GTEST}" ] ; then
@@ -65,6 +69,23 @@ main() {
     popd # ./deps_install_workarea
 
     sudo rm -rf ./deps_install_workarea
+}
+
+install_cjson() {
+    pushd ../external
+
+    git clone https://github.com/DaveGamble/cJSON.git
+    pushd cJSON
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+    sudo make install
+
+    popd # cJSON
+
+    popd # ../external
 }
 
 cd $(dirname $0)
