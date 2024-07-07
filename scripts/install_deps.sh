@@ -76,7 +76,7 @@ main() {
     fi
     popd # ../
 
-    if [ "TRUE" == ${INSTALL_CJSON}] ; then
+    if [ "TRUE" == "${INSTALL_CJSON}" ] ; then
         install_cjson
     fi
 
