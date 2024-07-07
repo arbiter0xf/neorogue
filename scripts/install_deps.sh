@@ -4,9 +4,6 @@ set -ex
 
 readonly INSTALL_SDL="TRUE"
 readonly INSTALL_SDL_IMAGE="TRUE"
-readonly INSTALL_BOOSTORG_JSON="FALSE"
-readonly INSTALL_BOOSTORG_ALL="FALSE"
-readonly INSTALL_BOOSTORG_ASIO="FALSE"
 readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_PUGIXML="FALSE"
 readonly INSTALL_CMAKE="TRUE"
@@ -55,60 +52,7 @@ if [ ! -d external ] ; then
     mkdir external
 fi
 
-if [ ! -d external/boostorg ] ; then
-    mkdir external/boostorg
-fi
-
-pushd external/boostorg
-if [ "TRUE" == "$INSTALL_BOOSTORG_JSON" ] ; then
-    git clone https://github.com/boostorg/json.git
-    # Dependencies for using boostorg json headeronly follow
-    git clone https://github.com/boostorg/config.git
-    git clone https://github.com/boostorg/assert.git
-    git clone https://github.com/boostorg/throw_exception.git
-    git clone https://github.com/boostorg/core.git
-    git clone https://github.com/boostorg/container.git
-    git clone https://github.com/boostorg/move.git
-    git clone https://github.com/boostorg/static_assert.git
-    git clone https://github.com/boostorg/intrusive.git
-    git clone https://github.com/boostorg/system.git
-    git clone https://github.com/boostorg/mp11.git
-    git clone https://github.com/boostorg/align.git
-    git clone https://github.com/boostorg/variant2.git
-fi
-
-if [ "TRUE" == "${INSTALL_BOOSTORG_ASIO}" ] ; then
-    test -d asio || git clone https://github.com/boostorg/asio.git
-    test -d date_time || git clone https://github.com/boostorg/date_time.git
-    test -d smart_ptr || git clone https://github.com/boostorg/smart_ptr.git
-    test -d utility || git clone https://github.com/boostorg/utility.git
-    test -d type_traits || git clone https://github.com/boostorg/type_traits.git
-    test -d numeric_conversion || git clone https://github.com/boostorg/numeric_conversion.git
-    test -d mpl || git clone https://github.com/boostorg/mpl.git
-    test -d preprocessor || git clone https://github.com/boostorg/preprocessor.git
-    test -d bind || git clone https://github.com/boostorg/bind.git
-    test -d regex || git clone https://github.com/boostorg/regex.git
-    test -d predef || git clone https://github.com/boostorg/predef.git
-fi
-popd # external/boostorg
 popd # ../
-
-pushd  ./deps_install_workarea
-if [ "TRUE" == ${INSTALL_BOOSTORG_ALL} ] ; then
-    boost_name="boost_1_80_0"
-    boost_tar="${boost_name}.tar.gz"
-    wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/${boost_tar}
-    tar -xvzf ${boost_tar}
-    pushd ${boost_name}
-    # ./bootstrap.sh --with-libraries='asio json'
-    # asio currently not detected as a library. See libraries
-    # with --show-libraries
-    ./bootstrap.sh
-    sudo ./b2 install
-    popd # ${boost_name}
-    rm ${boost_tar}
-fi
-popd # ./deps_install_workarea
 
 pushd ./deps_install_workarea
 if [ "TRUE" == "${INSTALL_GTEST}" ] ; then
