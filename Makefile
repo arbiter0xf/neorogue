@@ -13,31 +13,7 @@ SRC_SERVER_ROUTE := src/server_route/main.cpp
 SRC_SERVER_ROUTE_TEST_CLIENT := src/server_route/test_client.cpp
 
 CC := g++
-INCLUDES := \
-	    -Iexternal/boostorg/json/include/ \
-	    -Iexternal/boostorg/config/include/ \
-	    -Iexternal/boostorg/assert/include/ \
-	    -Iexternal/boostorg/throw_exception/include/ \
-	    -Iexternal/boostorg/core/include/ \
-	    -Iexternal/boostorg/container/include/ \
-	    -Iexternal/boostorg/move/include/ \
-	    -Iexternal/boostorg/static_assert/include/ \
-	    -Iexternal/boostorg/intrusive/include/ \
-	    -Iexternal/boostorg/system/include/ \
-	    -Iexternal/boostorg/mp11/include/ \
-	    -Iexternal/boostorg/align/include/ \
-	    -Iexternal/boostorg/asio/include/ \
-	    -Iexternal/boostorg/date_time/include/ \
-	    -Iexternal/boostorg/smart_ptr/include/ \
-	    -Iexternal/boostorg/utility/include/ \
-	    -Iexternal/boostorg/type_traits/include/ \
-	    -Iexternal/boostorg/numeric_conversion/include/ \
-	    -Iexternal/boostorg/mpl/include/ \
-	    -Iexternal/boostorg/preprocessor/include/ \
-	    -Iexternal/boostorg/bind/include/ \
-	    -Iexternal/boostorg/regex/include/ \
-	    -Iexternal/boostorg/predef/include/ \
-	    -Iinclude
+INCLUDES := -Iinclude
 INCLUDES_TEST := -I/opt/gtest/include/
 COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
 COMPILER_FLAGS_GAME := \

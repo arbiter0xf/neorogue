@@ -8,25 +8,54 @@ Map::Map(std::string path)
 
 void Map::loadJson(std::string path)
 {
-    Json::readFromFile(path, mapTmj);
+    mapTmj = Json::readFromFile(path);
 }
 
-boost::json::value Map::getTmj(void)
+cJSON* Map::getTmj(void)
 {
     return mapTmj;
 }
 
+#if 0
+boost::json::value Map::getTmjBoostlib(void)
+{
+    return mapTmj;
+}
+#endif
+
+cJSON* Map::getLayers(void)
+{
+    Log::w("Map::getLayers not yet implemented");
+    return nullptr;
+}
+
+#if 0
 boost::json::value Map::getLayers(void)
 {
     return mapTmj.get_object().find("layers")->value();
 }
+#endif
 
 int Map::getLayerAmount(void)
 {
-    return getLayers().as_array().size();
+    Log::w("Map::getLayerAmount not yet implemented");
+    return -1;
 }
 
+#if 0
+int Map::getLayerAmountBoostlib(void)
+{
+    return getLayers().as_array().size();
+}
+#endif
+
 std::uint32_t Map::getTiledGid(const int x, const int y, const int layerNum)
+{
+    Log::w("Map::getTiledGid not yet implemented");
+}
+
+#if 0
+std::uint32_t Map::getTiledGidBoostlib(const int x, const int y, const int layerNum)
 {
     std::uint32_t tiledGid = 0;
     int layerWidth = 0;
@@ -60,3 +89,4 @@ std::uint32_t Map::getTiledGid(const int x, const int y, const int layerNum)
 
     return tiledGid;
 }
+#endif

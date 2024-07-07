@@ -6,10 +6,16 @@
 
 #include "Log.hpp"
 
+void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
+{
+    Log::w("GraphicsUtil::generateTiles not yet implemented");
+}
+
+#if 0
 /*
  * \exception May throw std::exception
  */
-void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
+void GraphicsUtil::generateTilesBoostlib(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
 {
     int spritesheetTileHeight = -1;
     int spritesheetTileWidth = -1;
@@ -105,8 +111,15 @@ void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& t
         }
     }
 }
+#endif
 
 void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheetPool, Map& map)
+{
+    Log::w("GraphicsUtil::loadSpritesheets not yet implemented");
+}
+
+#if 0
+void GraphicsUtil::loadSpritesheetsBoostlib(spritesheet_pool& spritesheetPool, Map& map)
 {
     boost::json::value tmj = map.getTmj();
     std::vector<std::string> tilesetNames;
@@ -155,6 +168,7 @@ void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheetPool, Map& map)
             });
 #endif
 }
+#endif
 
 // Keeping as a reference for using std::filesystem
 void GraphicsUtil::generateTileIdMapFile(tile_id_map& tileIdMap)

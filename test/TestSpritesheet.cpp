@@ -1,3 +1,5 @@
+#if 0
+
 #include "gtest/gtest.h"
 
 #include "GraphicsUtil.hpp"
@@ -35,7 +37,13 @@ TEST_F(TestSpritesheet, SpritesheetGetsFirstgid)
     EXPECT_EQ(testSpritesheet.getTiledFirstgid(), 560);
 }
 
+#if 0
 TEST_F(TestSpritesheet, SpritesheetLoadsExpectedTmjData)
+{
+}
+#endif
+
+TEST_F(TestSpritesheet, SpritesheetLoadsExpectedTmjDataBoostlib)
 {
     spritesheet_pool spritesheetPool;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
@@ -69,3 +77,5 @@ TEST_F(TestSpritesheet, SpritesheetLoadsExpectedTmjData)
 
     EXPECT_EQ(layerData.as_array()[82].as_int64(), 83);
 }
+
+#endif

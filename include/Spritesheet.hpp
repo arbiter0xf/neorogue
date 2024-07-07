@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Json.hpp"
 #include "Map.hpp"
@@ -29,7 +30,10 @@ public:
 
     std::string getName(void) const;
     std::shared_ptr<SDL_Texture> getTexture(void);
-    const boost::json::value& getJson(void);
+    cJSON* getJson(void);
+#if 0
+    const boost::json::value& getJsonBoostlib(void);
+#endif
     int getTiledFirstgid(void) const;
 
     static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames;
@@ -37,7 +41,10 @@ public:
 private:
     std::string name;
     std::shared_ptr<SDL_Texture> texture;
-    boost::json::value jsonValue;
+    cJSON* json;
+#if 0
+    boost::json::value jsonValueBoostlib;
+#endif
     int tiledFirstgid;
 
     void loadTexture(std::string pathImage);

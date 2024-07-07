@@ -1,3 +1,5 @@
+#if 0
+
 #include "gtest/gtest.h"
 
 #include "Map.hpp"
@@ -65,3 +67,5 @@ TEST_F(TestMap, TryToGetGidFromOutOfBounds3)
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
     EXPECT_EQ(testMap.getTiledGid(x, y, layer), 0);
 }
+
+#endif

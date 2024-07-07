@@ -9,15 +9,29 @@ public:
     Map() = delete;
     Map(std::string path);
 
-    boost::json::value getTmj(void);
-    boost::json::value getLayers(void);
+    cJSON* getTmj(void);
+#if 0
+    boost::json::value getTmjBoostlib(void);
+#endif
+
+    cJSON* getLayers(void);
+#if 0
+    boost::json::value getLayersBoostlib(void);
+#endif
+
     int getLayerAmount(void);
+#if 0
+    int getLayerAmountBoostlib(void);
+#endif
     std::uint32_t getTiledGid(const int x, const int y, const int layerNum);
 
 private:
     void loadJson(std::string path);
 
-    boost::json::value mapTmj;
+    cJSON* mapTmj;
+#if 0
+    boost::json::value mapTmjBoostlib;
+#endif
 };
 
 #endif // MAP_HPP_DEFINED

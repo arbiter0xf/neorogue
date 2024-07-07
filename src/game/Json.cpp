@@ -1,10 +1,39 @@
+#if 0
+// Remove when boostlib methods removed
 #include <iostream>
 #include <fstream>
+#endif
+
+#include <string.h>
+#include <sys/stat.h>
 
 #include "Json.hpp"
 #include "Log.hpp"
 
-void Json::readFromFile(std::string filename, boost::json::value& jsonValue)
+cJSON* Json::readFromFile(std::string file_path)
+{
+    int ret;
+    struct stat file_stat;
+
+    ret = 0;
+    file_stat = {};
+
+    ret = stat(file_path.c_str(), &file_stat);
+    if (0 != ret) {
+        std::string msg = "Failed to stat ";
+        msg += file_path;
+        msg += " : ";
+        msg += strerror(errno);
+        throw std::runtime_error(msg);
+    }
+
+    printf("%s size is: %d\n", file_path.c_str(), file_stat.st_size);
+
+    return nullptr; // TODO return cJSON
+}
+
+#if 0
+void Json::readFromFileBoostlib(std::string filename, boost::json::value& jsonValue)
 {
     std::ifstream jsonStream;
     char buffer[4096] = {0};
@@ -114,3 +143,5 @@ boost::json::object Json::getFirstInnerObject(const boost::json::value& jsonValu
     auto iter = outerObj.begin();
     return iter->value().get_object();
 }
+
+#endif

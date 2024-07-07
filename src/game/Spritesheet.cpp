@@ -46,10 +46,17 @@ std::shared_ptr<SDL_Texture> Spritesheet::getTexture(void)
     return texture;
 }
 
-const boost::json::value& Spritesheet::getJson(void)
+cJSON* Spritesheet::getJson(void)
+{
+    return json;
+}
+
+#if 0
+const boost::json::value& Spritesheet::getJsonBoostlib(void)
 {
     return jsonValue;
 }
+#endif
 
 int Spritesheet::getTiledFirstgid(void) const
 {
@@ -68,10 +75,23 @@ void Spritesheet::loadTexture(std::string pathImage)
 
 void Spritesheet::loadJson(std::string pathJson)
 {
-    Json::readFromFile(pathJson, jsonValue);
+    json = Json::readFromFile(pathJson);
 }
 
+#if 0
+void Spritesheet::loadJsonBoostlib(std::string pathJson)
+{
+    Json::readFromFile(pathJson, jsonValue);
+}
+#endif
+
 void Spritesheet::fetchFirstgid(Map& map)
+{
+    Log::w("Spritesheet::fetchFirstgid not yet implemented");
+}
+
+#if 0
+void Spritesheet::fetchFirstgidBoostlib(Map& map)
 {
     boost::json::value tmj = map.getTmj();
 
@@ -115,3 +135,4 @@ void Spritesheet::fetchFirstgid(Map& map)
 
     throw std::runtime_error("Could not find firstgid for spritesheet: " + name);
 }
+#endif
