@@ -8,6 +8,8 @@ readonly INSTALL_GTEST="TRUE"
 readonly INSTALL_CMAKE="TRUE"
 readonly INSTALL_CPP_COMPILER="TRUE"
 readonly INSTALL_CJSON="TRUE"
+readonly INSTALL_WGET="TRUE"
+readonly INSTALL_GIT="TRUE"
 
 main() {
     if [ ! -d deps_install_workarea ] ; then
@@ -24,6 +26,16 @@ main() {
     if [ "TRUE" == "${INSTALL_CPP_COMPILER}" ] ; then
         sudo apt update
         sudo apt install g++
+    fi
+
+    if [ "TRUE" == "${INSTALL_WGET}" ] ; then
+        sudo apt update
+        sudo apt install wget
+    fi
+
+    if [ "TRUE" == "${INSTALL_GIT}" ] ; then
+        sudo apt update
+        sudo apt install git
     fi
 
     if [ "TRUE" == "$INSTALL_SDL" ] ; then
