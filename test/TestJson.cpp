@@ -27,9 +27,19 @@ TEST_F(TestJson, ParseJsonFromFile)
     EXPECT_NE(json, nullptr);
 }
 
-// TODO read tileheight and match to be '32'
-//
-TEST_F(TestJson, X)
+TEST_F(TestJson, ReadMapTileHeight)
 {
-    EXPECT_EQ(1, 0); // Test is yet to be written
+    cJSON* json;
+    cJSON* tileheight;
+
+    const std::string file_path = "test_data/map2_16x16_redone.tmj";
+
+    json = 0;
+    tileheight = 0;
+
+    json = Json::readFromFile(file_path);
+
+    tileheight = cJSON_GetObjectItemCaseSensitive(json, "tileheight");
+
+    EXPECT_EQ(32, tileheight->valueint); // Test is yet to be written
 }
