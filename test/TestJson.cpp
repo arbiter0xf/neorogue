@@ -41,5 +41,5 @@ TEST_F(TestJson, ReadMapTileHeight)
 
     tileheight = cJSON_GetObjectItemCaseSensitive(json, "tileheight");
 
-    EXPECT_EQ(32, tileheight->valueint); // Test is yet to be written
+    EXPECT_EQ(32, tileheight->valueint);
 }
