@@ -156,58 +156,6 @@ void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheet_pool, Map& map
     }
 }
 
-#if 0
-void GraphicsUtil::loadSpritesheetsBoostlib(spritesheet_pool& spritesheetPool, Map& map)
-{
-    boost::json::value tmj = map.getTmj();
-    std::vector<std::string> tilesetNames;
-
-    spritesheetPool.clear();
-
-    if (boost::json::kind::object != tmj.kind()) {
-        throw std::runtime_error("Top level map .tmj JSON value is not an object");
-    }
-
-    boost::json::value tilesetsArray = tmj
-        .get_object()
-        .find("tilesets")
-        ->value();
-
-    if (boost::json::kind::array != tilesetsArray.kind()) {
-        throw std::runtime_error("JSON tilesets value is not an array");
-    }
-
-    for (boost::json::value tileset : tilesetsArray.as_array()) {
-        std::string tmpStr;
-        boost::json::value tilesetSource = tileset
-            .get_object()
-            .find("source")
-            ->value();
-        tmpStr = tilesetSource.as_string().c_str();
-        tilesetNames.push_back(tmpStr);
-    }
-
-    for (std::string spritesheetName : Spritesheet::spritesheetNames) {
-        for (std::string tilesetName : tilesetNames) {
-            if (0 == tilesetName.compare(spritesheetName + ".tsx")) {
-                spritesheetPool.push_back(Spritesheet(spritesheetName, map));
-                break;
-            }
-        }
-    }
-
-#if 0
-    std::transform(
-            Spritesheet::spritesheetNames.cbegin(),
-            Spritesheet::spritesheetNames.cend(),
-            spritesheetPool.begin(),
-            [](const std::string name) {
-                return Spritesheet(name, map);
-            });
-#endif
-}
-#endif
-
 // Keeping as a reference for using std::filesystem
 void GraphicsUtil::generateTileIdMapFile(tile_id_map& tileIdMap)
 {
