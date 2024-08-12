@@ -6,7 +6,7 @@
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 
-const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheetNames = {
+const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheet_names = {
     "dc-dngn-collection-spritesheet",
     "dc-misc-collection-spritesheet",
     "dc-mon-collection-spritesheet",

@@ -36,7 +36,7 @@ public:
 #endif
     int getTiledFirstgid(void) const;
 
-    static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames;
+    static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheet_names;
 
 private:
     std::string name;
