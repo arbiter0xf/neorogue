@@ -113,9 +113,47 @@ void GraphicsUtil::generateTilesBoostlib(spritesheet_pool& spritesheetPool, tile
 }
 #endif
 
-void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheetPool, Map& map)
+void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheet_pool, Map& map)
 {
-    Log::w("GraphicsUtil::loadSpritesheets not yet implemented");
+    cJSON* tmj;
+    cJSON* item;
+    cJSON* tileset;
+    cJSON* tileset_source;
+
+    std::vector<std::string> tileset_names;
+
+    tmj = 0;
+    item = 0;
+    tileset = 0;
+    tileset_source = 0;
+
+    tmj = map.getTmj();
+    if ( ! cJSON_IsObject(tmj)) {
+        throw std::runtime_error("Top level map .tmj JSON value is not an object");
+    }
+
+    item = cJSON_GetObjectItemCaseSensitive(tmj, "tilesets");
+    if ( ! cJSON_IsArray(item)) {
+        throw std::runtime_error("JSON tilesets value is not an array");
+    }
+
+    cJSON_ArrayForEach(tileset, item) {
+        tileset_source = cJSON_GetObjectItemCaseSensitive(tileset, "source");
+        if ( ! cJSON_IsString(tileset_source)) {
+            throw std::runtime_error("Tileset source is not a string");
+        }
+
+        tileset_names.push_back(tileset_source->valuestring);
+    }
+
+    for (std::string spritesheet_name : Spritesheet::spritesheet_names) {
+        for (std::string tileset_name : tileset_names) {
+            if (0 == tileset_name.compare(spritesheet_name + ".tsx")) {
+                spritesheet_pool.push_back(Spritesheet(spritesheet_name, map));
+                break;
+            }
+        }
+    }
 }
 
 #if 0

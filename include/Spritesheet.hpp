@@ -50,6 +50,7 @@ private:
     void loadTexture(std::string pathImage);
     void loadJson(std::string pathJson);
     void fetchFirstgid(Map& map);
+    void set_tiled_firstgid(int new_tiled_firstgid);
 };
 
 #endif
