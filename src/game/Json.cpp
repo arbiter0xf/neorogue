@@ -96,45 +96,6 @@ cJSON* Json::readFromFile(std::string file_path)
 }
 
 #if 0
-void Json::readFromFileBoostlib(std::string filename, boost::json::value& jsonValue)
-{
-    std::ifstream jsonStream;
-    char buffer[4096] = {0};
-    std::size_t readAmount = 0;
-    boost::json::stream_parser jsonStreamParser;
-    boost::json::error_code ec;
-
-    jsonStream.open(filename, std::ifstream::in);
-    if (jsonStream.fail()) {
-        throw std::runtime_error("Failed to open json file: " + filename);
-    }
-
-    do {
-        jsonStream.read(buffer, sizeof(buffer));
-        readAmount = jsonStream.gcount();
-#if DEBUG_VERBOSE
-        std::cout << DBG << "Successfully read " << readAmount << " characters" << "\n";
-#endif
-        jsonStreamParser.write(buffer, readAmount, ec);
-        if (ec) {
-            throw std::runtime_error("Stream parser write failed");
-        }
-    } while(!jsonStream.eof());
-
-    jsonStreamParser.finish(ec);
-    if (ec) {
-        throw std::runtime_error("Stream parser finish failed");
-    }
-
-    jsonStream.clear();
-    jsonStream.close();
-    if (jsonStream.fail()) {
-        throw std::runtime_error("Failed to close json file: " + filename);
-    }
-
-    jsonValue = jsonStreamParser.release();
-}
-
 boost::json::value Json::getValueWithKey(
         const char* key,
         const boost::json::object& frameObject)

@@ -51,13 +51,6 @@ cJSON* Spritesheet::getJson(void)
     return json;
 }
 
-#if 0
-const boost::json::value& Spritesheet::getJsonBoostlib(void)
-{
-    return jsonValue;
-}
-#endif
-
 int Spritesheet::getTiledFirstgid(void) const
 {
     return tiledFirstgid;
@@ -82,13 +75,6 @@ void Spritesheet::loadJson(std::string pathJson)
 {
     json = Json::readFromFile(pathJson);
 }
-
-#if 0
-void Spritesheet::loadJsonBoostlib(std::string pathJson)
-{
-    Json::readFromFile(pathJson, jsonValue);
-}
-#endif
 
 void Spritesheet::fetchFirstgid(Map& map)
 {
