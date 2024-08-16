@@ -6,8 +6,103 @@
 
 #include "Log.hpp"
 
-void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
+void GraphicsUtil::generateTiles(spritesheet_pool& spritesheet_pool, tile_pool& tile_pool)
 {
+    int spritesheet_tile_height;
+    int spritesheet_tile_width;
+    int spritesheet_width;
+
+    cJSON* tmj;
+    cJSON* item;
+    cJSON* data_item;
+    cJSON* layer_data;
+    cJSON* layers_array;
+    std::shared_ptr<SDL_Texture> texture_spritesheet;
+
+    spritesheet_tile_height = -1;
+    spritesheet_tile_width = -1;
+    spritesheet_width = -1;
+    tmj = 0;
+    item = 0;
+    data_item = 0;
+    layer_data = 0;
+    layers_array = 0;
+
+    tile_pool.clear();
+
+    for (Spritesheet& spritesheet : spritesheet_pool) {
+        tmj = spritesheet.getJson();
+        texture_spritesheet = spritesheet.getTexture();
+
+        if ( ! cJSON_IsObject(tmj)) {
+            throw std::runtime_error("Top level tmj JSON value is not an object");
+        }
+
+        item = cJSON_GetObjectItemCaseSensitive(tmj, "tileheight");
+        spritesheet_tile_height = item->valueint;
+
+        item = cJSON_GetObjectItemCaseSensitive(tmj, "tilewidth");
+        spritesheet_tile_width = item->valueint;
+
+        if (32 != spritesheet_tile_height || 32 != spritesheet_tile_width) {
+            throw std::runtime_error("Spritesheet tile size is not 32x32");
+        }
+
+        layers_array = cJSON_GetObjectItemCaseSensitive(tmj, "layers");
+        if (1 != cJSON_GetArraySize(layers_array)) {
+            throw std::runtime_error("Spritesheet JSON does not contain 1 layer");
+        }
+
+        item = cJSON_GetArrayItem(layers_array, 0);
+        layer_data = cJSON_GetObjectItemCaseSensitive(item, "data");
+        if ( ! cJSON_IsArray(layer_data)) {
+            throw std::runtime_error("layer_data is not an array");
+        }
+
+        item = cJSON_GetObjectItemCaseSensitive(item, "width");
+        spritesheet_width = item->valueint;
+
+        // for (boost::json::value dataItem : layerData.as_array()) {
+        cJSON_ArrayForEach(data_item, layer_data) {
+            // ID for spritesheet and GID for whole map
+            unsigned int tiled_id = data_item->valueint;
+            unsigned int tiled_gid = spritesheet.getTiledFirstgid() - 1 + tiled_id;
+
+            if (0 == tiled_id) {
+                break;
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_HORIZONTALLY_FLAG)) {
+                throw std::runtime_error("Horizontally flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_VERTICALLY_FLAG)) {
+                throw std::runtime_error("Vertically flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_DIAGONALLY_FLAG)) {
+                throw std::runtime_error("Diagonally flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_ROTATED_HEXAGONAL_120_FLAG)) {
+                throw std::runtime_error("Rotated tiles not supported");
+            }
+
+            const int x = (tiled_id - 1) % spritesheet_width;
+            const int y = (tiled_id - 1) / spritesheet_width;
+
+            tile_pool[tiled_gid] = Tile(
+                        "namePlaceholder",
+                        texture_spritesheet,
+                        x * g_constants::TILE_WIDTH,
+                        y * g_constants::TILE_HEIGHT,
+                        g_constants::TILE_WIDTH,
+                        g_constants::TILE_HEIGHT,
+                        tiled_gid,
+                        tiled_id);
+        }
+    }
+
     Log::w("GraphicsUtil::generateTiles not yet implemented");
 }
 
