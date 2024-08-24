@@ -8,8 +8,15 @@ Map::Map(std::string path)
 
 void Map::loadJson(std::string path)
 {
+    Log::w("Map::loadJson not yet implemented");
+}
+
+#if 0
+void Map::cJSONloadJson(std::string path)
+{
     mapTmj = Json::readFromFile(path);
 }
+#endif
 
 cJSON* Map::getTmj(void)
 {

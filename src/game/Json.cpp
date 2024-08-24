@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #endif
+#include <fstream>
 
 #include <string.h>
 #include <sys/stat.h>
@@ -10,6 +11,15 @@
 #include "Json.hpp"
 #include "Log.hpp"
 
+nlohmann::json Json::readFromFile(std::string file_path)
+{
+    std::ifstream f(file_path.c_str());
+    nlohmann::json data = nlohmann::json::parse(f);
+
+    return data;
+}
+
+#if 0
 cJSON* Json::readFromFile(std::string file_path)
 {
     const int bytes = 1;
@@ -94,6 +104,7 @@ cJSON* Json::readFromFile(std::string file_path)
 
     return json;
 }
+#endif
 
 #if 0
 boost::json::value Json::getValueWithKey(

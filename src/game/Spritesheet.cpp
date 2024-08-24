@@ -73,8 +73,15 @@ void Spritesheet::loadTexture(std::string pathImage)
 
 void Spritesheet::loadJson(std::string pathJson)
 {
+    Log::w("Spritesheet::loadJson not yet implemented");
+}
+
+#if 0
+void Spritesheet::cJSONloadJson(std::string pathJson)
+{
     json = Json::readFromFile(pathJson);
 }
+#endif
 
 void Spritesheet::fetchFirstgid(Map& map)
 {

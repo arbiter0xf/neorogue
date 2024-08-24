@@ -6,13 +6,15 @@
 #endif
 
 #include <cjson/cJSON.h>
+#include <nlohmann/json.hpp>
 
 #include <string>
 
 class Json
 {
 public:
-    static cJSON* readFromFile(std::string filename);
+    static nlohmann::json readFromFile(std::string filename);
+    // static cJSON* readFromFile(std::string filename);
 #if 0
     static void readFromFileBoostlib(std::string filename, boost::json::value& jsonValue);
     static void texturepackerGetFrameObject(

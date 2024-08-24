@@ -37,6 +37,12 @@ TEST_F(TestSpritesheet, SpritesheetGetsFirstgid)
 
 TEST_F(TestSpritesheet, MonSpritesheetContainsOneLayer)
 {
+    EXPECT_EQ(0, 1);
+}
+
+#if 0
+TEST_F(TestSpritesheet, MonSpritesheetContainsOneLayer)
+{
     cJSON* tmj;
     cJSON* layers_array;
     spritesheet_pool spritesheet_pool;
@@ -63,7 +69,14 @@ TEST_F(TestSpritesheet, MonSpritesheetContainsOneLayer)
 
     EXPECT_EQ(cJSON_GetArraySize(layers_array), 1);
 }
+#endif
 
+TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
+{
+    EXPECT_EQ(0, 1);
+}
+
+#if 0
 TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
 {
     cJSON* tmj;
@@ -100,3 +113,4 @@ TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
 
     EXPECT_EQ(data_item->valueint, 83);
 }
+#endif
