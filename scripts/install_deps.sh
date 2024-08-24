@@ -97,7 +97,7 @@ install_cjson() {
 
     mkdir build
     cd build
-    cmake ..
+    cmake .. -DBUILD_SHARED_AND_STATIC_LIBS=On
     make
     sudo make install
 
