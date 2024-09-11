@@ -15,7 +15,7 @@ public:
     boost::json::value getTmjBoostlib(void);
 #endif
 
-    cJSON* getLayers(void);
+    std::vector<nlohmann::json> getLayers(void);
 #if 0
     boost::json::value getLayersBoostlib(void);
 #endif
@@ -24,7 +24,7 @@ public:
 #if 0
     int getLayerAmountBoostlib(void);
 #endif
-    std::uint32_t getTiledGid(const int x, const int y, const int layerNum);
+    std::uint32_t get_tiled_gid(const int x, const int y, const int layerNum);
 
 private:
     void loadJson(std::string path);

@@ -113,7 +113,7 @@ void fillScreenTiles(
                     break;
                 }
 
-                std::uint32_t tiledGid = map.getTiledGid(levelX, levelY, layerNum);
+                std::uint32_t tiledGid = map.get_tiled_gid(levelX, levelY, layerNum);
                 // Leave as null if gid zero
                 if (0 != tiledGid) {
                     screenTiles[screenTileY][screenTileX] = &(tilePool[tiledGid]);
@@ -234,6 +234,8 @@ void game(void)
 
     // TODO check file existence
 
+    Log::clear();
+
     Log::i("Loading map2");
     Map currentMap = Map("maps/map2_16x16_redone.tmj");
 
@@ -256,8 +258,10 @@ void game(void)
     try {
         GraphicsUtil::generateTiles(spritesheetPool, tilePool);
     } catch (std::exception const& e) {
-        std::cerr << ERR << "Exception while generating tiles from spritesheets: "
-            << e.what() << "\n";
+        std::string msg = "Exception while generating tiles from spritesheets: ";
+        msg += e.what();
+        msg += "\n";
+        Log::e(msg);
         throw e;
     }
 

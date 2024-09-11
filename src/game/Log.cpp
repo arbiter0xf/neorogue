@@ -1,6 +1,7 @@
 #include "Log.hpp"
 
 #include <chrono>
+#include <fstream>
 
 void Log::w(std::string msg)
 {
@@ -26,6 +27,13 @@ void Log::d(std::string msg)
     Log::log(debug);
 }
 
+void Log::clear(void)
+{
+    std::ofstream logfile;
+    logfile.open("log.txt", std::ios_base::out | std::ios_base::trunc);
+    logfile.close();
+}
+
 void Log::log(std::string msg)
 {
     auto currentTime = std::chrono::system_clock::now();
@@ -33,4 +41,9 @@ void Log::log(std::string msg)
         std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch());
 
     std::cout << currentTimeMillis.count() << " " << msg << std::endl;
+
+    std::ofstream logfile;
+    logfile.open("log.txt", std::ios_base::app);
+    logfile << currentTimeMillis.count() << " " << msg << std::endl;
+    logfile.close();
 }

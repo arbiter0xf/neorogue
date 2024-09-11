@@ -21,6 +21,7 @@ void GraphicsUtil::generateTiles(spritesheet_pool& spritesheet_pool, tile_pool& 
     spritesheet_tile_width = -1;
     spritesheet_width = -1;
 
+    Log::d("clearing tile_pool");
     tile_pool.clear();
 
     for (Spritesheet& spritesheet : spritesheet_pool) {
@@ -31,6 +32,7 @@ void GraphicsUtil::generateTiles(spritesheet_pool& spritesheet_pool, tile_pool& 
             throw std::runtime_error("Top level tmj JSON value is not an object");
         }
 
+        Log::d("getting tile height and width");
         spritesheet_tile_height = tmj["tileheight"];
         spritesheet_tile_width = tmj["tilewidth"];
 
@@ -45,12 +47,46 @@ void GraphicsUtil::generateTiles(spritesheet_pool& spritesheet_pool, tile_pool& 
 
         item = layers_array[0];
         auto data_array = item["data"];
-        spritesheet_width = item["data"]["width"];
+        spritesheet_width = item["width"];
 
-        for (nlohmann::json data_item : data_array) {
+        for (auto data_item : data_array) {
+            // ID for spritesheet and GID for whole map
+            unsigned int tiled_id = data_item;
+            unsigned int tiled_gid = spritesheet.getTiledFirstgid() - 1 + tiled_id;
+
+            if (0 == tiled_id) {
+                break;
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_HORIZONTALLY_FLAG)) {
+                throw std::runtime_error("Horizontally flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_VERTICALLY_FLAG)) {
+                throw std::runtime_error("Vertically flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_DIAGONALLY_FLAG)) {
+                throw std::runtime_error("Diagonally flipped tiles not supported");
+            }
+
+            if (0 != (tiled_gid & g_constants::TILED_ROTATED_HEXAGONAL_120_FLAG)) {
+                throw std::runtime_error("Rotated tiles not supported");
+            }
+
+            const int x = (tiled_id - 1) % spritesheet_width;
+            const int y = (tiled_id - 1) / spritesheet_width;
+
+            tile_pool[tiled_gid] = Tile(
+                        "namePlaceholder",
+                        texture_spritesheet,
+                        x * g_constants::TILE_WIDTH,
+                        y * g_constants::TILE_HEIGHT,
+                        g_constants::TILE_WIDTH,
+                        g_constants::TILE_HEIGHT,
+                        tiled_gid,
+                        tiled_id);
         }
-
-        // TODO finish writing
     }
 }
 
