@@ -8,7 +8,7 @@ Map::Map(std::string path)
 
 void Map::loadJson(std::string path)
 {
-    Log::w("Map::loadJson not yet implemented");
+    mapTmj = Json::readFromFile(path);
 }
 
 #if 0
@@ -18,7 +18,7 @@ void Map::cJSONloadJson(std::string path)
 }
 #endif
 
-cJSON* Map::getTmj(void)
+nlohmann::json Map::getTmj(void)
 {
     return mapTmj;
 }

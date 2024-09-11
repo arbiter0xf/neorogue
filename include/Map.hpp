@@ -9,8 +9,9 @@ public:
     Map() = delete;
     Map(std::string path);
 
-    cJSON* getTmj(void);
+    nlohmann::json getTmj(void);
 #if 0
+    cJSON* getTmj(void);
     boost::json::value getTmjBoostlib(void);
 #endif
 
@@ -28,8 +29,9 @@ public:
 private:
     void loadJson(std::string path);
 
-    cJSON* mapTmj;
+    nlohmann::json mapTmj;
 #if 0
+    cJSON* mapTmj;
     boost::json::value mapTmjBoostlib;
 #endif
 };

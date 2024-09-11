@@ -31,8 +31,9 @@ public:
 
     std::string getName(void) const;
     std::shared_ptr<SDL_Texture> getTexture(void);
-    cJSON* getJson(void);
+    nlohmann::json getJson(void);
 #if 0
+    cJSON* cJSONgetJson(void);
     const boost::json::value& getJsonBoostlib(void);
 #endif
     int getTiledFirstgid(void) const;
@@ -42,8 +43,9 @@ public:
 private:
     std::string name;
     std::shared_ptr<SDL_Texture> texture;
-    cJSON* json;
+    nlohmann::json json;
 #if 0
+    cJSON* json;
     boost::json::value jsonValueBoostlib;
 #endif
     int tiledFirstgid;
