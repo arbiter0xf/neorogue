@@ -114,7 +114,10 @@ install_cjson() {
 install_nlohmannjson() {
     pushd ../external
 
-    mkdir nlohmann
+    if [ ! -d nlohmann ] ; then
+        mkdir nlohmann
+    fi
+
     pushd nlohmann
 
     wget https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp
