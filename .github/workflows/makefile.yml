@@ -23,14 +23,11 @@ jobs:
     - name: Install tools
       run: ./scripts/install_tools.sh
 
-    - name: Build - prepare
-      run: ./create_meson_build_dir.sh
-
-    - name: Build - build
-      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson compile
+    - name: Build
+      run: make
 
     - name: Test
-      run: cd build && PATH="${PATH}:${HOME}.local/bin" meson test
+      run: make test
 
     # - name: Run tests
     #   run: make check
