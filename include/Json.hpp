@@ -1,11 +1,6 @@
 #ifndef JSON_HPP_DEFINED
 #define JSON_HPP_DEFINED
 
-#if 0
-#include <boost/json.hpp>
-#endif
-
-#include <cjson/cJSON.h>
 #include <nlohmann/json.hpp>
 
 #include <string>
