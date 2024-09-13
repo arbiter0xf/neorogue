@@ -1,5 +1,3 @@
-#if 0
-
 #include "gtest/gtest.h"
 
 #include "Map.hpp"
@@ -28,7 +26,7 @@ TEST_F(TestMap, GetGidOfFirstLayer)
     const int x = 9;
     const int y = 7;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
-    EXPECT_EQ(testMap.getTiledGid(x, y, layer), 347);
+    EXPECT_EQ(testMap.get_tiled_gid(x, y, layer), 347);
 }
 
 TEST_F(TestMap, GetGidOfSecondLayer)
@@ -37,7 +35,7 @@ TEST_F(TestMap, GetGidOfSecondLayer)
     const int x = 5;
     const int y = 12;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
-    EXPECT_EQ(testMap.getTiledGid(x, y, layer), 1178);
+    EXPECT_EQ(testMap.get_tiled_gid(x, y, layer), 1178);
 }
 
 TEST_F(TestMap, TryToGetGidFromOutOfBounds1)
@@ -46,7 +44,7 @@ TEST_F(TestMap, TryToGetGidFromOutOfBounds1)
     const int x = -1;
     const int y = 12;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
-    EXPECT_EQ(testMap.getTiledGid(x, y, layer), 0);
+    EXPECT_EQ(testMap.get_tiled_gid(x, y, layer), 0);
 }
 
 TEST_F(TestMap, TryToGetGidFromOutOfBounds2)
@@ -55,7 +53,7 @@ TEST_F(TestMap, TryToGetGidFromOutOfBounds2)
     const int x = 3;
     const int y = 16;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
-    EXPECT_EQ(testMap.getTiledGid(x, y, layer), 0);
+    EXPECT_EQ(testMap.get_tiled_gid(x, y, layer), 0);
 }
 
 TEST_F(TestMap, TryToGetGidFromOutOfBounds3)
@@ -65,7 +63,5 @@ TEST_F(TestMap, TryToGetGidFromOutOfBounds3)
     const int x = 3;
     const int y = 8;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
-    EXPECT_EQ(testMap.getTiledGid(x, y, layer), 0);
+    EXPECT_EQ(testMap.get_tiled_gid(x, y, layer), 0);
 }
-
-#endif
