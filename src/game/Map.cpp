@@ -83,7 +83,6 @@ std::uint32_t Map::get_tiled_gid(const int x, const int y, const int layer_num)
         x < 0 || x > (layer_width - 1) ||
         y < 0 || y > (layer_height - 1);
     if (out_of_bounds) {
-        Log::w("x or y out of bounds while getting tiled gid");
         return 0;
     }
 
