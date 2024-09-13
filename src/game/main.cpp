@@ -1,9 +1,3 @@
-// Header-only with multiple translation units
-// https://www.boost.org/doc/libs/1_69_0/libs/test/doc/html/boost_test/adv_scenarios/single_header_customizations/multiple_translation_units.html
-// Must to include boost/json/src.hpp in only one source file and other files
-// must then include boost/json.hpp.
-#include <boost/json/src.hpp>
-
 #include <stdio.h>
 
 #include <array>
@@ -61,7 +55,6 @@ void renderTile(
 void fillScreenTiles(
         tile_pool& tilePool,
         Map& map,
-        tile_id_map& tileIdMap,
         int cameraX,
         int cameraY,
         screen_tiles_layers& screenTilesLayers)
@@ -119,7 +112,7 @@ void fillScreenTiles(
                     break;
                 }
 
-                std::uint32_t tiledGid = map.getTiledGid(levelX, levelY, layerNum);
+                std::uint32_t tiledGid = map.get_tiled_gid(levelX, levelY, layerNum);
                 // Leave as null if gid zero
                 if (0 != tiledGid) {
                     screenTiles[screenTileY][screenTileX] = &(tilePool[tiledGid]);
@@ -139,8 +132,8 @@ void renderScreenTiles(
         Sdlw& sdlw,
         const screen_tiles& screenTiles)
 {
-    for (int screenY = 0; screenY < screenTiles.size(); screenY++) {
-        for (int screenX = 0; screenX < screenTiles[0].size(); screenX++) {
+    for (size_t screenY = 0; screenY < screenTiles.size(); screenY++) {
+        for (size_t screenX = 0; screenX < screenTiles[0].size(); screenX++) {
             if (NULL == screenTiles[screenY][screenX]) {
                 continue;
             }
@@ -219,7 +212,6 @@ void printConstructedSpritesheets(const spritesheet_pool& spritesheetPool)
 
 void game(void)
 {
-    int err = -1;
     int ret = -1;
 
     int cameraY = g_constants::TILES_VERTICAL / 2;
@@ -238,7 +230,12 @@ void game(void)
 
     screen_tiles_layers screenTilesLayers;
 
+    (void) tileIdMap;
+    (void) texturePool;
+
     // TODO check file existence
+
+    Log::clear();
 
     Log::i("Loading map2");
     Map currentMap = Map("maps/map2_16x16_redone.tmj");
@@ -262,8 +259,10 @@ void game(void)
     try {
         GraphicsUtil::generateTiles(spritesheetPool, tilePool);
     } catch (std::exception const& e) {
-        std::cerr << ERR << "Exception while generating tiles from spritesheets: "
-            << e.what() << "\n";
+        std::string msg = "Exception while generating tiles from spritesheets: ";
+        msg += e.what();
+        msg += "\n";
+        Log::e(msg);
         throw e;
     }
 
@@ -285,7 +284,6 @@ void game(void)
 
         fillScreenTiles(tilePool,
 			currentMap,
-			tileIdMap,
 			cameraX,
 			cameraY,
 			screenTilesLayers);
@@ -315,6 +313,9 @@ void game(void)
 // https://djrollins.com/2016/10/02/sdl-on-windows/
 extern "C" int main(int argc, char* argv[])
 {
+    (void) argc;
+    (void) argv;
+
     try {
         game();
     } catch(std::exception const& e) {

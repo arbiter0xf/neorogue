@@ -9,15 +9,15 @@ public:
     Map() = delete;
     Map(std::string path);
 
-    boost::json::value getTmj(void);
-    boost::json::value getLayers(void);
+    nlohmann::json getTmj(void);
+    std::vector<nlohmann::json> getLayers(void);
     int getLayerAmount(void);
-    std::uint32_t getTiledGid(const int x, const int y, const int layerNum);
+    std::uint32_t get_tiled_gid(const int x, const int y, const int layerNum);
 
 private:
     void loadJson(std::string path);
 
-    boost::json::value mapTmj;
+    nlohmann::json mapTmj;
 };
 
 #endif // MAP_HPP_DEFINED

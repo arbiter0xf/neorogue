@@ -6,7 +6,7 @@
 #include "Sdlw.hpp"
 #include "Spritesheet.hpp"
 
-const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheetNames = {
+const std::array<std::string, SPRITESHEET_POOL_SIZE> Spritesheet::spritesheet_names = {
     "dc-dngn-collection-spritesheet",
     "dc-misc-collection-spritesheet",
     "dc-mon-collection-spritesheet",
@@ -46,14 +46,19 @@ std::shared_ptr<SDL_Texture> Spritesheet::getTexture(void)
     return texture;
 }
 
-const boost::json::value& Spritesheet::getJson(void)
+nlohmann::json Spritesheet::getJson(void)
 {
-    return jsonValue;
+    return json;
 }
 
 int Spritesheet::getTiledFirstgid(void) const
 {
     return tiledFirstgid;
+}
+
+void Spritesheet::set_tiled_firstgid(int new_tiled_firstgid)
+{
+    tiledFirstgid = new_tiled_firstgid;
 }
 
 void Spritesheet::loadTexture(std::string pathImage)
@@ -68,47 +73,45 @@ void Spritesheet::loadTexture(std::string pathImage)
 
 void Spritesheet::loadJson(std::string pathJson)
 {
-    Json::readFromFile(pathJson, jsonValue);
+    json = Json::readFromFile(pathJson);
 }
 
 void Spritesheet::fetchFirstgid(Map& map)
 {
-    boost::json::value tmj = map.getTmj();
+    int tilesets_array_size;
 
-    if (boost::json::kind::object != tmj.kind()) {
+    std::string tileset_source_str;
+
+    nlohmann::json tmj;
+    nlohmann::json tileset;
+
+    const std::string spritesheet_name = getName();
+
+    tilesets_array_size = -1;
+    tileset_source_str = "N/A";
+
+    tmj = map.getTmj();
+
+    if ( ! tmj.is_object()) {
         std::string msg = "While fetching firstgid, top level map .tmj ";
         msg += "JSON value is not an object";
         throw std::runtime_error(msg);
     }
 
-    boost::json::value tilesetsArray = tmj
-        .get_object()
-        .find("tilesets")
-        ->value();
+    auto tilesets_array = tmj["tilesets"];
+    tilesets_array_size = tmj["tilesets"].size();
 
-    if (boost::json::kind::array != tilesetsArray.kind()) {
-        throw std::runtime_error(
-                "While fetching firstgid, JSON tilesets value is not an array");
-    }
+    for (int i = 0; i < tilesets_array_size; ++i) {
+        tileset = tilesets_array[i];
+        tileset_source_str = tileset["source"];
 
-    for (boost::json::value tileset : tilesetsArray.as_array()) {
-        std::string tilesetSourceStr;
-        boost::json::value tilesetSource = tileset
-            .get_object()
-            .find("source")
-            ->value();
-        tilesetSourceStr = tilesetSource.as_string().c_str();
-
-        if (0 != tilesetSourceStr.compare(name + ".tsx")) {
+        if (0 != tileset_source_str.compare(spritesheet_name + ".tsx")) {
             continue;
         }
 
-        boost::json::value tilesetFirstgid = tileset
-            .get_object()
-            .find("firstgid")
-            ->value();
+        auto tileset_firstgid = tileset["firstgid"];
 
-        tiledFirstgid = tilesetFirstgid.as_int64();
+        set_tiled_firstgid(tileset_firstgid);
 
         return;
     }

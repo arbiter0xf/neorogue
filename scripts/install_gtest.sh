@@ -3,15 +3,15 @@
 set -ex
 
 if [ ! -d libs_temp ] ; then
-	mkdir libs_temp
+    mkdir libs_temp
 fi
 
 if [ ! -d /opt/gtest/include ] ; then
-	sudo mkdir -p /opt/gtest/include
+    sudo mkdir -p /opt/gtest/include
 fi
 
 if [ ! -d /opt/gtest/lib ] ; then
-	sudo mkdir -p /opt/gtest/lib
+    sudo mkdir -p /opt/gtest/lib
 fi
 
 cd libs_temp

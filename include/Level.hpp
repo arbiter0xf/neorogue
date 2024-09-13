@@ -9,7 +9,7 @@ public:
     Level() = delete;
     Level(std::string path);
 
-    int getTileId(const int x, const int y);
+    int getTileId(const unsigned int x, const unsigned int y);
 
 private:
     void loadFromFile(std::string path);

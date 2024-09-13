@@ -6,154 +6,118 @@
 
 #include "Log.hpp"
 
-/*
- * \exception May throw std::exception
- */
-void GraphicsUtil::generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool)
+void GraphicsUtil::generateTiles(spritesheet_pool& spritesheet_pool, tile_pool& tile_pool)
 {
-    int spritesheetTileHeight = -1;
-    int spritesheetTileWidth = -1;
-    int spritesheetWidth = -1;
+    int spritesheet_tile_height;
+    int spritesheet_tile_width;
+    int spritesheet_width;
 
-    tilePool.clear();
+    nlohmann::json tmj;
+    nlohmann::json item;
 
-    for (Spritesheet& spritesheet : spritesheetPool) {
-        boost::json::value tmj = spritesheet.getJson();
-        std::shared_ptr<SDL_Texture> textureSpritesheet = spritesheet.getTexture();
+    std::shared_ptr<SDL_Texture> texture_spritesheet;
 
-        if (boost::json::kind::object != tmj.kind()) {
-            throw std::runtime_error("Top level Tiled JSON value is not an object");
+    spritesheet_tile_height = -1;
+    spritesheet_tile_width = -1;
+    spritesheet_width = -1;
+
+    Log::d("clearing tile_pool");
+    tile_pool.clear();
+
+    for (Spritesheet& spritesheet : spritesheet_pool) {
+        tmj = spritesheet.getJson();
+        texture_spritesheet = spritesheet.getTexture();
+
+        if ( ! tmj.is_object()) {
+            throw std::runtime_error("Top level tmj JSON value is not an object");
         }
 
-        spritesheetTileHeight = tmj
-            .get_object()
-            .find("tileheight")
-            ->value()
-            .as_int64();
+        Log::d("getting tile height and width");
+        spritesheet_tile_height = tmj["tileheight"];
+        spritesheet_tile_width = tmj["tilewidth"];
 
-        spritesheetTileWidth = tmj
-            .get_object()
-            .find("tilewidth")
-            ->value()
-            .as_int64();
-
-        if (32 != spritesheetTileHeight || 32 != spritesheetTileWidth) {
+        if (32 != spritesheet_tile_height || 32 != spritesheet_tile_width) {
             throw std::runtime_error("Spritesheet tile size is not 32x32");
         }
 
-        boost::json::value layersArray = tmj
-            .get_object()
-            .find("layers")
-            ->value();
-
-        if (layersArray.as_array().size() > 1) {
-            throw std::runtime_error("More than 1 layer in a spritesheet JSON");
+        auto layers_array = tmj["layers"];
+        if (1 != layers_array.size()) {
+            throw std::runtime_error("Spritesheet JSON does not contain 1 layer");
         }
 
-        boost::json::value layerData = layersArray.as_array()[0]
-            .get_object()
-            .find("data")
-            ->value();
+        item = layers_array[0];
+        auto data_array = item["data"];
+        spritesheet_width = item["width"];
 
-        spritesheetWidth = layersArray.as_array()[0]
-            .get_object()
-            .find("width")
-            ->value()
-            .as_int64();
-
-        if (boost::json::kind::array != layerData.kind()) {
-            throw std::runtime_error("Unsupported spritesheet layer data");
-        }
-
-        for (boost::json::value dataItem : layerData.as_array()) {
+        for (auto data_item : data_array) {
             // ID for spritesheet and GID for whole map
-            unsigned tiledId = dataItem.as_int64();
-            unsigned tiledGid = spritesheet.getTiledFirstgid() - 1 + tiledId;
+            unsigned int tiled_id = data_item;
+            unsigned int tiled_gid = spritesheet.getTiledFirstgid() - 1 + tiled_id;
 
-            if (0 == tiledId) {
+            if (0 == tiled_id) {
                 break;
             }
 
-            if (0 != (tiledGid & g_constants::TILED_FLIPPED_HORIZONTALLY_FLAG)) {
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_HORIZONTALLY_FLAG)) {
                 throw std::runtime_error("Horizontally flipped tiles not supported");
             }
 
-            if (0 != (tiledGid & g_constants::TILED_FLIPPED_VERTICALLY_FLAG)) {
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_VERTICALLY_FLAG)) {
                 throw std::runtime_error("Vertically flipped tiles not supported");
             }
 
-            if (0 != (tiledGid & g_constants::TILED_FLIPPED_DIAGONALLY_FLAG)) {
+            if (0 != (tiled_gid & g_constants::TILED_FLIPPED_DIAGONALLY_FLAG)) {
                 throw std::runtime_error("Diagonally flipped tiles not supported");
             }
 
-            if (0 != (tiledGid & g_constants::TILED_ROTATED_HEXAGONAL_120_FLAG)) {
+            if (0 != (tiled_gid & g_constants::TILED_ROTATED_HEXAGONAL_120_FLAG)) {
                 throw std::runtime_error("Rotated tiles not supported");
             }
 
-            const int x = (tiledId - 1) % spritesheetWidth;
-            const int y = (tiledId - 1) / spritesheetWidth;
+            const int x = (tiled_id - 1) % spritesheet_width;
+            const int y = (tiled_id - 1) / spritesheet_width;
 
-            tilePool[tiledGid] = Tile(
+            tile_pool[tiled_gid] = Tile(
                         "namePlaceholder",
-                        textureSpritesheet,
+                        texture_spritesheet,
                         x * g_constants::TILE_WIDTH,
                         y * g_constants::TILE_HEIGHT,
                         g_constants::TILE_WIDTH,
                         g_constants::TILE_HEIGHT,
-                        tiledGid,
-                        tiledId);
+                        tiled_gid,
+                        tiled_id);
         }
     }
 }
 
-void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheetPool, Map& map)
+void GraphicsUtil::loadSpritesheets(spritesheet_pool& spritesheet_pool, Map& map)
 {
-    boost::json::value tmj = map.getTmj();
-    std::vector<std::string> tilesetNames;
+    nlohmann::json tmj;
 
-    spritesheetPool.clear();
+    std::string tileset_source;
+    std::vector<std::string> tileset_names;
 
-    if (boost::json::kind::object != tmj.kind()) {
+    tmj = map.getTmj();
+    if ( ! tmj.is_object()) {
         throw std::runtime_error("Top level map .tmj JSON value is not an object");
     }
 
-    boost::json::value tilesetsArray = tmj
-        .get_object()
-        .find("tilesets")
-        ->value();
+    auto tilesets = tmj["tilesets"];
 
-    if (boost::json::kind::array != tilesetsArray.kind()) {
-        throw std::runtime_error("JSON tilesets value is not an array");
+    for (auto tileset : tilesets) {
+        tileset_source = tileset["source"];
+
+        tileset_names.push_back(tileset_source);
     }
 
-    for (boost::json::value tileset : tilesetsArray.as_array()) {
-        std::string tmpStr;
-        boost::json::value tilesetSource = tileset
-            .get_object()
-            .find("source")
-            ->value();
-        tmpStr = tilesetSource.as_string().c_str();
-        tilesetNames.push_back(tmpStr);
-    }
-
-    for (std::string spritesheetName : Spritesheet::spritesheetNames) {
-        for (std::string tilesetName : tilesetNames) {
-            if (0 == tilesetName.compare(spritesheetName + ".tsx")) {
-                spritesheetPool.push_back(Spritesheet(spritesheetName, map));
+    for (std::string spritesheet_name : Spritesheet::spritesheet_names) {
+        for (std::string tileset_name : tileset_names) {
+            if (0 == tileset_name.compare(spritesheet_name + ".tsx")) {
+                spritesheet_pool.push_back(Spritesheet(spritesheet_name, map));
                 break;
             }
         }
     }
-
-#if 0
-    std::transform(
-            Spritesheet::spritesheetNames.cbegin(),
-            Spritesheet::spritesheetNames.cend(),
-            spritesheetPool.begin(),
-            [](const std::string name) {
-                return Spritesheet(name, map);
-            });
-#endif
 }
 
 // Keeping as a reference for using std::filesystem

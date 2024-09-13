@@ -16,6 +16,7 @@ public:
     static void i(std::string msg);
     static void e(std::string msg);
     static void d(std::string msg);
+    static void clear(void);
 
 private:
     static void log(std::string msg);

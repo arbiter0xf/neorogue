@@ -14,6 +14,7 @@ protected:
     }
 };
 
+// TODO Find out if Level is an outdated concept and remove if so.
 TEST_F(TestLevel, GetTestLevel1TileDescriptions)
 {
     const int descriptionX10Y0 = 11;

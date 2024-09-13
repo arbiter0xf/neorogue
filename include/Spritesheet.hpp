@@ -6,11 +6,12 @@
 #endif
 
 #ifdef _WIN32
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #endif
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Json.hpp"
 #include "Map.hpp"
@@ -29,20 +30,21 @@ public:
 
     std::string getName(void) const;
     std::shared_ptr<SDL_Texture> getTexture(void);
-    const boost::json::value& getJson(void);
+    nlohmann::json getJson(void);
     int getTiledFirstgid(void) const;
 
-    static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheetNames;
+    static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheet_names;
 
 private:
     std::string name;
     std::shared_ptr<SDL_Texture> texture;
-    boost::json::value jsonValue;
+    nlohmann::json json;
     int tiledFirstgid;
 
     void loadTexture(std::string pathImage);
     void loadJson(std::string pathJson);
     void fetchFirstgid(Map& map);
+    void set_tiled_firstgid(int new_tiled_firstgid);
 };
 
 #endif

@@ -11,8 +11,8 @@
 namespace g_constants {
     inline constexpr int TILE_HEIGHT = 32;
     inline constexpr int TILE_WIDTH = 32;
-    inline constexpr int SCREEN_WIDTH = 640;
-    inline constexpr int SCREEN_HEIGHT = 480;
+    inline constexpr int SCREEN_WIDTH = 800;
+    inline constexpr int SCREEN_HEIGHT = 600;
     inline constexpr int TILES_HORIZONTAL = (SCREEN_WIDTH / TILE_WIDTH);
     inline constexpr int TILES_VERTICAL = (SCREEN_HEIGHT / TILE_HEIGHT);
     inline constexpr int SCREEN_TILES = TILES_HORIZONTAL * TILES_VERTICAL + 1; // +1 for null termination

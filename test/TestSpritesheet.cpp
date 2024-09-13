@@ -18,14 +18,14 @@ protected:
 
 TEST_F(TestSpritesheet, SpritesheetGetsFirstgid)
 {
-    spritesheet_pool spritesheetPool;
+    spritesheet_pool spritesheet_pool;
     Map testMap = Map("test_data/map2_16x16_redone.tmj");
 
-    GraphicsUtil::loadSpritesheets(spritesheetPool, testMap);
+    GraphicsUtil::loadSpritesheets(spritesheet_pool, testMap);
 
-    Spritesheet& testSpritesheet = spritesheetPool[0];
+    Spritesheet& testSpritesheet = spritesheet_pool[0];
 
-    for (Spritesheet& s : spritesheetPool) {
+    for (Spritesheet& s : spritesheet_pool) {
         if (0 == s.getName().compare("dc-misc-collection-spritesheet")) {
             testSpritesheet = s;
             break;
@@ -35,37 +35,59 @@ TEST_F(TestSpritesheet, SpritesheetGetsFirstgid)
     EXPECT_EQ(testSpritesheet.getTiledFirstgid(), 560);
 }
 
-TEST_F(TestSpritesheet, SpritesheetLoadsExpectedTmjData)
+TEST_F(TestSpritesheet, MonSpritesheetContainsOneLayer)
 {
-    spritesheet_pool spritesheetPool;
-    Map testMap = Map("test_data/map2_16x16_redone.tmj");
+    nlohmann::json tmj;
 
-    GraphicsUtil::loadSpritesheets(spritesheetPool, testMap);
+    spritesheet_pool spritesheet_pool;
 
-    Spritesheet& testSpritesheet = spritesheetPool[0];
+    Map test_map = Map("test_data/map2_16x16_redone.tmj");
 
-    for (Spritesheet& s : spritesheetPool) {
+    GraphicsUtil::loadSpritesheets(spritesheet_pool, test_map);
+
+    Spritesheet& test_spritesheet = spritesheet_pool[0];
+
+    for (Spritesheet& s : spritesheet_pool) {
         if (0 == s.getName().compare("dc-mon-collection-spritesheet")) {
-            testSpritesheet = s;
+            test_spritesheet = s;
             break;
         }
     }
 
-    boost::json::value tmj = testSpritesheet.getJson();
+    tmj = test_spritesheet.getJson();
 
-    boost::json::value layersArray = tmj
-        .get_object()
-        .find("layers")
-        ->value();
+    auto layers_array = tmj["layers"];
 
-    if (layersArray.as_array().size() > 1) {
-        throw std::runtime_error("More than 1 layer in a spritesheet JSON");
+    EXPECT_EQ(layers_array.size(), 1);
+}
+
+TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
+{
+    nlohmann::json tmj;
+    nlohmann::json layer;
+
+    spritesheet_pool spritesheet_pool;
+
+    Map test_map = Map("test_data/map2_16x16_redone.tmj");
+
+    tmj = {};
+
+    GraphicsUtil::loadSpritesheets(spritesheet_pool, test_map);
+
+    Spritesheet& test_spritesheet = spritesheet_pool[0];
+
+    for (Spritesheet& s : spritesheet_pool) {
+        if (0 == s.getName().compare("dc-mon-collection-spritesheet")) {
+            test_spritesheet = s;
+            break;
+        }
     }
 
-    boost::json::value layerData = layersArray.as_array()[0]
-        .get_object()
-        .find("data")
-        ->value();
+    tmj = test_spritesheet.getJson();
+    auto layers_array = tmj["layers"];
+    layer = layers_array[0];
+    auto data_array = layer["data"];
+    auto data_item = data_array[82];
 
-    EXPECT_EQ(layerData.as_array()[82].as_int64(), 83);
+    EXPECT_EQ(data_item, 83);
 }

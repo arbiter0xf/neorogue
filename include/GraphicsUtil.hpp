@@ -9,9 +9,6 @@ class GraphicsUtil
 public:
     static void generateTiles(spritesheet_pool& spritesheetPool, tile_pool& tilePool);
     static void loadSpritesheets(spritesheet_pool& spritesheetPool, Map& map);
-    static void generateTileIdMap(
-            spritesheet_pool& spritesheetPool,
-            tile_id_map& tileIdMap);
     static void generateTileIdMapFile(tile_id_map& tileIdMap);
 
 private:

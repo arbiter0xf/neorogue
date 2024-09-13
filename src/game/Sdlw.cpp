@@ -3,7 +3,7 @@
 #endif
 
 #ifdef _WIN32
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #endif
 
 #include <iostream>
@@ -51,7 +51,6 @@ Sdlw& Sdlw::getReference()
  */
 void Sdlw::initRendering(void)
 {
-    int ret = -1;
     std::string msg = "";
 
     const int imgFlags = IMG_INIT_PNG;
