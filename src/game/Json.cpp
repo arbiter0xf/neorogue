@@ -1,7 +1,6 @@
 #include <fstream>
 
 #include <string.h>
-#include <sys/stat.h>
 
 #include "Json.hpp"
 #include "Log.hpp"
