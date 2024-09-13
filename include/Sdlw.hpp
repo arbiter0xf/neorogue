@@ -7,7 +7,6 @@
 
 #ifdef _WIN32
 #include <SDL2/SDL.h>
-// #include <SDL.h>
 #endif
 
 #include <cstdint>

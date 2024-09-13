@@ -26,10 +26,6 @@ COMPILER_FLAGS_GAME_WINDOWS := \
 		       -static-libgcc \
 		       -static-libstdc++ \
 		       -DGRAPHICS_ENABLED=1
-#   COMPILER_FLAGS_GAME_WINDOWS := \
-#   			   -I/usr/local/include/SDL2 \
-#   		       $(COMMON_COMPILER_FLAGS) \
-#   		       -DGRAPHICS_ENABLED=1
 COMPILER_FLAGS_TEST := \
 		      $(INCLUDES_TEST) \
 		      $(COMMON_COMPILER_FLAGS) \
@@ -39,7 +35,6 @@ COMPILER_FLAGS_SERVER_ROUTE := \
 			       $(COMMON_COMPILER_FLAGS)
 COMPILER_FLAGS_SERVER_ROUTE_TEST_CLIENT := $(COMPILER_FLAGS_SERVER_ROUTE)
 LINKER_FLAGS = -lSDL2 -lSDL2_image
-# Can be compiled without -lSDL2main flag?
 LINKER_FLAGS_WINDOWS := \
 			-L/mnt/d/mingw_dev/SDL2-2.30.6/x86_64-w64-mingw32/lib/ \
 			-L/mnt/d/mingw_dev/SDL2_image-2.8.2/x86_64-w64-mingw32/lib/ \
@@ -48,17 +43,6 @@ LINKER_FLAGS_WINDOWS := \
 			-lSDL2main \
 			-lSDL2 \
 			-lSDL2_image
-# LINKER_FLAGS_WINDOWS := \
-# 			-L/mnt/d/mingw_dev/SDL2-2.30.6/x86_64-w64-mingw32/lib/ \
-# 			-L/mnt/d/mingw_dev/SDL2_image-2.8.2/x86_64-w64-mingw32/lib/ \
-# 			-Wl,-subsystem,windows \
-# 			-lmingw32 \
-# 			-lSDL2main \
-# 			-lSDL2 \
-# 			-lSDL2_image \
-# 			-lcjson
-# LINKER_FLAGS_WINDOWS = -L/usr/local/lib -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lcjson
-# LINKER_FLAGS_WINDOWS = -L/usr/local/lib -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -mwindows -lcjson
 LINKER_FLAGS_TEST := \
 		    $(LINKER_FLAGS) \
 		    -lgtest \

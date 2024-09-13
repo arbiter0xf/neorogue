@@ -10,30 +10,14 @@ public:
     Map(std::string path);
 
     nlohmann::json getTmj(void);
-#if 0
-    cJSON* getTmj(void);
-    boost::json::value getTmjBoostlib(void);
-#endif
-
     std::vector<nlohmann::json> getLayers(void);
-#if 0
-    boost::json::value getLayersBoostlib(void);
-#endif
-
     int getLayerAmount(void);
-#if 0
-    int getLayerAmountBoostlib(void);
-#endif
     std::uint32_t get_tiled_gid(const int x, const int y, const int layerNum);
 
 private:
     void loadJson(std::string path);
 
     nlohmann::json mapTmj;
-#if 0
-    cJSON* mapTmj;
-    boost::json::value mapTmjBoostlib;
-#endif
 };
 
 #endif // MAP_HPP_DEFINED

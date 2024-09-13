@@ -51,13 +51,6 @@ nlohmann::json Spritesheet::getJson(void)
     return json;
 }
 
-#if 0
-cJSON* Spritesheet::cJSONgetJson(void)
-{
-    return json;
-}
-#endif
-
 int Spritesheet::getTiledFirstgid(void) const
 {
     return tiledFirstgid;
@@ -82,13 +75,6 @@ void Spritesheet::loadJson(std::string pathJson)
 {
     json = Json::readFromFile(pathJson);
 }
-
-#if 0
-void Spritesheet::cJSONloadJson(std::string pathJson)
-{
-    json = Json::readFromFile(pathJson);
-}
-#endif
 
 void Spritesheet::fetchFirstgid(Map& map)
 {
@@ -132,64 +118,3 @@ void Spritesheet::fetchFirstgid(Map& map)
 
     throw std::runtime_error("Could not find firstgid for spritesheet: " + name);
 }
-
-#if 0
-void Spritesheet::cJSONfetchFirstgid(Map& map)
-{
-    int tilesets_array_size;
-
-    std::string tileset_source_str;
-
-    cJSON* tmj;
-    cJSON* item;
-    cJSON* tileset;
-    cJSON* tileset_source;
-    cJSON* tileset_firstgid;
-
-    const std::string spritesheet_name = getName();
-
-    tmj = 0;
-    item = 0;
-    tileset = 0;
-    tileset_source = 0;
-    tileset_firstgid = 0;
-
-    tilesets_array_size = -1;
-
-    tileset_source_str = "N/A";
-
-    tmj = map.getTmj();
-
-    if ( ! cJSON_IsObject(tmj)) {
-        std::string msg = "While fetching firstgid, top level map .tmj ";
-        msg += "JSON value is not an object";
-        throw std::runtime_error(msg);
-    }
-
-    item = cJSON_GetObjectItemCaseSensitive(tmj, "tilesets");
-    if ( ! cJSON_IsArray(item)) {
-        throw std::runtime_error(
-            "While fetching firstgid, JSON tilesets value is not an array");
-    }
-
-    tilesets_array_size = cJSON_GetArraySize(item);
-    for (int i = 0; i < tilesets_array_size; ++i) {
-        tileset = cJSON_GetArrayItem(item, i);
-        tileset_source = cJSON_GetObjectItemCaseSensitive(tileset, "source");
-        tileset_source_str = tileset_source->valuestring;
-
-        if (0 != tileset_source_str.compare(spritesheet_name + ".tsx")) {
-            continue;
-        }
-
-        tileset_firstgid = cJSON_GetObjectItemCaseSensitive(
-            tileset, "firstgid");
-
-        set_tiled_firstgid(tileset_firstgid->valueint);
-
-        return;
-    }
-
-    throw std::runtime_error("Could not find firstgid for spritesheet: " + name);
-}
-#endif

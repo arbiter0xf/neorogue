@@ -7,7 +7,6 @@
 
 #ifdef _WIN32
 #include <SDL2/SDL.h>
-// #include <SDL.h>
 #endif
 
 #include <memory>
@@ -32,10 +31,6 @@ public:
     std::string getName(void) const;
     std::shared_ptr<SDL_Texture> getTexture(void);
     nlohmann::json getJson(void);
-#if 0
-    cJSON* cJSONgetJson(void);
-    const boost::json::value& getJsonBoostlib(void);
-#endif
     int getTiledFirstgid(void) const;
 
     static const std::array<std::string, SPRITESHEET_POOL_SIZE> spritesheet_names;
@@ -44,10 +39,6 @@ private:
     std::string name;
     std::shared_ptr<SDL_Texture> texture;
     nlohmann::json json;
-#if 0
-    cJSON* json;
-    boost::json::value jsonValueBoostlib;
-#endif
     int tiledFirstgid;
 
     void loadTexture(std::string pathImage);

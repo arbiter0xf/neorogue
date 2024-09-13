@@ -61,37 +61,6 @@ TEST_F(TestSpritesheet, MonSpritesheetContainsOneLayer)
     EXPECT_EQ(layers_array.size(), 1);
 }
 
-#if 0
-TEST_F(TestSpritesheet, cJSONMonSpritesheetContainsOneLayer)
-{
-    cJSON* tmj;
-    cJSON* layers_array;
-    spritesheet_pool spritesheet_pool;
-
-    Map test_map = Map("test_data/map2_16x16_redone.tmj");
-
-    tmj = 0;
-    layers_array = 0;
-
-    GraphicsUtil::loadSpritesheets(spritesheet_pool, test_map);
-
-    Spritesheet& test_spritesheet = spritesheet_pool[0];
-
-    for (Spritesheet& s : spritesheet_pool) {
-        if (0 == s.getName().compare("dc-mon-collection-spritesheet")) {
-            test_spritesheet = s;
-            break;
-        }
-    }
-
-    tmj = test_spritesheet.getJson();
-
-    layers_array = cJSON_GetObjectItemCaseSensitive(tmj, "layers");
-
-    EXPECT_EQ(cJSON_GetArraySize(layers_array), 1);
-}
-#endif
-
 TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
 {
     nlohmann::json tmj;
@@ -122,42 +91,3 @@ TEST_F(TestSpritesheet, MonSpritesheetDataIndex82Gives83)
 
     EXPECT_EQ(data_item, 83);
 }
-
-#if 0
-TEST_F(TestSpritesheet, cJSONMonSpritesheetDataIndex82Gives83)
-{
-    cJSON* tmj;
-    cJSON* data_array;
-    cJSON* data_item;
-    cJSON* layer;
-    cJSON* layers_array;
-    spritesheet_pool spritesheet_pool;
-
-    Map test_map = Map("test_data/map2_16x16_redone.tmj");
-
-    tmj = 0;
-    layer = 0;
-    data_item = 0;
-    data_array = 0;
-    layers_array = 0;
-
-    GraphicsUtil::loadSpritesheets(spritesheet_pool, test_map);
-
-    Spritesheet& test_spritesheet = spritesheet_pool[0];
-
-    for (Spritesheet& s : spritesheet_pool) {
-        if (0 == s.getName().compare("dc-mon-collection-spritesheet")) {
-            test_spritesheet = s;
-            break;
-        }
-    }
-
-    tmj = test_spritesheet.getJson();
-    layers_array = cJSON_GetObjectItemCaseSensitive(tmj, "layers");
-    layer = cJSON_GetArrayItem(layers_array, 0);
-    data_array = cJSON_GetObjectItemCaseSensitive(layer, "data");
-    data_item = cJSON_GetArrayItem(data_array, 82);
-
-    EXPECT_EQ(data_item->valueint, 83);
-}
-#endif

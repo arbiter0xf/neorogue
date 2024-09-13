@@ -26,21 +26,6 @@ TEST_F(TestJson, ParseJsonFromFile)
     EXPECT_NE(json, nullptr);
 }
 
-#if 0
-TEST_F(TestJson, cJSONParseJsonFromFile)
-{
-    cJSON* json;
-
-    const std::string file_path = "test_data/map2_16x16_redone.tmj";
-
-    json = 0;
-
-    json = Json::readFromFile(file_path);
-
-    EXPECT_NE(json, nullptr);
-}
-#endif
-
 TEST_F(TestJson, ReadMapTileHeight)
 {
     nlohmann::json json;
@@ -56,22 +41,3 @@ TEST_F(TestJson, ReadMapTileHeight)
 
     EXPECT_EQ(32, tileheight);
 }
-
-#if 0
-TEST_F(TestJson, cJSONReadMapTileHeight)
-{
-    cJSON* json;
-    cJSON* tileheight;
-
-    const std::string file_path = "test_data/map2_16x16_redone.tmj";
-
-    json = 0;
-    tileheight = 0;
-
-    json = Json::readFromFile(file_path);
-
-    tileheight = cJSON_GetObjectItemCaseSensitive(json, "tileheight");
-
-    EXPECT_EQ(32, tileheight->valueint);
-}
-#endif
