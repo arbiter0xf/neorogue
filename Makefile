@@ -21,7 +21,7 @@ COMPILER_FLAGS_GAME := \
 		       $(COMMON_COMPILER_FLAGS) \
 		       -DGRAPHICS_ENABLED=1
 COMPILER_FLAGS_GAME_WINDOWS := \
-			   -I/mnt/d/mingw_dev/SDL2-2.30.6/x86_64-w64-mingw32/include/ \
+			   -I/mnt/d/mingw_dev/sdl_combined_headers/include \
 		       $(COMMON_COMPILER_FLAGS) \
 		       -static-libgcc \
 		       -static-libstdc++ \
@@ -68,7 +68,7 @@ $(EXE_NAME_GAME): $(SRC_GAME) $(HEADERS_GAME_DIR)
 	$(CXX) $(SRC_GAME) $(COMPILER_FLAGS_GAME) $(LINKER_FLAGS) -o $@
 
 $(WINDOWS_EXE_NAME_GAME): $(SRC_GAME) $(HEADERS_GAME_DIR)
-	CPLUS_INCLUDE_PATH=/usr/local/include $(CC_MINGW) $(SRC_GAME) $(COMPILER_FLAGS_GAME_WINDOWS) $(LINKER_FLAGS_WINDOWS) -o $@
+	$(CC_MINGW) $(SRC_GAME) $(COMPILER_FLAGS_GAME_WINDOWS) $(LINKER_FLAGS_WINDOWS) -o $@
 
 $(EXE_NAME_SERVER_ROUTE): $(SRC_SERVER_ROUTE)
 	$(CXX) $(SRC_SERVER_ROUTE) $(COMPILER_FLAGS_SERVER_ROUTE) -o $@
