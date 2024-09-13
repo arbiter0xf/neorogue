@@ -54,7 +54,7 @@ void Level::loadFromFile(std::string path)
     }
 }
 
-int Level::getTileId(const int x, const int y)
+int Level::getTileId(const unsigned int x, const unsigned int y)
 {
     if (y >= tileIds.size()) {
         throw std::runtime_error("y value out of bounds when trying to access tileIds");

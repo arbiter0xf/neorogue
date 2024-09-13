@@ -16,7 +16,7 @@ CC := g++
 CC_MINGW := x86_64-w64-mingw32-g++
 INCLUDES := -Iinclude -Iexternal
 INCLUDES_TEST := -I/opt/gtest/include/
-COMMON_COMPILER_FLAGS := $(INCLUDES) -w -std=c++17
+COMMON_COMPILER_FLAGS := $(INCLUDES) -Wall -Wextra -Wpedantic -std=c++17
 COMPILER_FLAGS_GAME := \
 		       $(COMMON_COMPILER_FLAGS) \
 		       -DGRAPHICS_ENABLED=1

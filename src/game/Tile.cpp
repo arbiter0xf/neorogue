@@ -26,7 +26,7 @@ Tile::Tile(
 {
 }
 
-const std::string Tile::getName() const
+std::string Tile::getName() const
 {
     return name;
 }
@@ -36,32 +36,32 @@ std::shared_ptr<SDL_Texture> Tile::getSheetTexture()
     return sheetTexture;
 }
 
-const int Tile::getSheetX() const
+int Tile::getSheetX() const
 {
     return sheetX;
 }
 
-const int Tile::getSheetY() const
+int Tile::getSheetY() const
 {
     return sheetY;
 }
 
-const int Tile::getSheetW() const
+int Tile::getSheetW() const
 {
     return sheetW;
 }
 
-const int Tile::getSheetH() const
+int Tile::getSheetH() const
 {
     return sheetH;
 }
 
-const int Tile::getTiledGid() const
+int Tile::getTiledGid() const
 {
     return tiledGid;
 }
 
-const int Tile::getTiledId() const
+int Tile::getTiledId() const
 {
     return tiledId;
 }

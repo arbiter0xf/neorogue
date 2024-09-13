@@ -36,21 +36,21 @@ public:
             const int _tiledGid,
             const int _tiledId);
 
-    const int getScreenX() const;
-    const int getScreenY() const;
-    const std::string getName() const;
+    int getScreenX() const;
+    int getScreenY() const;
+    std::string getName() const;
     std::shared_ptr<SDL_Texture> getSheetTexture();
-    const int getSheetX() const;
-    const int getSheetY() const;
-    const int getSheetW() const;
-    const int getSheetH() const;
-    const int getTiledGid() const;
-    const int getTiledId() const;
+    int getSheetX() const;
+    int getSheetY() const;
+    int getSheetW() const;
+    int getSheetH() const;
+    int getTiledGid() const;
+    int getTiledId() const;
     std::string getDump();
 
 private:
-    std::shared_ptr<SDL_Texture> sheetTexture;
     std::string name;
+    std::shared_ptr<SDL_Texture> sheetTexture;
     int sheetX;
     int sheetY;
     int sheetW;

@@ -52,7 +52,6 @@ Sdlw& Sdlw::getReference()
  */
 void Sdlw::initRendering(void)
 {
-    int ret = -1;
     std::string msg = "";
 
     const int imgFlags = IMG_INIT_PNG;

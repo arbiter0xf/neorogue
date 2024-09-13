@@ -55,7 +55,6 @@ void renderTile(
 void fillScreenTiles(
         tile_pool& tilePool,
         Map& map,
-        tile_id_map& tileIdMap,
         int cameraX,
         int cameraY,
         screen_tiles_layers& screenTilesLayers)
@@ -133,8 +132,8 @@ void renderScreenTiles(
         Sdlw& sdlw,
         const screen_tiles& screenTiles)
 {
-    for (int screenY = 0; screenY < screenTiles.size(); screenY++) {
-        for (int screenX = 0; screenX < screenTiles[0].size(); screenX++) {
+    for (size_t screenY = 0; screenY < screenTiles.size(); screenY++) {
+        for (size_t screenX = 0; screenX < screenTiles[0].size(); screenX++) {
             if (NULL == screenTiles[screenY][screenX]) {
                 continue;
             }
@@ -213,7 +212,6 @@ void printConstructedSpritesheets(const spritesheet_pool& spritesheetPool)
 
 void game(void)
 {
-    int err = -1;
     int ret = -1;
 
     int cameraY = g_constants::TILES_VERTICAL / 2;
@@ -231,6 +229,9 @@ void game(void)
     spritesheet_pool spritesheetPool;
 
     screen_tiles_layers screenTilesLayers;
+
+    (void) tileIdMap;
+    (void) texturePool;
 
     // TODO check file existence
 
@@ -283,7 +284,6 @@ void game(void)
 
         fillScreenTiles(tilePool,
 			currentMap,
-			tileIdMap,
 			cameraX,
 			cameraY,
 			screenTilesLayers);
@@ -313,6 +313,9 @@ void game(void)
 // https://djrollins.com/2016/10/02/sdl-on-windows/
 extern "C" int main(int argc, char* argv[])
 {
+    (void) argc;
+    (void) argv;
+
     try {
         game();
     } catch(std::exception const& e) {
